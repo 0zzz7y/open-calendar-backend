@@ -1,4 +1,4 @@
 package com.tomaszwnuk.dailyassistant.note
 
-class NoteDto {
+class NoteController {
 }
