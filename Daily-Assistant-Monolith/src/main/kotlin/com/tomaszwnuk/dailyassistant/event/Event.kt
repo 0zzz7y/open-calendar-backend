@@ -1,8 +1,10 @@
 package com.tomaszwnuk.dailyassistant.event
 
-import com.tomaszwnuk.dailyassistant.domain.DomainEntity
+import com.tomaszwnuk.dailyassistant.calendar.Calendar
+import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.Schedulable
+import com.tomaszwnuk.dailyassistant.domain.entry.Entry
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -11,7 +13,7 @@ import java.time.LocalDateTime
 data class Event(
 
     @Column(columnDefinition = "VARCHAR(255)", nullable = false)
-    override val title: String,
+    override val name: String,
 
     @Column(columnDefinition = "TEXT", nullable = true)
     override val description: String? = null,
@@ -29,13 +31,14 @@ data class Event(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
-    val category: Category? = null
-) : DomainEntity(), Schedulable {
+    override val category: Category? = null
 
-    fun toDto(): EventDto {
+) : Entry(name, description, category), Schedulable {
+
+    override fun toDto(): EventDto {
         return EventDto(
             id = id,
-            title = title,
+            name = name,
             description = description,
             date = date,
             recurringPattern = recurringPattern,
@@ -43,4 +46,5 @@ data class Event(
             categoryId = category?.id
         )
     }
+
 }

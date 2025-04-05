@@ -11,4 +11,5 @@ enum class RecurringPattern(val value: Int) {
     MONTHLY(3),
 
     YEARLY(4);
+
 }

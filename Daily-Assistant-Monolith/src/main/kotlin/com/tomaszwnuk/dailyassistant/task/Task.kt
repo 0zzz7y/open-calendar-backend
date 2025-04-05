@@ -1,8 +1,10 @@
 package com.tomaszwnuk.dailyassistant.task
 
-import com.tomaszwnuk.dailyassistant.domain.DomainEntity
+import com.tomaszwnuk.dailyassistant.calendar.Calendar
+import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.Schedulable
+import com.tomaszwnuk.dailyassistant.domain.entry.Entry
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -11,7 +13,7 @@ import java.time.LocalDateTime
 data class Task(
 
     @Column(columnDefinition = "VARCHAR(255)", nullable = false)
-    override val title: String,
+    override val name: String? = null,
 
     @Column(columnDefinition = "TEXT", nullable = false)
     override val description: String,
@@ -32,13 +34,14 @@ data class Task(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
-    val category: Category? = null
-) : DomainEntity(), Schedulable {
+    override val category: Category? = null
 
-    fun toDto(): TaskDto {
+) : Entry(name, description, category), Schedulable {
+
+    override fun toDto(): TaskDto {
         return TaskDto(
             id = id,
-            title = title,
+            name = name,
             description = description,
             date = date,
             recurringPattern = recurringPattern,
@@ -47,4 +50,5 @@ data class Task(
             categoryId = category?.id
         )
     }
+
 }

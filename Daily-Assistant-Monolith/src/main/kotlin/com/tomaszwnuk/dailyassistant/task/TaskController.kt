@@ -1,5 +1,6 @@
 package com.tomaszwnuk.dailyassistant.task
 
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -15,19 +16,19 @@ class TaskController(private val _taskService: TaskService) {
     }
 
     @GetMapping("/{id}")
-    fun getTaskById(id: UUID): ResponseEntity<TaskDto> {
+    fun getTaskById(@PathVariable id: UUID): ResponseEntity<TaskDto> {
         val task: TaskDto = _taskService.getById(id).toDto()
         return ResponseEntity.ok(task)
     }
 
     @PostMapping
-    fun createTask(@RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
+    fun createTask(@Valid @RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
         val created: TaskDto = _taskService.create(dto).toDto()
         return ResponseEntity.status(201).body(created)
     }
 
     @PutMapping("/{id}")
-    fun updateTask(@PathVariable id: UUID, @RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
+    fun updateTask(@PathVariable id: UUID, @Valid @RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
         val updated: TaskDto = _taskService.update(id, dto).toDto()
         return ResponseEntity.ok(updated)
     }
@@ -37,4 +38,5 @@ class TaskController(private val _taskService: TaskService) {
         _taskService.delete(id)
         return ResponseEntity.noContent().build()
     }
+
 }

@@ -10,4 +10,5 @@ interface EventRepository : JpaRepository<Event, UUID> {
     fun findAllByCategoryId(categoryId: UUID): List<Event>
 
     fun findAllByCalendarIdAndCategoryId(calendarId: UUID, categoryId: UUID): List<Event>
+
 }

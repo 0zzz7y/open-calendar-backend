@@ -1,16 +1,17 @@
 package com.tomaszwnuk.dailyassistant.event
 
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
+import com.tomaszwnuk.dailyassistant.domain.entry.EntryDto
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 data class EventDto(
 
-    val id: UUID? = null,
+    override val id: UUID? = null,
 
-    val title: String,
+    override val name: String,
 
-    val description: String? = null,
+    override val description: String? = null,
 
     val date: LocalDateTime,
 
@@ -18,5 +19,6 @@ data class EventDto(
 
     val calendarId: UUID,
 
-    val categoryId: UUID? = null
-)
+    override val categoryId: UUID? = null
+
+) : EntryDto(id, name, description, categoryId)

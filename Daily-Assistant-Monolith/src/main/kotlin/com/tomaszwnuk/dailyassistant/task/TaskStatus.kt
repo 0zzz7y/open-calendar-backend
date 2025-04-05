@@ -7,4 +7,5 @@ enum class TaskStatus(val value: Int) {
     IN_PROGRESS(2),
 
     DONE(3);
+
 }

@@ -10,4 +10,5 @@ interface TaskRepository : JpaRepository<Task, UUID> {
     fun findAllByCalendarId(calendarId: UUID): List<Task>
 
     fun findAllByCalendarIdAndCategoryId(calendarId: UUID, categoryId: UUID): List<Task>
+
 }

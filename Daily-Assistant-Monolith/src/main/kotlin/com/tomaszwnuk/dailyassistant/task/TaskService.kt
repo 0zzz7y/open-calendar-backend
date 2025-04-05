@@ -1,12 +1,19 @@
 package com.tomaszwnuk.dailyassistant.task
 
+import com.tomaszwnuk.dailyassistant.calendar.CalendarRepository
+import com.tomaszwnuk.dailyassistant.category.CategoryRepository
+import org.springframework.stereotype.Service
 import java.util.*
-import kotlin.NoSuchElementException
 
+@Service
 class TaskService(
+
     private val _taskRepository: TaskRepository,
+
     private val _calendarRepository: CalendarRepository,
+
     private val _categoryRepository: CategoryRepository,
+
 ) {
 
     fun getAll(): List<Task> = _taskRepository.findAll()
@@ -16,8 +23,10 @@ class TaskService(
     }
 
     fun create(dto: TaskDto): Task {
-        val calendar = _calendarRepository.findById(dto.calendarId).orElseThrow {
-            NoSuchElementException("Calendar with id ${dto.calendarId} could not be found.")
+        val calendar = dto.calendarId?.let {
+            _calendarRepository.findById(it).orElseThrow {
+                NoSuchElementException("Calendar with id ${dto.calendarId} could not be found.")
+            }
         }
         val category = dto.categoryId?.let {
             _categoryRepository.findById(it).orElseThrow {
@@ -26,7 +35,7 @@ class TaskService(
         }
 
         val task = Task(
-            title = dto.title,
+            name = dto.name,
             description = dto.description,
             date = dto.date,
             recurringPattern = dto.recurringPattern,
@@ -40,8 +49,10 @@ class TaskService(
 
     fun update(id: UUID, dto: TaskDto): Task {
         val existing = getById(id)
-        val calendar = _calendarRepository.findById(dto.calendarId).orElseThrow {
-            NoSuchElementException("Calendar with id ${dto.calendarId} could not be found.")
+        val calendar = dto.calendarId?.let {
+            _calendarRepository.findById(it).orElseThrow {
+                NoSuchElementException("Calendar with id ${dto.calendarId} could not be found.")
+            }
         }
         val category = dto.categoryId?.let {
             _categoryRepository.findById(it).orElseThrow {
@@ -50,7 +61,7 @@ class TaskService(
         }
 
         val updated = existing.copy(
-            title = dto.title,
+            name = dto.name,
             description = dto.description,
             date = dto.date,
             recurringPattern = dto.recurringPattern,
@@ -66,4 +77,5 @@ class TaskService(
         val task = getById(id)
         _taskRepository.delete(task)
     }
+
 }
