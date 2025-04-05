@@ -6,7 +6,6 @@ class CategoryColors {
 
         const val DEFAULT_COLOR = "#1591EA"
 
-        // ...TODO
     }
 
 }

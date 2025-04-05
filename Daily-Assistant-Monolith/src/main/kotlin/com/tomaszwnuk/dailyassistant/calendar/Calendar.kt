@@ -14,7 +14,7 @@ data class Calendar(
     @Column(columnDefinition = "CHAR(36)", nullable = false)
     override val id: UUID = UUID.randomUUID(),
 
-    ) : com.tomaszwnuk.dailyassistant.domain.Entity() {
+) : com.tomaszwnuk.dailyassistant.domain.entity.Entity() {
 
     fun toDto(): CalendarDto {
         return CalendarDto(

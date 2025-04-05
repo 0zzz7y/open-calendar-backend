@@ -6,11 +6,9 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping
+@RequestMapping("/events")
 class EventController(
-
     private val _eventService: EventService
-
 ) {
 
     @GetMapping

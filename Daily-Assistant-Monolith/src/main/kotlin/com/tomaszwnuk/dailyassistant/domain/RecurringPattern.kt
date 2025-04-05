@@ -12,4 +12,10 @@ enum class RecurringPattern(val value: Int) {
 
     YEARLY(4);
 
+    companion object {
+        fun valueOf(code: Int): RecurringPattern =
+            entries.find { it.value == code }
+                ?: throw IllegalArgumentException("Invalid code for RecurringPattern: $code")
+    }
+
 }

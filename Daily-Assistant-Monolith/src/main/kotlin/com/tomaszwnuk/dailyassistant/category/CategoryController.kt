@@ -16,15 +16,10 @@ import java.util.*
 @RestController
 @RequestMapping("/categories")
 class CategoryController(
-
     private val _categoryService: CategoryService,
-
     private val _eventRepository: EventRepository,
-
     private val _taskRepository: TaskRepository,
-
     private val _noteRepository: NoteRepository
-
 ) {
 
     @GetMapping
@@ -59,42 +54,42 @@ class CategoryController(
 
     @GetMapping("/{id}/items")
     fun getAllItemsForCategory(@PathVariable id: UUID): ResponseEntity<List<Map<String, Any>>> {
-        val tasks = _taskRepository.findAllByCategoryId(id).map {
+        val tasks: List<Map<String, Any>> = _taskRepository.findAllByCategoryId(id).map {
             it.toDto().toMapWithType("task")
         }
-        val events = _eventRepository.findAllByCategoryId(id).map {
+        val events: List<Map<String, Any>> = _eventRepository.findAllByCategoryId(id).map {
             it.toDto().toMapWithType("event")
         }
-        val notes = _noteRepository.findAllByCategoryId(id).map {
+        val notes: List<Map<String, Any>> = _noteRepository.findAllByCategoryId(id).map {
             it.toDto().toMapWithType("note")
         }
 
-        val items = tasks + events + notes
-
+        val items: List<Map<String, Any>> = tasks + events + notes
         return ResponseEntity.ok(items)
     }
 
     @GetMapping("/{id}/events")
     fun getEvents(@PathVariable id: UUID): ResponseEntity<List<EventDto>> {
-        val events = _eventRepository.findAllByCategoryId(id).map { it.toDto() }
+        val events: List<EventDto> = _eventRepository.findAllByCategoryId(id).map { it.toDto() }
         return ResponseEntity.ok(events)
     }
 
     @GetMapping("/{id}/tasks")
     fun getTasks(@PathVariable id: UUID): ResponseEntity<List<TaskDto>> {
-        val tasks = _taskRepository.findAllByCategoryId(id).map { it.toDto() }
+        val tasks: List<TaskDto> = _taskRepository.findAllByCategoryId(id).map { it.toDto() }
         return ResponseEntity.ok(tasks)
     }
 
     @GetMapping("/{id}/notes")
     fun getNotes(@PathVariable id: UUID): ResponseEntity<List<NoteDto>> {
-        val notes = _noteRepository.findAllByCategoryId(id).map { it.toDto() }
+        val notes: List<NoteDto> = _noteRepository.findAllByCategoryId(id).map { it.toDto() }
         return ResponseEntity.ok(notes)
     }
 
-    fun Any.toMapWithType(type: String): Map<String, Any> {
-        val baseMap = jacksonObjectMapper().convertValue<Map<String, Any>>(this)
-        return baseMap + mapOf("type" to type)
+    private fun Any.toMapWithType(type: String): Map<String, Any> {
+        val map: Map<String, Any> = jacksonObjectMapper().convertValue<Map<String, Any>>(this)
+        val mapWithType: Map<String, Any> = map + mapOf("type" to type)
+        return mapWithType
     }
 
 }

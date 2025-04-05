@@ -20,7 +20,7 @@ data class Category(
     @Column(columnDefinition = "VARCHAR(7)", nullable = false)
     val color: String = CategoryColors.DEFAULT_COLOR,
 
-) : com.tomaszwnuk.dailyassistant.domain.Entity() {
+) : com.tomaszwnuk.dailyassistant.domain.entity.Entity() {
 
     fun toDto(): CategoryDto {
         return CategoryDto(

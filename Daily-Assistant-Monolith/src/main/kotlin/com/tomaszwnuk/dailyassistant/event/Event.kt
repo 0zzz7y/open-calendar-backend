@@ -21,7 +21,7 @@ data class Event(
     @Column(columnDefinition = "Date", nullable = false)
     override val date: LocalDateTime,
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "recurring_pattern", nullable = false)
     override val recurringPattern: RecurringPattern = RecurringPattern.NONE,
 

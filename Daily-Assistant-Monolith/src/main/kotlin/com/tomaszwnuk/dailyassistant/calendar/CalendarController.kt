@@ -12,13 +12,9 @@ import java.util.*
 @RestController
 @RequestMapping("/calendars")
 class CalendarController(
-
     private val _calendarService: CalendarService,
-
     private val _eventRepository: EventRepository,
-
     private val _taskRepository: TaskRepository
-
 ) {
 
     @GetMapping

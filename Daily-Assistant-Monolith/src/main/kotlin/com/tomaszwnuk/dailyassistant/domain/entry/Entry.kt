@@ -1,7 +1,7 @@
 package com.tomaszwnuk.dailyassistant.domain.entry
 
 import com.tomaszwnuk.dailyassistant.category.Category
-import com.tomaszwnuk.dailyassistant.domain.Entity
+import com.tomaszwnuk.dailyassistant.domain.entity.Entity
 import jakarta.persistence.*
 
 @MappedSuperclass

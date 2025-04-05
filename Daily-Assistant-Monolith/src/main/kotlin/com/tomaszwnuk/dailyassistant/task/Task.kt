@@ -24,7 +24,7 @@ data class Task(
     @Column(name = "recurring_pattern", nullable = false)
     override val recurringPattern: RecurringPattern = RecurringPattern.NONE,
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     val status: TaskStatus = TaskStatus.TODO,
 
