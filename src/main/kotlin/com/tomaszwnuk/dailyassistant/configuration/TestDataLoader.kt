@@ -56,10 +56,13 @@ class TestDataLoader(
     }
 
     private fun createCategories(): Map<String, Category> {
-        val startTime: Long  = System.currentTimeMillis()
-        val urgent: Category = _categoryRepository.save(Category(name = "Urgent", color = CategoryColors.toHex(Color.RED)))
-        val casual: Category = _categoryRepository.save(Category(name = "Casual", color = CategoryColors.toHex(Color.GREEN)))
-        val health: Category = _categoryRepository.save(Category(name = "Health", color = CategoryColors.toHex(Color.RED)))
+        val startTime: Long = System.currentTimeMillis()
+        val urgent: Category =
+            _categoryRepository.save(Category(name = "Urgent", color = CategoryColors.toHex(Color.RED)))
+        val casual: Category =
+            _categoryRepository.save(Category(name = "Casual", color = CategoryColors.toHex(Color.GREEN)))
+        val health: Category =
+            _categoryRepository.save(Category(name = "Health", color = CategoryColors.toHex(Color.RED)))
         val categories: Map<String, Category> = mapOf(
             "urgent" to urgent,
             "casual" to casual,
@@ -71,7 +74,7 @@ class TestDataLoader(
     }
 
     private fun createEvents(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
-        val startTime: Long  = System.currentTimeMillis()
+        val startTime: Long = System.currentTimeMillis()
         val now: LocalDateTime = LocalDateTime.now()
         val dailyStandup = Event(
             name = "Daily Standup",
@@ -97,7 +100,7 @@ class TestDataLoader(
     }
 
     private fun createTasks(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
-        val startTime: Long  = System.currentTimeMillis()
+        val startTime: Long = System.currentTimeMillis()
         val now: LocalDateTime = LocalDateTime.now()
         val bicepsAndBackTraining = Task(
             name = "Biceps & Back",
