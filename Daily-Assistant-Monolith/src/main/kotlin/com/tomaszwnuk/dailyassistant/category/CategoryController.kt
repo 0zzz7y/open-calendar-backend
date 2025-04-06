@@ -6,13 +6,17 @@ import com.tomaszwnuk.dailyassistant.event.EventDto
 import com.tomaszwnuk.dailyassistant.event.EventRepository
 import com.tomaszwnuk.dailyassistant.note.NoteDto
 import com.tomaszwnuk.dailyassistant.note.NoteRepository
-import com.tomaszwnuk.dailyassistant.task.TaskDto
 import com.tomaszwnuk.dailyassistant.task.TaskRepository
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
+@Suppress("unused")
 @RestController
 @RequestMapping("/categories")
 class CategoryController(
@@ -22,10 +26,22 @@ class CategoryController(
     private val _noteRepository: NoteRepository
 ) {
 
+    @PostMapping
+    fun create(@Valid @RequestBody dto: CategoryDto): ResponseEntity<CategoryDto> {
+        val created: CategoryDto = _categoryService.create(dto).toDto()
+        return ResponseEntity.status(201).body(created)
+    }
+
     @GetMapping
-    fun getAll(): ResponseEntity<List<CategoryDto>> {
-        val categories: List<CategoryDto> = _categoryService.getAll().map { it.toDto() }
-        return ResponseEntity.ok(categories)
+    fun getAll(
+        @PageableDefault(
+            size = 10,
+            sort = ["startDate"],
+            direction = Sort.Direction.ASC
+        ) pageable: Pageable
+    ): ResponseEntity<Page<CategoryDto>> {
+        val categoriesPage: Page<CategoryDto> = _categoryService.getAll(pageable).map { it.toDto() }
+        return ResponseEntity.ok(categoriesPage)
     }
 
     @GetMapping("/{id}")
@@ -34,10 +50,67 @@ class CategoryController(
         return ResponseEntity.ok(category)
     }
 
-    @PostMapping
-    fun create(@Valid @RequestBody dto: CategoryDto): ResponseEntity<CategoryDto> {
-        val created: CategoryDto = _categoryService.create(dto).toDto()
-        return ResponseEntity.status(201).body(created)
+    @GetMapping("/{id}/items")
+    fun getAllItems(
+        @PathVariable id: UUID, @PageableDefault(
+            size = 10,
+            sort = ["startDate"],
+            direction = Sort.Direction.ASC
+        ) pageable: Pageable
+    ): ResponseEntity<List<Map<String, Any>>> {
+        val tasks: Page<Map<String, Any>> = _taskRepository.findAllByCategoryId(id, pageable).map {
+            it.toDto().toMapWithType("task")
+        }
+        val events: Page<Map<String, Any>> = _eventRepository.findAllByCategoryId(id, pageable).map {
+            it.toDto().toMapWithType("event")
+        }
+        val notes: Page<Map<String, Any>> = _noteRepository.findAllByCategoryId(id, pageable).map {
+            it.toDto().toMapWithType("note")
+        }
+
+        val items: List<Map<String, Any>> = tasks + events + notes
+        return ResponseEntity.ok(items)
+    }
+
+    @GetMapping("/{id}/events")
+    fun getEvents(
+        @PathVariable id: UUID,
+        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+    ): ResponseEntity<Page<EventDto>> {
+        val eventsPage: Page<EventDto> = _eventRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
+        return ResponseEntity.ok(eventsPage)
+    }
+
+    @GetMapping("/{id}/tasks")
+    fun getTasks(
+        @PathVariable id: UUID,
+        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+    ): ResponseEntity<*> {
+        val tasksPage = _taskRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
+        return ResponseEntity.ok(tasksPage)
+    }
+
+    @GetMapping("/{id}/notes")
+    fun getNotes(
+        @PathVariable id: UUID,
+        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+    ): ResponseEntity<Page<NoteDto>> {
+        val notesPage: Page<NoteDto> = _noteRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
+        return ResponseEntity.ok(notesPage)
+    }
+
+    @GetMapping("/filter")
+    fun filter(
+        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) color: String?,
+        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+    ): ResponseEntity<Page<CategoryDto>> {
+        val filter = CategoryFilterDto(
+            name = name,
+            color = color
+        )
+        val result: Page<CategoryDto> = _categoryService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(result)
     }
 
     @PutMapping("/{id}")
@@ -50,40 +123,6 @@ class CategoryController(
     fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
         _categoryService.delete(id)
         return ResponseEntity.noContent().build()
-    }
-
-    @GetMapping("/{id}/items")
-    fun getAllItemsForCategory(@PathVariable id: UUID): ResponseEntity<List<Map<String, Any>>> {
-        val tasks: List<Map<String, Any>> = _taskRepository.findAllByCategoryId(id).map {
-            it.toDto().toMapWithType("task")
-        }
-        val events: List<Map<String, Any>> = _eventRepository.findAllByCategoryId(id).map {
-            it.toDto().toMapWithType("event")
-        }
-        val notes: List<Map<String, Any>> = _noteRepository.findAllByCategoryId(id).map {
-            it.toDto().toMapWithType("note")
-        }
-
-        val items: List<Map<String, Any>> = tasks + events + notes
-        return ResponseEntity.ok(items)
-    }
-
-    @GetMapping("/{id}/events")
-    fun getEvents(@PathVariable id: UUID): ResponseEntity<List<EventDto>> {
-        val events: List<EventDto> = _eventRepository.findAllByCategoryId(id).map { it.toDto() }
-        return ResponseEntity.ok(events)
-    }
-
-    @GetMapping("/{id}/tasks")
-    fun getTasks(@PathVariable id: UUID): ResponseEntity<List<TaskDto>> {
-        val tasks: List<TaskDto> = _taskRepository.findAllByCategoryId(id).map { it.toDto() }
-        return ResponseEntity.ok(tasks)
-    }
-
-    @GetMapping("/{id}/notes")
-    fun getNotes(@PathVariable id: UUID): ResponseEntity<List<NoteDto>> {
-        val notes: List<NoteDto> = _noteRepository.findAllByCategoryId(id).map { it.toDto() }
-        return ResponseEntity.ok(notes)
     }
 
     private fun Any.toMapWithType(type: String): Map<String, Any> {

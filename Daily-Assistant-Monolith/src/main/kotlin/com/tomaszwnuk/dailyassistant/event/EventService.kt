@@ -4,8 +4,11 @@ import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.calendar.CalendarRepository
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
+import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.info
-import com.tomaszwnuk.dailyassistant.domain.validation.findOrThrow
+import com.tomaszwnuk.dailyassistant.validation.findOrThrow
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -16,9 +19,39 @@ class EventService(
     private val _categoryRepository: CategoryRepository,
 ) {
 
+    fun create(dto: EventDto): Event {
+        info(this, "Creating $dto")
+        val calendar: Calendar = _calendarRepository.findOrThrow(id = dto.calendarId)
+        val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
+
+        val event = Event(
+            name = dto.name,
+            description = dto.description,
+            startDate = dto.startDate,
+            endDate = dto.endDate,
+            recurringPattern = RecurringPattern.valueOf(dto.recurringPattern),
+            calendar = calendar,
+            category = category
+        )
+
+        info(this, "Created $event")
+        return _eventRepository.save(event)
+    }
+
     fun getAll(): List<Event> {
         info(this, "Fetching all events")
-        return _eventRepository.findAll()
+        val events: List<Event> = _eventRepository.findAll()
+
+        info(this, "Found $events")
+        return events
+    }
+
+    fun getAll(pageable: Pageable): Page<Event> {
+        info(this, "Fetching all events")
+        val events: Page<Event> = _eventRepository.findAll(pageable)
+
+        info(this, "Found $events")
+        return events
     }
 
     fun getById(id: UUID): Event {
@@ -29,22 +62,21 @@ class EventService(
         return event
     }
 
-    fun create(dto: EventDto): Event {
-        info(this, "Creating $dto")
-        val calendar: Calendar = _calendarRepository.findOrThrow(id = dto.calendarId)
-        val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
-
-        val event = Event(
-            name = dto.name,
-            description = dto.description,
-            date = dto.date,
-            recurringPattern = dto.recurringPattern,
-            calendar = calendar,
-            category = category
+    fun filter(filter: EventFilterDto, pageable: Pageable): Page<Event> {
+        info(this, "Filtering events with $filter")
+        val filteredEvents: Page<Event> = _eventRepository.filter(
+            name = filter.name,
+            description = filter.description,
+            dateTo = filter.dateTo,
+            dateFrom = filter.dateFrom,
+            categoryId = filter.categoryId,
+            calendarId = filter.calendarId,
+            recurringPattern = filter.recurringPattern,
+            pageable = pageable
         )
 
-        info(this, "Created $event")
-        return _eventRepository.save(event)
+        info(this, "Found $filteredEvents")
+        return filteredEvents
     }
 
     fun update(id: UUID, dto: EventDto): Event {
@@ -56,8 +88,9 @@ class EventService(
         val updated: Event = existing.copy(
             name = dto.name,
             description = dto.description,
-            date = dto.date,
-            recurringPattern = dto.recurringPattern,
+            startDate = dto.startDate,
+            endDate = dto.endDate,
+            recurringPattern = RecurringPattern.valueOf(dto.recurringPattern),
             calendar = calendar,
             category = category
         )

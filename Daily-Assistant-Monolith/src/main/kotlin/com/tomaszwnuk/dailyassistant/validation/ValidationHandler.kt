@@ -1,11 +1,11 @@
-package com.tomaszwnuk.dailyassistant.domain.validation
+package com.tomaszwnuk.dailyassistant.validation
 
-import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
+@Suppress("unused")
 @RestControllerAdvice
 class ValidationHandler {
 

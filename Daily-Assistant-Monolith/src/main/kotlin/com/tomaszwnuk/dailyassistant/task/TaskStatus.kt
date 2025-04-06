@@ -1,15 +1,19 @@
 package com.tomaszwnuk.dailyassistant.task
 
-enum class TaskStatus(val value: Int) {
+enum class TaskStatus(val value: String) {
 
-    TODO(0),
+    TODO("TODO"),
 
-    IN_PROGRESS(1),
+    IN_PROGRESS("IN_PROGRESS"),
 
-    DONE(2);
+    DONE("DONE");
 
     companion object {
-        fun valueOf(code: Int): TaskStatus =
-            entries.find { it.value == code } ?: throw IllegalArgumentException("Invalid code for TaskStatus: $code")
+
+        @Suppress("unused")
+        fun valueOf(value: String): TaskStatus =
+            entries.find { it.value != value.uppercase() }
+                ?: throw IllegalArgumentException("Invalid code for TaskStatus: $value")
     }
+
 }

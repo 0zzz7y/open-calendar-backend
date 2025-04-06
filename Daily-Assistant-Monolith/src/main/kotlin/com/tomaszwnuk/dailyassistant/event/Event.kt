@@ -15,11 +15,14 @@ data class Event(
     @Column(columnDefinition = "VARCHAR(255)", nullable = false)
     override val name: String,
 
-    @Column(columnDefinition = "TEXT", nullable = true)
+    @Column(columnDefinition = "VARCHAR(4096)", nullable = true)
     override val description: String? = null,
 
-    @Column(columnDefinition = "Date", nullable = false)
-    override val date: LocalDateTime,
+    @Column(columnDefinition = "TIMESTAMP", nullable = false)
+    override val startDate: LocalDateTime,
+
+    @Column(columnDefinition = "TIMESTAMP", nullable = false)
+    override val endDate: LocalDateTime,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "recurring_pattern", nullable = false)
@@ -40,8 +43,9 @@ data class Event(
             id = id,
             name = name,
             description = description,
-            date = date,
-            recurringPattern = recurringPattern,
+            startDate = startDate,
+            endDate = endDate,
+            recurringPattern = recurringPattern.value,
             calendarId = calendar.id,
             categoryId = category?.id
         )

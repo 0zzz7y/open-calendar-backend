@@ -20,7 +20,7 @@ abstract class Entity {
 
     @CreatedDate
     @Column(updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    var createdAt: LocalDateTime? = null
 
     @LastModifiedDate
     var updatedAt: LocalDateTime? = null

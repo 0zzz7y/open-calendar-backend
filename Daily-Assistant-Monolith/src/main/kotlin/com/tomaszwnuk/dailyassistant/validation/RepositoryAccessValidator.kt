@@ -1,4 +1,4 @@
-package com.tomaszwnuk.dailyassistant.domain.validation
+package com.tomaszwnuk.dailyassistant.validation
 
 import com.tomaszwnuk.dailyassistant.domain.logger
 import org.springframework.data.jpa.repository.JpaRepository

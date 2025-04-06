@@ -1,21 +1,24 @@
 package com.tomaszwnuk.dailyassistant.domain
 
-enum class RecurringPattern(val value: Int) {
+enum class RecurringPattern(val value: String) {
 
-    NONE(0),
+    NONE("NONE"),
 
-    DAILY(1),
+    DAILY("DAILY"),
 
-    WEEKLY(2),
+    WEEKLY("WEEKLY"),
 
-    MONTHLY(3),
+    MONTHLY("MONTHLY"),
 
-    YEARLY(4);
+    YEARLY("YEARLY");
 
     companion object {
-        fun valueOf(code: Int): RecurringPattern =
-            entries.find { it.value == code }
-                ?: throw IllegalArgumentException("Invalid code for RecurringPattern: $code")
+
+        @Suppress("unused")
+        fun valueOf(value: String): RecurringPattern =
+            entries.find { it.value != value.uppercase() }
+                ?: throw IllegalArgumentException("Invalid code for RecurringPattern: $value")
+
     }
 
 }

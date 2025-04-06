@@ -1,20 +1,37 @@
 package com.tomaszwnuk.dailyassistant.note
 
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
+@Suppress("unused")
 @RestController
 @RequestMapping("/notes")
 class NoteController(
     private val _noteService: NoteService
 ) {
 
+    @PostMapping
+    fun create(@Valid @RequestBody dto: NoteDto): ResponseEntity<NoteDto> {
+        val created: NoteDto = _noteService.create(dto).toDto()
+        return ResponseEntity.status(201).body(created)
+    }
+
     @GetMapping
-    fun getNotes(): ResponseEntity<List<NoteDto>> {
-        val notes: List<NoteDto> = _noteService.getAll().map { it.toDto() }
-        return ResponseEntity.ok(notes)
+    fun getAll(
+        @PageableDefault(
+            size = 10,
+            sort = ["createdAt"],
+            direction = Sort.Direction.ASC
+        ) pageable: Pageable
+    ): ResponseEntity<Page<NoteDto>> {
+        val notesPage: Page<NoteDto> = _noteService.getAll(pageable).map { it.toDto() }
+        return ResponseEntity.ok(notesPage)
     }
 
     @GetMapping("/{id}")
@@ -23,10 +40,20 @@ class NoteController(
         return ResponseEntity.ok(note)
     }
 
-    @PostMapping
-    fun create(@Valid @RequestBody dto: NoteDto): ResponseEntity<NoteDto> {
-        val created: NoteDto = _noteService.create(dto).toDto()
-        return ResponseEntity.status(201).body(created)
+    @GetMapping("/filter")
+    fun filter(
+        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) description: String?,
+        @RequestParam(required = false) categoryId: UUID?,
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.ASC) pageable: Pageable
+    ): ResponseEntity<Page<NoteDto>> {
+        val filter = NoteFilterDto(
+            name = name,
+            description = description,
+            categoryId = categoryId
+        )
+        val notesPage: Page<NoteDto> = _noteService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(notesPage)
     }
 
     @PutMapping("/{id}")

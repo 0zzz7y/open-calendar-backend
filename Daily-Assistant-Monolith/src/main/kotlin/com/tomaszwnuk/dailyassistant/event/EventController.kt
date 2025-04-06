@@ -1,20 +1,40 @@
 package com.tomaszwnuk.dailyassistant.event
 
+import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import jakarta.validation.Valid
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.time.LocalDateTime
 import java.util.*
 
+@Suppress("unused")
 @RestController
 @RequestMapping("/events")
 class EventController(
     private val _eventService: EventService
 ) {
 
+    @PostMapping
+    fun create(@Valid @RequestBody dto: EventDto): ResponseEntity<EventDto> {
+        val created: EventDto = _eventService.create(dto).toDto()
+        return ResponseEntity.status(201).body(created)
+    }
+
     @GetMapping
-    fun getEvents(): ResponseEntity<List<EventDto>> {
-        val events: List<EventDto> = _eventService.getAll().map { it.toDto() }
-        return ResponseEntity.ok(events)
+    fun getAll(
+        @PageableDefault(
+            size = 10,
+            sort = ["createdAt"],
+            direction = Sort.Direction.ASC
+        ) pageable: Pageable
+    ): ResponseEntity<Page<EventDto>> {
+        val eventsPage: Page<EventDto> = _eventService.getAll(pageable).map { it.toDto() }
+        return ResponseEntity.ok(eventsPage)
     }
 
     @GetMapping("/{id}")
@@ -23,10 +43,28 @@ class EventController(
         return ResponseEntity.ok(event)
     }
 
-    @PostMapping
-    fun create(@Valid @RequestBody dto: EventDto): ResponseEntity<EventDto> {
-        val created: EventDto = _eventService.create(dto).toDto()
-        return ResponseEntity.status(201).body(created)
+    @GetMapping("/filter")
+    fun filter(
+        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) description: String?,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateFrom: String?,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateTo: String?,
+        @RequestParam(required = false) recurringPattern: String?,
+        @RequestParam(required = false) calendarId: UUID?,
+        @RequestParam(required = false) categoryId: UUID?,
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.ASC) pageable: Pageable
+    ): ResponseEntity<Page<EventDto>> {
+        val filter = EventFilterDto(
+            name = name,
+            description = description,
+            dateFrom = dateFrom?.let { LocalDateTime.parse(it) },
+            dateTo = dateTo?.let { LocalDateTime.parse(it) },
+            recurringPattern = recurringPattern?.let { RecurringPattern.valueOf(it) },
+            calendarId = calendarId,
+            categoryId = categoryId
+        )
+        val result: Page<EventDto> = _eventService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(result)
     }
 
     @PutMapping

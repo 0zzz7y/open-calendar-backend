@@ -4,8 +4,11 @@ import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.calendar.CalendarRepository
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
+import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.info
-import com.tomaszwnuk.dailyassistant.domain.validation.findOrThrow
+import com.tomaszwnuk.dailyassistant.validation.findOrThrow
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -16,9 +19,37 @@ class TaskService(
     private val _categoryRepository: CategoryRepository,
 ) {
 
+    fun create(dto: TaskDto): Task {
+        info(this, "Creating $dto")
+        val calendar: Calendar? = dto.calendarId?.let { _calendarRepository.findOrThrow(id = it) }
+        val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
+
+        val task = Task(
+            name = dto.name,
+            description = dto.description,
+            startDate = dto.startDate,
+            endDate = dto.endDate,
+            recurringPattern = RecurringPattern.valueOf(dto.recurringPattern),
+            status = TaskStatus.valueOf(dto.status),
+            calendar = calendar,
+            category = category
+        )
+
+        info(this, "Created $task")
+        return _taskRepository.save(task)
+    }
+
     fun getAll(): List<Task> {
         info(this, "Fetching all tasks")
         val tasks: List<Task> = _taskRepository.findAll()
+
+        info(this, "Found $tasks")
+        return tasks
+    }
+
+    fun getAll(pageable: Pageable): Page<Task> {
+        info(this, "Fetching all tasks")
+        val tasks: Page<Task> = _taskRepository.findAll(pageable)
 
         info(this, "Found $tasks")
         return tasks
@@ -32,23 +63,21 @@ class TaskService(
         return task
     }
 
-    fun create(dto: TaskDto): Task {
-        info(this, "Creating $dto")
-        val calendar: Calendar? = dto.calendarId?.let { _calendarRepository.findOrThrow(id = it) }
-        val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
-
-        val task = Task(
-            name = dto.name,
-            description = dto.description,
-            date = dto.date,
-            recurringPattern = dto.recurringPattern,
-            status = dto.status,
-            calendar = calendar,
-            category = category
+    fun filter(filter: TaskFilterDto, pageable: Pageable): Page<Task> {
+        info(this, "Filtering tasks with $filter")
+        val tasks: Page<Task> = _taskRepository.filter(
+            name = filter.name,
+            description = filter.description,
+            dateFrom = filter.dateFrom,
+            dateTo = filter.dateTo,
+            categoryId = filter.categoryId,
+            calendarId = filter.calendarId,
+            recurringPattern = filter.recurringPattern,
+            pageable = pageable
         )
 
-        info(this, "Created $task")
-        return _taskRepository.save(task)
+        info(this, "Found $tasks")
+        return tasks
     }
 
     fun update(id: UUID, dto: TaskDto): Task {
@@ -60,9 +89,10 @@ class TaskService(
         val updated: Task = existing.copy(
             name = dto.name,
             description = dto.description,
-            date = dto.date,
-            recurringPattern = dto.recurringPattern,
-            status = dto.status,
+            startDate = dto.startDate,
+            endDate = dto.endDate,
+            recurringPattern = RecurringPattern.valueOf(dto.recurringPattern),
+            status = TaskStatus.valueOf(dto.status),
             calendar = calendar,
             category = category
         )

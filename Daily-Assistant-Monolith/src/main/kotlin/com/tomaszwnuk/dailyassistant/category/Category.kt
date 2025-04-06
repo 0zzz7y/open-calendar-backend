@@ -18,7 +18,7 @@ data class Category(
     val name: String,
 
     @Column(columnDefinition = "VARCHAR(7)", nullable = false)
-    val color: String = CategoryColors.DEFAULT_COLOR,
+    val color: String = CategoryColors.DEFAULT
 
 ) : com.tomaszwnuk.dailyassistant.domain.entity.Entity() {
 

@@ -1,8 +1,10 @@
 package com.tomaszwnuk.dailyassistant.category
 
 import com.tomaszwnuk.dailyassistant.domain.info
-import com.tomaszwnuk.dailyassistant.domain.validation.assertNameDoesNotExist
-import com.tomaszwnuk.dailyassistant.domain.validation.findOrThrow
+import com.tomaszwnuk.dailyassistant.validation.assertNameDoesNotExist
+import com.tomaszwnuk.dailyassistant.validation.findOrThrow
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -10,16 +12,6 @@ import java.util.*
 class CategoryService(
     private val _categoryRepository: CategoryRepository
 ) {
-
-    fun getAll(): List<Category> = _categoryRepository.findAll()
-
-    fun getById(id: UUID): Category {
-        info(this, "Fetching category with id $id")
-        val category: Category = _categoryRepository.findOrThrow(id)
-
-        info(this, "Found $category")
-        return category
-    }
 
     fun create(dto: CategoryDto): Category {
         info(this, "Creating $dto")
@@ -35,6 +27,42 @@ class CategoryService(
 
         info(this, "Created $category")
         return _categoryRepository.save(category)
+    }
+
+    fun getAll(): List<Category> {
+        info(this, "Fetching all categories")
+        val categories: List<Category> = _categoryRepository.findAll()
+
+        info(this, "Found $categories")
+        return categories
+    }
+
+    fun getAll(pageable: Pageable): Page<Category> {
+        info(this, "Fetching all categories")
+        val categories: Page<Category> = _categoryRepository.findAll(pageable)
+
+        info(this, "Found $categories")
+        return categories
+    }
+
+    fun getById(id: UUID): Category {
+        info(this, "Fetching category with id $id")
+        val category: Category = _categoryRepository.findOrThrow(id)
+
+        info(this, "Found $category")
+        return category
+    }
+
+    fun filter(filter: CategoryFilterDto, pageable: Pageable): Page<Category> {
+        info(this, "Filtering categories with $filter")
+        val categories: Page<Category> = _categoryRepository.filter(
+            name = filter.name,
+            color = filter.color,
+            pageable = pageable
+        )
+
+        info(this, "Found $categories")
+        return categories
     }
 
     fun update(id: UUID, dto: CategoryDto): Category {

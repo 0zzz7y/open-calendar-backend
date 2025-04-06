@@ -2,7 +2,9 @@ package com.tomaszwnuk.dailyassistant.event
 
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.entry.EntryDto
-import jakarta.validation.constraints.*
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 import java.time.LocalDateTime
 import java.util.*
 
@@ -14,15 +16,17 @@ data class EventDto(
     @field:Size(max = 255, message = "Name cannot be longer than 255 characters.")
     override val name: String,
 
-    @field:NotBlank(message = "Description cannot be blank.")
+    @field:Size(max = 4096, message = "Description cannot be longer than 4096 characters.")
     override val description: String? = null,
 
-    @field:NotNull(message = "Date is required.")
-    val date: LocalDateTime,
+    @field:NotNull(message = "Start date is required.")
+    val startDate: LocalDateTime,
 
-    @field:Min(0, message = "Invalid recurring pattern.")
-    @field:Max(4, message = "Invalid recurring pattern.")
-    val recurringPattern: RecurringPattern = RecurringPattern.NONE,
+    @field:NotNull(message = "End date is required.")
+    val endDate: LocalDateTime,
+
+    @field:NotNull(message = "Recurring pattern is required.")
+    val recurringPattern: String = RecurringPattern.NONE.value,
 
     @field:NotNull(message = "Calendar ID is required.")
     val calendarId: UUID,

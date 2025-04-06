@@ -12,14 +12,17 @@ import java.time.LocalDateTime
 @Table(name = "task")
 data class Task(
 
-    @Column(columnDefinition = "VARCHAR(255)", nullable = false)
+    @Column(columnDefinition = "VARCHAR(255)", nullable = true)
     override val name: String? = null,
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "VARCHAR(4096)", nullable = false)
     override val description: String,
 
-    @Column(columnDefinition = "Date", nullable = false)
-    override val date: LocalDateTime,
+    @Column(columnDefinition = "TIMESTAMP", nullable = true)
+    override val startDate: LocalDateTime? = null,
+
+    @Column(columnDefinition = "TIMESTAMP", nullable = true)
+    override val endDate: LocalDateTime? = null,
 
     @Column(name = "recurring_pattern", nullable = false)
     override val recurringPattern: RecurringPattern = RecurringPattern.NONE,
@@ -43,9 +46,10 @@ data class Task(
             id = id,
             name = name,
             description = description,
-            date = date,
-            recurringPattern = recurringPattern,
-            status = status,
+            startDate = startDate,
+            endDate = endDate,
+            recurringPattern = recurringPattern.value,
+            status = status.value,
             calendarId = calendar?.id,
             categoryId = category?.id
         )

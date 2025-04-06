@@ -11,7 +11,7 @@ data class Note(
     @Column(columnDefinition = "VARCHAR(255)", nullable = true)
     override val name: String,
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "VARCHAR(4096)", nullable = false)
     override val description: String? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
