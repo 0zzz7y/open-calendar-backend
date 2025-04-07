@@ -52,8 +52,8 @@ class NoteController(
             description = description,
             categoryId = categoryId
         )
-        val notesPage: Page<NoteDto> = _noteService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(notesPage)
+        val notePages: Page<NoteDto> = _noteService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(notePages)
     }
 
     @PutMapping("/{id}")

@@ -1,5 +1,6 @@
 package com.tomaszwnuk.dailyassistant.task
 
+import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -57,10 +58,13 @@ class TaskController(private val _taskService: TaskService) {
             description = description,
             dateFrom = dateFrom?.let { LocalDateTime.parse(it) },
             dateTo = dateTo?.let { LocalDateTime.parse(it) },
+            recurringPattern = recurringPattern?.let { RecurringPattern.valueOf(it) },
+            status = status?.let { TaskStatus.valueOf(it) },
+            calendarId = calendarId,
             categoryId = categoryId
         )
-        val tasksPage: Page<TaskDto> = _taskService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(tasksPage)
+        val taskPages: Page<TaskDto> = _taskService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(taskPages)
     }
 
     @PutMapping("/{id}")

@@ -26,11 +26,11 @@ interface EventRepository : JpaRepository<Event, UUID> {
     SELECT e FROM Event e
     WHERE (:name IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')))
       AND (:description IS NULL OR LOWER(e.description) LIKE LOWER(CONCAT('%', :description, '%')))
-      AND (:calendarId IS NULL OR e.calendar.id = :calendarId)
-      AND (:categoryId IS NULL OR e.category.id = :categoryId)
-      AND (:recurringPattern IS NULL OR e.recurringPattern = :recurringPattern)
       AND (:dateFrom IS NULL OR e.startDate >= :dateFrom)
       AND (:dateTo IS NULL OR e.endDate <= :dateTo)
+      AND (:recurringPattern IS NULL OR e.recurringPattern = :recurringPattern)
+      AND (:calendarId IS NULL OR e.calendar.id = :calendarId)
+      AND (:categoryId IS NULL OR e.category.id = :categoryId)
     """
     )
     fun filter(
@@ -38,9 +38,9 @@ interface EventRepository : JpaRepository<Event, UUID> {
         @Param("description") description: String?,
         @Param("dateFrom") dateFrom: LocalDateTime?,
         @Param("dateTo") dateTo: LocalDateTime?,
-        @Param("categoryId") categoryId: UUID?,
-        @Param("calendarId") calendarId: UUID?,
         @Param("recurringPattern") recurringPattern: RecurringPattern?,
+        @Param("calendarId") calendarId: UUID?,
+        @Param("categoryId") categoryId: UUID?,
         pageable: Pageable
     ): Page<Event>
 

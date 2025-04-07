@@ -64,19 +64,20 @@ class TaskService(
 
     fun filter(filter: TaskFilterDto, pageable: Pageable): Page<Task> {
         info(this, "Filtering tasks with $filter")
-        val tasks: Page<Task> = _taskRepository.filter(
+        val filteredTasks: Page<Task> = _taskRepository.filter(
             name = filter.name,
             description = filter.description,
             dateFrom = filter.dateFrom,
             dateTo = filter.dateTo,
-            categoryId = filter.categoryId,
-            calendarId = filter.calendarId,
             recurringPattern = filter.recurringPattern,
+            status = filter.status,
+            calendarId = filter.calendarId,
+            categoryId = filter.categoryId,
             pageable = pageable
         )
 
-        info(this, "Found $tasks")
-        return tasks
+        info(this, "Found $filteredTasks")
+        return filteredTasks
     }
 
     fun update(id: UUID, dto: TaskDto): Task {

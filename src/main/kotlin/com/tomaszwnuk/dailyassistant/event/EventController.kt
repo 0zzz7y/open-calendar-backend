@@ -63,8 +63,8 @@ class EventController(
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val result: Page<EventDto> = _eventService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(result)
+        val eventPages: Page<EventDto> = _eventService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(eventPages)
     }
 
     @PutMapping("/{id}")

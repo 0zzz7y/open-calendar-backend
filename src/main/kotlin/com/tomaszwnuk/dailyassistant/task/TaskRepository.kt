@@ -20,11 +20,12 @@ interface TaskRepository : JpaRepository<Task, UUID> {
     SELECT t FROM Task t
     WHERE (:name IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :name, '%')))
       AND (:description IS NULL OR LOWER(t.description) LIKE LOWER(CONCAT('%', :description, '%')))
-      AND (:calendarId IS NULL OR t.calendar.id = :calendarId)
-      AND (:categoryId IS NULL OR t.category.id = :categoryId)
-      AND (:recurringPattern IS NULL OR t.recurringPattern = :recurringPattern)
       AND (:dateFrom IS NULL OR t.endDate >= :dateFrom)
       AND (:dateTo IS NULL OR t.startDate <= :dateTo)
+      AND (:recurringPattern IS NULL OR t.recurringPattern = :recurringPattern)
+      AND (:status IS NULL OR t.status = :status)
+      AND (:calendarId IS NULL OR t.calendar.id = :calendarId)
+      AND (:categoryId IS NULL OR t.category.id = :categoryId)
     """
     )
     fun filter(
@@ -32,9 +33,10 @@ interface TaskRepository : JpaRepository<Task, UUID> {
         @Param("description") description: String?,
         @Param("dateFrom") dateFrom: LocalDateTime?,
         @Param("dateTo") dateTo: LocalDateTime?,
-        @Param("categoryId") categoryId: UUID?,
-        @Param("calendarId") calendarId: UUID?,
         @Param("recurringPattern") recurringPattern: RecurringPattern?,
+        @Param("status") status: TaskStatus?,
+        @Param("calendarId") calendarId: UUID?,
+        @Param("categoryId") categoryId: UUID?,
         pageable: Pageable
     ): Page<Task>
 

@@ -66,11 +66,11 @@ class EventService(
         val filteredEvents: Page<Event> = _eventRepository.filter(
             name = filter.name,
             description = filter.description,
-            dateTo = filter.dateTo,
             dateFrom = filter.dateFrom,
-            categoryId = filter.categoryId,
-            calendarId = filter.calendarId,
+            dateTo = filter.dateTo,
             recurringPattern = filter.recurringPattern,
+            calendarId = filter.calendarId,
+            categoryId = filter.categoryId,
             pageable = pageable
         )
 

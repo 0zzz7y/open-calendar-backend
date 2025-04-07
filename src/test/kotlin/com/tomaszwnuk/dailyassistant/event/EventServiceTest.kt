@@ -64,25 +64,15 @@ class EventServiceTest {
             calendar = _sampleCalendar,
             category = _sampleCategory
         )
-        _sampleDto = EventDto(
-            id = _sampleEvent.id,
-            name = _sampleEvent.name,
-            description = _sampleEvent.description,
-            startDate = _sampleEvent.startDate,
-            endDate = _sampleEvent.endDate,
-            recurringPattern = _sampleEvent.recurringPattern,
-            calendarId = _sampleCalendar.id,
-            categoryId = _sampleCategory.id
-        )
+        _sampleDto = _sampleEvent.toDto()
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
     }
 
     @Test
-    fun `should create and return saved event`() {
+    fun `should return created event`() {
         whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
         whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(_sampleEvent).whenever(_eventRepository).save(any())
-
         val result: Event = _eventService.create(_sampleDto)
 
         assertEquals(_sampleEvent.id, result.id)
@@ -94,11 +84,10 @@ class EventServiceTest {
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent, _sampleEvent)
 
         whenever(_eventRepository.findAll(_pageable)).thenReturn(PageImpl(events))
-
         val result = _eventService.getAll(_pageable)
 
-        assertEquals(3, result.totalElements)
-        assertEquals(events[0].id, result.content[0].id)
+        assertEquals(events.size, result.totalElements.toInt())
+        verify(_eventRepository).findAll(_pageable)
     }
 
     @Test
@@ -106,10 +95,10 @@ class EventServiceTest {
         val id: UUID = _sampleEvent.id
 
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
-
         val result: Event = _eventService.getById(id)
 
         assertEquals(id, result.id)
+        verify(_eventRepository).findById(id)
     }
 
     @Test
@@ -119,7 +108,7 @@ class EventServiceTest {
 
         whenever(
             _eventRepository.filter(
-                eq("Event"),
+                eq(filter.name),
                 isNull(),
                 isNull(),
                 isNull(),
@@ -129,13 +118,23 @@ class EventServiceTest {
                 eq(_pageable)
             )
         ).thenReturn(PageImpl(events))
-
         val result: Page<Event> = _eventService.filter(filter, _pageable)
-        assertEquals(3, result.totalElements)
+
+        assertEquals(events.size, result.totalElements.toInt())
+        verify(_eventRepository).filter(
+            eq(filter.name),
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            eq(_pageable)
+        )
     }
 
     @Test
-    fun `should update and return updated event`() {
+    fun `should return updated event`() {
         val id: UUID = _sampleEvent.id
         val updated: Event = _sampleEvent.copy(name = "Updated Event")
 
@@ -143,18 +142,18 @@ class EventServiceTest {
         whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
         whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(updated).whenever(_eventRepository).save(any())
-
         val result: Event = _eventService.update(id, _sampleDto)
 
         assertEquals(updated.name, result.name)
+        verify(_eventRepository).save(any())
     }
 
     @Test
     fun `should delete event`() {
         val id: UUID = _sampleEvent.id
+
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
         doNothing().whenever(_eventRepository).delete(_sampleEvent)
-
         _eventService.delete(id)
 
         verify(_eventRepository).delete(_sampleEvent)
