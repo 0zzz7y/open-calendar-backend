@@ -1,5 +1,8 @@
 package com.tomaszwnuk.dailyassistant.category
 
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_COLOR
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_ID
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_NAME
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -11,13 +14,13 @@ import java.util.*
 data class Category(
 
     @Id
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
     override val id: UUID = UUID.randomUUID(),
 
-    @Column(columnDefinition = "VARCHAR(255)", unique = true, nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_NAME, unique = true, nullable = false)
     val name: String,
 
-    @Column(columnDefinition = "VARCHAR(7)", nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_COLOR, nullable = false)
     val color: String = CategoryColors.DEFAULT
 
 ) : com.tomaszwnuk.dailyassistant.domain.entity.Entity() {

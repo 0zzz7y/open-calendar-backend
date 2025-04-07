@@ -30,7 +30,7 @@ class EventController(
         @PageableDefault(
             size = 10,
             sort = ["createdAt"],
-            direction = Sort.Direction.ASC
+            direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val eventsPage: Page<EventDto> = _eventService.getAll(pageable).map { it.toDto() }
@@ -52,7 +52,7 @@ class EventController(
         @RequestParam(required = false) recurringPattern: String?,
         @RequestParam(required = false) calendarId: UUID?,
         @RequestParam(required = false) categoryId: UUID?,
-        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val filter = EventFilterDto(
             name = name,
@@ -67,7 +67,7 @@ class EventController(
         return ResponseEntity.ok(result)
     }
 
-    @PutMapping
+    @PutMapping("/{id}")
     fun update(@PathVariable id: UUID, @Valid @RequestBody dto: EventDto): ResponseEntity<EventDto> {
         val updated: EventDto = _eventService.update(id, dto).toDto()
         return ResponseEntity.ok(updated)

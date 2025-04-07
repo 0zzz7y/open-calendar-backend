@@ -27,7 +27,7 @@ class NoteController(
         @PageableDefault(
             size = 10,
             sort = ["createdAt"],
-            direction = Sort.Direction.ASC
+            direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
         val notesPage: Page<NoteDto> = _noteService.getAll(pageable).map { it.toDto() }
@@ -45,7 +45,7 @@ class NoteController(
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) description: String?,
         @RequestParam(required = false) categoryId: UUID?,
-        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
         val filter = NoteFilterDto(
             name = name,

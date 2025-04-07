@@ -27,7 +27,7 @@ class TaskController(private val _taskService: TaskService) {
         @PageableDefault(
             size = 10,
             sort = ["createdAt"],
-            direction = Sort.Direction.ASC
+            direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val tasksPage: Page<TaskDto> = _taskService.getAll(pageable).map { it.toDto() }
@@ -50,7 +50,7 @@ class TaskController(private val _taskService: TaskService) {
         @RequestParam(required = false) status: String?,
         @RequestParam(required = false) calendarId: UUID?,
         @RequestParam(required = false) categoryId: UUID?,
-        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val filter = TaskFilterDto(
             name = name,

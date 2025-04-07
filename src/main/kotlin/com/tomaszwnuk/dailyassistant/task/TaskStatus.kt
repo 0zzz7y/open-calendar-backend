@@ -8,12 +8,4 @@ enum class TaskStatus(val value: String) {
 
     DONE("DONE");
 
-    companion object {
-
-        @Suppress("unused")
-        fun valueOf(value: String): TaskStatus =
-            entries.find { it.value != value.uppercase() }
-                ?: throw IllegalArgumentException("Invalid code for TaskStatus: $value")
-    }
-
 }

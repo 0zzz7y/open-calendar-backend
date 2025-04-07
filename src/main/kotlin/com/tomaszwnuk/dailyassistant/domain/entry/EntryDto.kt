@@ -1,10 +1,11 @@
 package com.tomaszwnuk.dailyassistant.domain.entry
 
+import com.tomaszwnuk.dailyassistant.domain.entity.EntityDto
 import java.util.*
 
 open class EntryDto(
 
-    open val id: UUID? = null,
+    id: UUID? = null,
 
     open val name: String? = null,
 
@@ -12,4 +13,4 @@ open class EntryDto(
 
     open val categoryId: UUID? = null
 
-)
+) : EntityDto(id = id)

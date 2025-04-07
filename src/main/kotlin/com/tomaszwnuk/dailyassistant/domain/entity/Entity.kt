@@ -1,5 +1,7 @@
 package com.tomaszwnuk.dailyassistant.domain.entity
 
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_DATE
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_ID
 import jakarta.persistence.Column
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.Id
@@ -12,17 +14,20 @@ import java.util.*
 
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener::class)
-abstract class Entity {
+abstract class Entity(
 
     @Id
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
     val id: UUID = UUID.randomUUID()
 
+) {
+
     @CreatedDate
-    @Column(updatable = false)
-    var createdAt: LocalDateTime? = null
+    @Column(columnDefinition = COLUMN_DEFINITION_DATE, updatable = false, nullable = false)
+    var createdAt: LocalDateTime = LocalDateTime.now()
 
     @LastModifiedDate
-    var updatedAt: LocalDateTime? = null
+    @Column(columnDefinition = COLUMN_DEFINITION_DATE, updatable = false, nullable = false)
+    var updatedAt: LocalDateTime = LocalDateTime.now()
 
 }

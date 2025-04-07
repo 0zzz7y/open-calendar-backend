@@ -36,8 +36,8 @@ class CategoryController(
     fun getAll(
         @PageableDefault(
             size = 10,
-            sort = ["startDate"],
-            direction = Sort.Direction.ASC
+            sort = ["name"],
+            direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<CategoryDto>> {
         val categoriesPage: Page<CategoryDto> = _categoryService.getAll(pageable).map { it.toDto() }
@@ -54,8 +54,8 @@ class CategoryController(
     fun getAllItems(
         @PathVariable id: UUID, @PageableDefault(
             size = 10,
-            sort = ["startDate"],
-            direction = Sort.Direction.ASC
+            sort = ["createdAt"],
+            direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<List<Map<String, Any>>> {
         val tasks: Page<Map<String, Any>> = _taskRepository.findAllByCategoryId(id, pageable).map {
@@ -75,7 +75,7 @@ class CategoryController(
     @GetMapping("/{id}/events")
     fun getEvents(
         @PathVariable id: UUID,
-        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val eventsPage: Page<EventDto> = _eventRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
         return ResponseEntity.ok(eventsPage)
@@ -84,7 +84,7 @@ class CategoryController(
     @GetMapping("/{id}/tasks")
     fun getTasks(
         @PathVariable id: UUID,
-        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<*> {
         val tasksPage = _taskRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
         return ResponseEntity.ok(tasksPage)
@@ -93,7 +93,7 @@ class CategoryController(
     @GetMapping("/{id}/notes")
     fun getNotes(
         @PathVariable id: UUID,
-        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
         val notesPage: Page<NoteDto> = _noteRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
         return ResponseEntity.ok(notesPage)
@@ -103,7 +103,7 @@ class CategoryController(
     fun filter(
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) color: String?,
-        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<CategoryDto>> {
         val filter = CategoryFilterDto(
             name = name,

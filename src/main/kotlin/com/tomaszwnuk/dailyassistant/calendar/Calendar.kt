@@ -1,5 +1,7 @@
 package com.tomaszwnuk.dailyassistant.calendar
 
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_ID
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_NAME
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -11,10 +13,10 @@ import java.util.*
 data class Calendar(
 
     @Id
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
     override val id: UUID = UUID.randomUUID(),
 
-    @Column(columnDefinition = "VARCHAR(255)", unique = true, nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_NAME, unique = true, nullable = false)
     val name: String
 
 ) : com.tomaszwnuk.dailyassistant.domain.entity.Entity() {

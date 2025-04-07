@@ -4,7 +4,6 @@ import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.calendar.CalendarRepository
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
-import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.info
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
 import org.springframework.data.domain.Page
@@ -29,8 +28,8 @@ class TaskService(
             description = dto.description,
             startDate = dto.startDate,
             endDate = dto.endDate,
-            recurringPattern = RecurringPattern.valueOf(dto.recurringPattern),
-            status = TaskStatus.valueOf(dto.status),
+            recurringPattern = dto.recurringPattern,
+            status = dto.status,
             calendar = calendar,
             category = category
         )
@@ -91,8 +90,8 @@ class TaskService(
             description = dto.description,
             startDate = dto.startDate,
             endDate = dto.endDate,
-            recurringPattern = RecurringPattern.valueOf(dto.recurringPattern),
-            status = TaskStatus.valueOf(dto.status),
+            recurringPattern = dto.recurringPattern,
+            status = dto.status,
             calendar = calendar,
             category = category
         )

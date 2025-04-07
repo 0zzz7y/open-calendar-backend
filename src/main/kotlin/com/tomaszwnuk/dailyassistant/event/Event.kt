@@ -5,23 +5,32 @@ import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.Schedulable
 import com.tomaszwnuk.dailyassistant.domain.entry.Entry
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_DATE
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_ID
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_NAME
 import jakarta.persistence.*
 import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Table(name = "event")
 data class Event(
 
-    @Column(columnDefinition = "VARCHAR(255)", nullable = false)
+    @Id
+    @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
+    override val id: UUID = UUID.randomUUID(),
+
+    @Column(columnDefinition = COLUMN_DEFINITION_NAME, nullable = false)
     override val name: String,
 
-    @Column(columnDefinition = "VARCHAR(4096)", nullable = true)
+    @Column(columnDefinition = COLUMN_DEFINITION_DESCRIPTION, nullable = true)
     override val description: String? = null,
 
-    @Column(columnDefinition = "TIMESTAMP", nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_DATE, nullable = false)
     override val startDate: LocalDateTime,
 
-    @Column(columnDefinition = "TIMESTAMP", nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_DATE, nullable = false)
     override val endDate: LocalDateTime,
 
     @Enumerated(EnumType.STRING)
@@ -36,7 +45,12 @@ data class Event(
     @JoinColumn(name = "category_id", nullable = true)
     override val category: Category? = null
 
-) : Entry(name, description, category), Schedulable {
+) : Entry(
+    id = id,
+    name = name,
+    description = description,
+    category = category
+), Schedulable {
 
     override fun toDto(): EventDto {
         return EventDto(
@@ -45,7 +59,7 @@ data class Event(
             description = description,
             startDate = startDate,
             endDate = endDate,
-            recurringPattern = recurringPattern.value,
+            recurringPattern = recurringPattern,
             calendarId = calendar.id,
             categoryId = category?.id
         )

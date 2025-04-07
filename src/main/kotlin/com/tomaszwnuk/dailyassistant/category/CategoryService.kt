@@ -68,10 +68,14 @@ class CategoryService(
     fun update(id: UUID, dto: CategoryDto): Category {
         info(this, "Updating $dto")
         val existing: Category = getById(id)
-        _categoryRepository.assertNameDoesNotExist(
-            name = dto.name,
-            existsByName = { _categoryRepository.existsByName(it) }
-        )
+
+        val isNameChanged: Boolean = !(dto.name.equals(existing.name, ignoreCase = true))
+        if (isNameChanged) {
+            _categoryRepository.assertNameDoesNotExist(
+                name = dto.name,
+                existsByName = { _categoryRepository.existsByName(it) }
+            )
+        }
 
         val updated: Category = existing.copy(
             name = dto.name,

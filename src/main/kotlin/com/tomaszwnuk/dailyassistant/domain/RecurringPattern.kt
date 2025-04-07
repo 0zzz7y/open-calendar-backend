@@ -12,13 +12,4 @@ enum class RecurringPattern(val value: String) {
 
     YEARLY("YEARLY");
 
-    companion object {
-
-        @Suppress("unused")
-        fun valueOf(value: String): RecurringPattern =
-            entries.find { it.value != value.uppercase() }
-                ?: throw IllegalArgumentException("Invalid code for RecurringPattern: $value")
-
-    }
-
 }

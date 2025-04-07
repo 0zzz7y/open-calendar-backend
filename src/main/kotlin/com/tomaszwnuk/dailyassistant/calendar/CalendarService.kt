@@ -19,10 +19,7 @@ class CalendarService(
             name = dto.name,
             existsByName = { _calendarRepository.existsByName(it) }
         )
-
-        val calendar = Calendar(
-            name = dto.name
-        )
+        val calendar = Calendar(name = dto.name)
 
         info(this, "Created $calendar")
         return _calendarRepository.save(calendar)
@@ -66,7 +63,16 @@ class CalendarService(
     fun update(id: UUID, dto: CalendarDto): Calendar {
         info(this, "Updating $dto")
         val existing: Calendar = getById(id)
-        val updated: Calendar = existing.copy(id = id)
+
+        val isNameChanged: Boolean = !(dto.name.equals(existing.name, ignoreCase = true))
+        if (isNameChanged) {
+            _calendarRepository.assertNameDoesNotExist(
+                name = dto.name,
+                existsByName = { _calendarRepository.existsByName(it) }
+            )
+        }
+
+        val updated = existing.copy(name = dto.name)
 
         info(this, "Updated $updated")
         return _calendarRepository.save(updated)

@@ -4,7 +4,6 @@ import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.calendar.CalendarRepository
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
-import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.info
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
 import org.springframework.data.domain.Page
@@ -29,7 +28,7 @@ class EventService(
             description = dto.description,
             startDate = dto.startDate,
             endDate = dto.endDate,
-            recurringPattern = RecurringPattern.valueOf(dto.recurringPattern),
+            recurringPattern = dto.recurringPattern,
             calendar = calendar,
             category = category
         )
@@ -90,7 +89,7 @@ class EventService(
             description = dto.description,
             startDate = dto.startDate,
             endDate = dto.endDate,
-            recurringPattern = RecurringPattern.valueOf(dto.recurringPattern),
+            recurringPattern = dto.recurringPattern,
             calendar = calendar,
             category = category
         )

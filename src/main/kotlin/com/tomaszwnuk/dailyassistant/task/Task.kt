@@ -5,25 +5,35 @@ import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.domain.Schedulable
 import com.tomaszwnuk.dailyassistant.domain.entry.Entry
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_DATE
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_ID
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_NAME
 import jakarta.persistence.*
 import java.time.LocalDateTime
+import java.util.*
 
 @Entity
 @Table(name = "task")
 data class Task(
 
-    @Column(columnDefinition = "VARCHAR(255)", nullable = true)
-    override val name: String? = null,
+    @Id
+    @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
+    override val id: UUID = UUID.randomUUID(),
 
-    @Column(columnDefinition = "VARCHAR(4096)", nullable = false)
-    override val description: String,
+    @Column(columnDefinition = COLUMN_DEFINITION_NAME, nullable = false)
+    override val name: String,
 
-    @Column(columnDefinition = "TIMESTAMP", nullable = true)
+    @Column(columnDefinition = COLUMN_DEFINITION_DESCRIPTION, nullable = true)
+    override val description: String? = null,
+
+    @Column(columnDefinition = COLUMN_DEFINITION_DATE, nullable = true)
     override val startDate: LocalDateTime? = null,
 
-    @Column(columnDefinition = "TIMESTAMP", nullable = true)
+    @Column(columnDefinition = COLUMN_DEFINITION_DATE, nullable = true)
     override val endDate: LocalDateTime? = null,
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "recurring_pattern", nullable = false)
     override val recurringPattern: RecurringPattern = RecurringPattern.NONE,
 
@@ -39,7 +49,12 @@ data class Task(
     @JoinColumn(name = "category_id", nullable = true)
     override val category: Category? = null
 
-) : Entry(name, description, category), Schedulable {
+) : Entry(
+    id = id,
+    name = name,
+    description = description,
+    category = category
+), Schedulable {
 
     override fun toDto(): TaskDto {
         return TaskDto(
@@ -48,8 +63,8 @@ data class Task(
             description = description,
             startDate = startDate,
             endDate = endDate,
-            recurringPattern = recurringPattern.value,
-            status = status.value,
+            recurringPattern = recurringPattern,
+            status = status,
             calendarId = calendar?.id,
             categoryId = category?.id
         )

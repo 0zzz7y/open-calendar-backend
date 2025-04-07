@@ -2,15 +2,10 @@ package com.tomaszwnuk.dailyassistant.category
 
 import java.awt.Color
 
-class CategoryColors {
+object CategoryColors {
 
+    const val DEFAULT = "#1591EA"
 
-    companion object {
-
-        const val DEFAULT = "#1591EA"
-
-        fun toHex(color: Color): String = String.format("#%02x%02x%02x", color.red, color.green, color.blue)
-
-    }
+    fun toHex(color: Color): String = String.format("#%02x%02x%02x", color.red, color.green, color.blue)
 
 }

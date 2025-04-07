@@ -32,8 +32,8 @@ class CalendarController(
     fun getAll(
         @PageableDefault(
             size = 10,
-            sort = ["startDate"],
-            direction = Sort.Direction.ASC
+            sort = ["createdAt"],
+            direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<CalendarDto>> {
         val calendarsPage: Page<CalendarDto> = _calendarService.getAll(pageable).map { it.toDto() }
@@ -49,7 +49,7 @@ class CalendarController(
     @GetMapping("/{id}/events")
     fun getEvents(
         @PathVariable id: UUID,
-        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val events: Page<EventDto> = _eventRepository.findAllByCalendarId(id, pageable).map { it.toDto() }
         return ResponseEntity.ok(events)
@@ -58,7 +58,7 @@ class CalendarController(
     @GetMapping("/{id}/tasks")
     fun getTasks(
         @PathVariable id: UUID,
-        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val tasksPage: Page<TaskDto> = _taskRepository.findAllByCalendarId(id, pageable).map { it.toDto() }
         return ResponseEntity.ok(tasksPage)
@@ -67,7 +67,7 @@ class CalendarController(
     @GetMapping("/filter")
     fun filter(
         @RequestParam(name = "name", required = false) name: String?,
-        @PageableDefault(size = 10, sort = ["startDate"], direction = Sort.Direction.ASC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<CalendarDto>> {
         val filter = CalendarFilterDto(
             name = name
