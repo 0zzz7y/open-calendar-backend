@@ -76,7 +76,7 @@ class TaskServiceTest {
         doReturn(_sampleTask).whenever(_taskRepository).save(any())
         val result: Task = _taskService.create(_sampleDto)
 
-        assertEquals(_sampleTask.name, result.name)
+        assertEquals(_sampleTask.id, result.id)
         verify(_taskRepository).save(any())
     }
 

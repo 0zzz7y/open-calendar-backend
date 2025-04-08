@@ -1,6 +1,7 @@
 package com.tomaszwnuk.dailyassistant.task
 
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
+import com.tomaszwnuk.dailyassistant.domain.Schedulable
 import com.tomaszwnuk.dailyassistant.domain.entry.EntryDto
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.DESCRIPTION_MAXIMUM_LENGTH
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.NAME_MAXIMUM_LENGTH
@@ -14,10 +15,10 @@ data class TaskDto(
 
     override val id: UUID? = null,
 
-    @field:NotBlank(message = "Description cannot be blank.")
+    @field:NotBlank(message = "Name cannot be blank.")
     @field:Size(
         max = NAME_MAXIMUM_LENGTH,
-        message = "Description cannot be longer than $NAME_MAXIMUM_LENGTH characters."
+        message = "Name cannot be longer than $NAME_MAXIMUM_LENGTH characters."
     )
     override val name: String,
 
@@ -27,12 +28,12 @@ data class TaskDto(
     )
     override val description: String? = null,
 
-    val startDate: LocalDateTime? = null,
+    override val startDate: LocalDateTime? = null,
 
-    val endDate: LocalDateTime? = null,
+    override val endDate: LocalDateTime? = null,
 
     @field:NotNull(message = "Recurring pattern is required.")
-    val recurringPattern: RecurringPattern = RecurringPattern.NONE,
+    override val recurringPattern: RecurringPattern = RecurringPattern.NONE,
 
     @field:NotNull(message = "Task status is required.")
     val status: TaskStatus = TaskStatus.TODO,
@@ -41,4 +42,4 @@ data class TaskDto(
 
     override val categoryId: UUID? = null
 
-) : EntryDto(id, name, description, categoryId)
+) : EntryDto(id, name, description, categoryId), Schedulable

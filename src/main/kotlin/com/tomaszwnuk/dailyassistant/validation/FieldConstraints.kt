@@ -2,8 +2,6 @@ package com.tomaszwnuk.dailyassistant.validation
 
 object FieldConstraints {
 
-    const val ID_LENGTH: Int = 36
-
     const val NAME_MAXIMUM_LENGTH: Int = 255
 
     const val DESCRIPTION_MAXIMUM_LENGTH: Int = 4096

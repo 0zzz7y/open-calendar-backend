@@ -4,7 +4,7 @@ import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import java.time.LocalDateTime
 import java.util.*
 
-class TaskFilterDto(
+data class TaskFilterDto(
 
     val name: String? = null,
 

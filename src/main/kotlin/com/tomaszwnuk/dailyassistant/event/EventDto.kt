@@ -18,7 +18,7 @@ data class EventDto(
     @field:NotBlank(message = "Name cannot be blank.")
     @field:Size(
         max = NAME_MAXIMUM_LENGTH,
-        message = "Description cannot be longer than $NAME_MAXIMUM_LENGTH characters."
+        message = "Name cannot be longer than $NAME_MAXIMUM_LENGTH characters."
     )
     override val name: String,
 
