@@ -11,11 +11,10 @@ import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import org.mockito.quality.Strictness
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import java.util.*
@@ -65,21 +64,75 @@ class NoteServiceTest {
         verify(_noteRepository).save(any())
     }
 
+    @Test
+    fun `should return paginated list of notes`() {
+        val notes: List<Note> = listOf(_sampleNote, _sampleNote, _sampleNote)
+
+        whenever(_noteRepository.findAll(_pageable)).thenReturn(PageImpl(notes))
+        val result: Page<Note> = _noteService.getAll(_pageable)
+
+        assertEquals(notes.size, result.totalElements.toInt())
+        verify(_noteRepository).findAll(_pageable)
+    }
 
     @Test
+    fun `should return note by id`() {
+        val id: UUID = _sampleNote.id
+
+        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
+        val result: Note = _noteService.getById(id)
+
+        assertEquals(_sampleNote.name, result.name)
+        verify(_noteRepository).findById(id)
+    }
 
     @Test
+    fun `should return filtered notes`() {
+        val filter = NoteFilterDto(name = "Groceries")
+        val notes: List<Note> = listOf(_sampleNote, _sampleNote, _sampleNote)
+
+        whenever(
+            _noteRepository.filter(
+                eq(filter.name),
+                isNull(),
+                isNull(),
+                eq(_pageable)
+            )
+        ).thenReturn(PageImpl(notes))
+        val result: Page<Note> = _noteService.filter(filter, _pageable)
+
+        assertEquals(notes.size, result.totalElements.toInt())
+        verify(_noteRepository).filter(
+            eq(filter.name),
+            isNull(),
+            isNull(),
+            eq(_pageable)
+        )
+    }
 
     @Test
+    fun `should return updated note`() {
+        val id: UUID = _sampleNote.id
+        val updated: Note = _sampleNote.copy(name = "Updated note")
+
+        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
+        whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
+        doReturn(updated).whenever(_noteRepository).save(any())
+        val result: Note = _noteService.update(id, _sampleDto)
+
+        assertEquals(updated.name, result.name)
+        verify(_noteRepository).save(any())
+    }
 
     @Test
+    fun `should delete note`() {
+        val id: UUID = _sampleNote.id
 
+        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
+        doNothing().whenever(_noteRepository).delete(_sampleNote)
+        _noteService.delete(id)
 
-
-
-
-
-
-
+        verify(_noteRepository).delete(_sampleNote)
+    }
 
 }

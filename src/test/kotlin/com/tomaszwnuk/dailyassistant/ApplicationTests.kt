@@ -1,6 +1,5 @@
 package com.tomaszwnuk.dailyassistant
 
-import com.tomaszwnuk.dailyassistant.event.EventServiceTest
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
@@ -8,8 +7,6 @@ import org.springframework.boot.test.context.SpringBootTest
 class ApplicationTests {
 
 	@Test
-	fun contextLoads() {
-
-	}
+	fun contextLoads() {}
 
 }

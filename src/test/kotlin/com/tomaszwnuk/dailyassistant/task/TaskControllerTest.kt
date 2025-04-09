@@ -77,7 +77,7 @@ class TaskControllerTest {
         val response: ResponseEntity<Page<TaskDto>> = _taskController.getAll(_pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(3, response.body?.totalElements)
+        assertEquals(tasks.size, response.body?.totalElements?.toInt())
         verify(_taskService).getAll(_pageable)
     }
 
@@ -124,7 +124,7 @@ class TaskControllerTest {
         val response: ResponseEntity<TaskDto> = _taskController.update(_sampleTask.id, _sampleDto)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(updated.name, response.body?.name)
+        assertEquals(updated.toDto(), response.body)
         verify(_taskService).update(_sampleTask.id, _sampleDto)
     }
 

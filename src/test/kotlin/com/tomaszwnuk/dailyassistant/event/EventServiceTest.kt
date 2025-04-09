@@ -80,7 +80,7 @@ class EventServiceTest {
     }
 
     @Test
-    fun `should return paged list of events`() {
+    fun `should return paginated list of events`() {
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent, _sampleEvent)
 
         whenever(_eventRepository.findAll(_pageable)).thenReturn(PageImpl(events))
@@ -97,7 +97,7 @@ class EventServiceTest {
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
         val result: Event = _eventService.getById(id)
 
-        assertEquals(id, result.id)
+        assertEquals(_sampleEvent.name, result.name)
         verify(_eventRepository).findById(id)
     }
 

@@ -81,7 +81,7 @@ class TaskServiceTest {
     }
 
     @Test
-    fun `should return paged list of tasks`() {
+    fun `should return paginated list of tasks`() {
         val tasks: List<Task> = listOf(_sampleTask, _sampleTask, _sampleTask)
 
         whenever(_taskRepository.findAll(_pageable)).thenReturn(PageImpl(tasks))
@@ -132,7 +132,7 @@ class TaskServiceTest {
             isNull(),
             isNull(),
             isNull(),
-            any()
+            eq(_pageable)
         )
     }
 

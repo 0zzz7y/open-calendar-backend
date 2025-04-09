@@ -64,7 +64,7 @@ class EventControllerTest {
         val response: ResponseEntity<EventDto> = _eventController.create(_sampleDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleDto.name, response.body?.name)
+        assertEquals(_sampleDto, response.body)
         verify(_eventService).create(_sampleDto)
     }
 
@@ -122,7 +122,7 @@ class EventControllerTest {
         val response: ResponseEntity<EventDto> = _eventController.update(_sampleEvent.id, _sampleDto)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(updated.name, response.body?.name)
+        assertEquals(updated.toDto(), response.body)
         verify(_eventService).update(_sampleEvent.id, _sampleDto)
     }
 
