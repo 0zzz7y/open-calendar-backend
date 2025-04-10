@@ -33,8 +33,8 @@ class EventController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
-        val eventsPage: Page<EventDto> = _eventService.getAll(pageable).map { it.toDto() }
-        return ResponseEntity.ok(eventsPage)
+        val events: Page<EventDto> = _eventService.getAll(pageable).map { it.toDto() }
+        return ResponseEntity.ok(events)
     }
 
     @GetMapping("/{id}")

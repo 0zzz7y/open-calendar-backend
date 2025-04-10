@@ -43,7 +43,7 @@ class CategoryControllerTest {
     private lateinit var _categoryService: CategoryService
 
     @Mock
-   private lateinit var _eventRepository: EventRepository
+    private lateinit var _eventRepository: EventRepository
 
     @Mock
     private lateinit var _taskRepository: TaskRepository
@@ -136,14 +136,14 @@ class CategoryControllerTest {
             calendar = sampleCalendar,
             category = _sampleCategory
         )
-        val events: List<Event> = listOf(event)
+        val events: List<Event> = listOf(event, event, event)
 
         whenever(_eventRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(events))
         val response: ResponseEntity<Page<EventDto>> = _categoryController.getEvents(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(events.size, response.body?.totalElements?.toInt())
-        assertEquals(event.name, response.body?.content?.first()?.name)
+        assertEquals(events[0].name, response.body?.content?.first()?.name)
     }
 
     @Test
@@ -161,14 +161,14 @@ class CategoryControllerTest {
             calendar = sampleCalendar,
             category = _sampleCategory
         )
-        val tasks: List<Task> = listOf(task)
+        val tasks: List<Task> = listOf(task, task, task)
 
         whenever(_taskRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(tasks))
         val response: ResponseEntity<Page<TaskDto>> = _categoryController.getTasks(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(tasks.size, response.body?.totalElements?.toInt())
-        assertEquals(task.name, response.body?.content?.first()?.name)
+        assertEquals(tasks[0].name, response.body?.content?.first()?.name)
     }
 
     @Test
@@ -180,14 +180,14 @@ class CategoryControllerTest {
             description = "Description",
             category = _sampleCategory
         )
-        val notes: List<Note> = listOf(note)
+        val notes: List<Note> = listOf(note, note, note)
 
         whenever(_noteRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(notes))
         val response: ResponseEntity<Page<NoteDto>> = _categoryController.getNotes(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(notes.size, response.body?.size)
-        assertEquals(note.name, response.body?.content?.first()?.name)
+        assertEquals(notes[0].name, response.body?.content?.first()?.name)
     }
 
     @Test
@@ -230,8 +230,8 @@ class CategoryControllerTest {
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(3, response.body?.size)
 
-        val types = response.body?.map { it["type"] }
-        assertTrue(types?.containsAll(listOf("event", "task", "note")) ?: false)
+        val types: List<Any?> = response.body?.map { it["type"] } ?: emptyList()
+        assertTrue(types.containsAll(listOf("event", "task", "note")))
     }
 
     @Test

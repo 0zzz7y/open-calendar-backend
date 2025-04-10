@@ -1,6 +1,6 @@
 package com.tomaszwnuk.dailyassistant.calendar
 
-import com.tomaszwnuk.dailyassistant.domain.info
+import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.validation.assertNameDoesNotExist
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
 import org.springframework.data.domain.Page

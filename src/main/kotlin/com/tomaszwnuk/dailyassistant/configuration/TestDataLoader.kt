@@ -6,7 +6,7 @@ import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryColors
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
-import com.tomaszwnuk.dailyassistant.domain.info
+import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.event.Event
 import com.tomaszwnuk.dailyassistant.event.EventRepository
 import com.tomaszwnuk.dailyassistant.note.Note

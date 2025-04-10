@@ -1,8 +1,6 @@
 package com.tomaszwnuk.dailyassistant.category
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.tomaszwnuk.dailyassistant.domain.utility.ItemTypeMapper.toMapWithType
 import com.tomaszwnuk.dailyassistant.event.EventDto
 import com.tomaszwnuk.dailyassistant.event.EventRepository
 import com.tomaszwnuk.dailyassistant.note.NoteDto
@@ -14,6 +12,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -31,7 +30,7 @@ class CategoryController(
     @PostMapping
     fun create(@Valid @RequestBody dto: CategoryDto): ResponseEntity<CategoryDto> {
         val created: CategoryDto = _categoryService.create(dto).toDto()
-        return ResponseEntity.status(201).body(created)
+        return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
     @GetMapping
@@ -42,8 +41,8 @@ class CategoryController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<CategoryDto>> {
-        val categoriesPage: Page<CategoryDto> = _categoryService.getAll(pageable).map { it.toDto() }
-        return ResponseEntity.ok(categoriesPage)
+        val categories: Page<CategoryDto> = _categoryService.getAll(pageable).map { it.toDto() }
+        return ResponseEntity.ok(categories)
     }
 
     @GetMapping("/{id}")
@@ -57,8 +56,8 @@ class CategoryController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
-        val eventsPage: Page<EventDto> = _eventRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
-        return ResponseEntity.ok(eventsPage)
+        val events: Page<EventDto> = _eventRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
+        return ResponseEntity.ok(events)
     }
 
     @GetMapping("/{id}/tasks")
@@ -66,8 +65,8 @@ class CategoryController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
-        val tasksPage: Page<TaskDto> = _taskRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
-        return ResponseEntity.ok(tasksPage)
+        val tasks: Page<TaskDto> = _taskRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
+        return ResponseEntity.ok(tasks)
     }
 
     @GetMapping("/{id}/notes")
@@ -75,13 +74,14 @@ class CategoryController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
-        val notesPage: Page<NoteDto> = _noteRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
-        return ResponseEntity.ok(notesPage)
+        val notes: Page<NoteDto> = _noteRepository.findAllByCategoryId(id, pageable).map { it.toDto() }
+        return ResponseEntity.ok(notes)
     }
 
     @GetMapping("/{id}/items")
     fun getAllItems(
-        @PathVariable id: UUID, @PageableDefault(
+        @PathVariable id: UUID,
+        @PageableDefault(
             size = 10,
             sort = ["createdAt"],
             direction = Sort.Direction.DESC
@@ -111,8 +111,8 @@ class CategoryController(
             name = name,
             color = color
         )
-        val result: Page<CategoryDto> = _categoryService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(result)
+        val categories: Page<CategoryDto> = _categoryService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(categories)
     }
 
     @PutMapping("/{id}")
@@ -125,12 +125,6 @@ class CategoryController(
     fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
         _categoryService.delete(id)
         return ResponseEntity.noContent().build()
-    }
-
-    private fun Any.toMapWithType(type: String): Map<String, Any> {
-        val map: Map<String, Any> = jacksonObjectMapper().registerModule(JavaTimeModule()).convertValue<Map<String, Any>>(this)
-        val mapWithType: Map<String, Any> = map + mapOf("type" to type)
-        return mapWithType
     }
 
 }

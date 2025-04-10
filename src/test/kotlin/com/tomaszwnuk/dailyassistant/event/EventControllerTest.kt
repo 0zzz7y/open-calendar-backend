@@ -81,18 +81,6 @@ class EventControllerTest {
     }
 
     @Test
-    fun `should return event by id with status code 200 OK`() {
-        val id: UUID = _sampleEvent.id
-
-        whenever(_eventService.getById(id)).thenReturn(_sampleEvent)
-        val response: ResponseEntity<EventDto> = _eventController.getById(id)
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(id, response.body?.id)
-        verify(_eventService).getById(id)
-    }
-
-    @Test
     fun `should return filtered list of events with status code 200 OK`() {
         val filter = EventFilterDto(name = "Standup")
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent, _sampleEvent)
@@ -112,6 +100,18 @@ class EventControllerTest {
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(events.size, response.body?.totalElements?.toInt())
         verify(_eventService).filter(eq(filter), eq(_pageable))
+    }
+
+    @Test
+    fun `should return event by id with status code 200 OK`() {
+        val id: UUID = _sampleEvent.id
+
+        whenever(_eventService.getById(id)).thenReturn(_sampleEvent)
+        val response: ResponseEntity<EventDto> = _eventController.getById(id)
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(id, response.body?.id)
+        verify(_eventService).getById(id)
     }
 
     @Test

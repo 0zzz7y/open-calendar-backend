@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
@@ -20,7 +21,7 @@ class TaskController(private val _taskService: TaskService) {
     @PostMapping
     fun create(@Valid @RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
         val created: TaskDto = _taskService.create(dto).toDto()
-        return ResponseEntity.status(201).body(created)
+        return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
     @GetMapping
@@ -31,8 +32,8 @@ class TaskController(private val _taskService: TaskService) {
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
-        val tasksPage: Page<TaskDto> = _taskService.getAll(pageable).map { it.toDto() }
-        return ResponseEntity.ok(tasksPage)
+        val tasks: Page<TaskDto> = _taskService.getAll(pageable).map { it.toDto() }
+        return ResponseEntity.ok(tasks)
     }
 
     @GetMapping("/{id}")
@@ -63,8 +64,8 @@ class TaskController(private val _taskService: TaskService) {
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val taskPages: Page<TaskDto> = _taskService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(taskPages)
+        val tasks: Page<TaskDto> = _taskService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(tasks)
     }
 
     @PutMapping("/{id}")

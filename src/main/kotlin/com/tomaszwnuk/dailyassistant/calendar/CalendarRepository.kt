@@ -14,7 +14,7 @@ interface CalendarRepository : JpaRepository<Calendar, UUID> {
     @Query(
         """
     SELECT c FROM Calendar c
-    WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))
+    WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT("%", :name, "%")))
     """
     )
     fun filter(

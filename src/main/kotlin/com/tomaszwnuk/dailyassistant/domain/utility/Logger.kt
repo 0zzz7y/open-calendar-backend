@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.tomaszwnuk.dailyassistant.domain
+package com.tomaszwnuk.dailyassistant.domain.utility
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

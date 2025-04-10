@@ -4,7 +4,7 @@ import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.calendar.CalendarRepository
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
-import com.tomaszwnuk.dailyassistant.domain.info
+import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

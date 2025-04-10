@@ -2,7 +2,7 @@ package com.tomaszwnuk.dailyassistant.note
 
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
-import com.tomaszwnuk.dailyassistant.domain.info
+import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -20,7 +20,9 @@ class NoteService(
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
 
         val note = Note(
-            name = dto.name, description = dto.description, category = category
+            name = dto.name,
+            description = dto.description,
+            category = category
         )
 
         info(this, "Created $note")

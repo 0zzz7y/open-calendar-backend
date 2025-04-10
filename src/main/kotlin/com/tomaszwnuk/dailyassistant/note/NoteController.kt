@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -19,7 +20,7 @@ class NoteController(
     @PostMapping
     fun create(@Valid @RequestBody dto: NoteDto): ResponseEntity<NoteDto> {
         val created: NoteDto = _noteService.create(dto).toDto()
-        return ResponseEntity.status(201).body(created)
+        return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
     @GetMapping
@@ -30,8 +31,8 @@ class NoteController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
-        val notesPage: Page<NoteDto> = _noteService.getAll(pageable).map { it.toDto() }
-        return ResponseEntity.ok(notesPage)
+        val notes: Page<NoteDto> = _noteService.getAll(pageable).map { it.toDto() }
+        return ResponseEntity.ok(notes)
     }
 
     @GetMapping("/{id}")
@@ -52,8 +53,8 @@ class NoteController(
             description = description,
             categoryId = categoryId
         )
-        val notePages: Page<NoteDto> = _noteService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(notePages)
+        val notes: Page<NoteDto> = _noteService.filter(filter, pageable).map { it.toDto() }
+        return ResponseEntity.ok(notes)
     }
 
     @PutMapping("/{id}")

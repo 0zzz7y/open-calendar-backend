@@ -1,6 +1,6 @@
 package com.tomaszwnuk.dailyassistant.validation
 
-import com.tomaszwnuk.dailyassistant.domain.logger
+import com.tomaszwnuk.dailyassistant.domain.utility.logger
 import org.springframework.data.jpa.repository.JpaRepository
 
 inline fun <reified T, ID : Any> JpaRepository<T, ID>.findOrThrow(

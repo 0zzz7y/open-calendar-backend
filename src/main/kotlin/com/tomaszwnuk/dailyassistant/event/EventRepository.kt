@@ -11,15 +11,9 @@ import java.util.*
 
 interface EventRepository : JpaRepository<Event, UUID> {
 
-    fun findAllByCalendarId(
-        calendarId: UUID,
-        pageable: Pageable
-    ): Page<Event>
+    fun findAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Event>
 
-    fun findAllByCategoryId(
-        categoryId: UUID,
-        pageable: Pageable
-    ): Page<Event>
+    fun findAllByCategoryId(categoryId: UUID, pageable: Pageable): Page<Event>
 
     @Query(
         """
