@@ -1,4 +1,4 @@
-package com.tomaszwnuk.dailyassistant.validation
+package com.tomaszwnuk.dailyassistant.throttling
 
 import com.tomaszwnuk.dailyassistant.validation.CommunicationConstraints.MAXIMUM_REQUESTS_PER_MINUTE
 import io.github.bucket4j.Bandwidth
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.time.Duration
 
 @Component
-class RateLimitingFilter : Filter {
+class ThrottlingFilter : Filter {
 
     private val _buckets: MutableMap<String, Bucket> = ConcurrentHashMap()
 
