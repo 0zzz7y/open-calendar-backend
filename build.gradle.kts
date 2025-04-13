@@ -32,6 +32,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
@@ -42,6 +43,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.41.2.2")
     implementation("com.h2database:h2")
 
+    implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -60,4 +62,13 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.register("runAllTests", Test::class) {
+    group = "verification"
+    description = "Runs all tests."
+    useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }

@@ -4,6 +4,7 @@ import com.tomaszwnuk.dailyassistant.domain.entry.EntryDto
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.DESCRIPTION_MAXIMUM_LENGTH
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.NAME_MAXIMUM_LENGTH
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import java.util.*
 
@@ -23,6 +24,9 @@ data class NoteDto(
         message = "Description cannot be longer than $DESCRIPTION_MAXIMUM_LENGTH characters."
     )
     override val description: String,
+
+    @field:NotNull(message = "Calendar ID is required.")
+    override val calendarId: UUID,
 
     override val categoryId: UUID? = null
 

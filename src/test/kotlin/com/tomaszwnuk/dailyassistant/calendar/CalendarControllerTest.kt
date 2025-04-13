@@ -5,11 +5,11 @@ import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import com.tomaszwnuk.dailyassistant.event.Event
 import com.tomaszwnuk.dailyassistant.event.EventDto
-import com.tomaszwnuk.dailyassistant.event.EventRepository
-import com.tomaszwnuk.dailyassistant.task.Task
-import com.tomaszwnuk.dailyassistant.task.TaskDto
-import com.tomaszwnuk.dailyassistant.task.TaskRepository
-import com.tomaszwnuk.dailyassistant.task.TaskStatus
+import com.tomaszwnuk.dailyassistant.event.EventService
+import com.tomaszwnuk.dailyassistant.note.Note
+import com.tomaszwnuk.dailyassistant.note.NoteDto
+import com.tomaszwnuk.dailyassistant.note.NoteService
+import com.tomaszwnuk.dailyassistant.task.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +20,6 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
@@ -41,10 +40,13 @@ class CalendarControllerTest {
     private lateinit var _calendarService: CalendarService
 
     @Mock
-    private lateinit var _eventRepository: EventRepository
+    private lateinit var _eventService: EventService
 
     @Mock
-    private lateinit var _taskRepository: TaskRepository
+    private lateinit var _taskService: TaskService
+
+    @Mock
+    private lateinit var _noteService: NoteService
 
     @InjectMocks
     private lateinit var _calendarController: CalendarController
@@ -86,7 +88,7 @@ class CalendarControllerTest {
         assertEquals(calendars.size, response.body?.totalElements?.toInt())
         verify(_calendarService).getAll(_pageable)
     }
-/* TODO: FIX
+/* FIXME:
 
     @Test
     fun `should return filtered list of calendars with status code 200 OK`() {
@@ -128,7 +130,7 @@ class CalendarControllerTest {
         )
         val events: List<Event> = listOf(event, event, event)
 
-        whenever(_eventRepository.findAllByCalendarId(id, _pageable)).thenReturn(PageImpl(events))
+        whenever(_eventService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(events))
         val response: ResponseEntity<Page<EventDto>> = _calendarController.getEvents(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -152,12 +154,32 @@ class CalendarControllerTest {
         )
         val tasks: List<Task> = listOf(task, task, task)
 
-        whenever(_taskRepository.findAllByCalendarId(id, _pageable)).thenReturn(PageImpl(tasks))
+        whenever(_taskService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(tasks))
         val response: ResponseEntity<Page<TaskDto>> = _calendarController.getTasks(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(tasks.size, response.body?.size)
         assertEquals(tasks[0].name, response.body?.content?.get(0)?.name)
+    }
+
+    @Test
+    fun `should return notes by calendar id with status code 200 OK`() {
+        val id: UUID = _sampleCalendar.id
+        val note = Note(
+            id = UUID.randomUUID(),
+            name = "Note",
+            description = "Description",
+            calendar = _sampleCalendar,
+            category = null
+        )
+        val notes: List<Note> = listOf(note, note, note)
+
+        whenever(_noteService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(notes))
+        val response: ResponseEntity<Page<NoteDto>> = _calendarController.getNotes(id, _pageable)
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(notes.size, response.body?.size)
+        assertEquals(notes[0].name, response.body?.content?.get(0)?.name)
     }
 
     @Test
@@ -184,13 +206,21 @@ class CalendarControllerTest {
             calendar = _sampleCalendar,
             category = null,
         )
+        val note = Note(
+            id = UUID.randomUUID(),
+            name = "Note",
+            description = "Description",
+            calendar = _sampleCalendar,
+            category = null
+        )
 
-        whenever(_eventRepository.findAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(event)))
-        whenever(_taskRepository.findAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(task)))
+        whenever(_eventService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(event)))
+        whenever(_taskService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(task)))
+        whenever(_noteService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(note)))
         val response: ResponseEntity<List<Map<String, Any>>> = _calendarController.getAllItems(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(2, response.body?.size)
+        assertEquals(3, response.body?.size)
 
         val types: List<Any?> = response.body?.map { it["type"] } ?: emptyList()
         assertTrue(types.containsAll(listOf("event", "task")))

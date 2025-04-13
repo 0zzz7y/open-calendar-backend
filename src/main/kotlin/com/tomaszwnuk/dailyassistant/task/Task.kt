@@ -42,8 +42,8 @@ data class Task(
     val status: TaskStatus = TaskStatus.TODO,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "calendar_id", nullable = true)
-    val calendar: Calendar? = null,
+    @JoinColumn(name = "calendar_id", nullable = false)
+    override val calendar: Calendar,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
@@ -53,6 +53,7 @@ data class Task(
     id = id,
     name = name,
     description = description,
+    calendar = calendar,
     category = category
 ), Schedulable {
 
@@ -65,7 +66,7 @@ data class Task(
             endDate = endDate,
             recurringPattern = recurringPattern,
             status = status,
-            calendarId = calendar?.id,
+            calendarId = calendar.id,
             categoryId = category?.id
         )
     }

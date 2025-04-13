@@ -8,6 +8,8 @@ data class NoteFilterDto(
 
     val description: String? = null,
 
+    val calendarId: UUID? = null,
+
     val categoryId: UUID? = null
 
 )

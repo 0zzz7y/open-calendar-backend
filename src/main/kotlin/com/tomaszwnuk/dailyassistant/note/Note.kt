@@ -1,5 +1,6 @@
 package com.tomaszwnuk.dailyassistant.note
 
+import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.domain.entry.Entry
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
@@ -23,6 +24,10 @@ data class Note(
     override val description: String,
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "calendar_id", nullable = false)
+    override val calendar: Calendar,
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
     override val category: Category? = null
 
@@ -30,6 +35,7 @@ data class Note(
     id = id,
     name = name,
     description = description,
+    calendar = calendar,
     category = category
 ) {
 
@@ -38,6 +44,7 @@ data class Note(
             id = id,
             name = name,
             description = description,
+            calendarId = calendar.id,
             categoryId = category?.id
         )
     }

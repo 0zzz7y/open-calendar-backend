@@ -6,6 +6,8 @@ import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
 import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -18,11 +20,14 @@ class TaskService(
     private val _categoryRepository: CategoryRepository,
 ) {
 
+    private var _timer: Long = 0
+
+    @CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId")
     fun create(dto: TaskDto): Task {
         info(this, "Creating $dto")
-        val calendar: Calendar? = dto.calendarId?.let { _calendarRepository.findOrThrow(id = it) }
+        _timer = System.currentTimeMillis()
+        val calendar: Calendar = dto.calendarId.let { _calendarRepository.findOrThrow(id = it) }
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
-
         val task = Task(
             name = dto.name,
             description = dto.description,
@@ -34,36 +39,44 @@ class TaskService(
             category = category
         )
 
-        info(this, "Created $task")
-        return _taskRepository.save(task)
+        val created: Task = _taskRepository.save(task)
+        info(this, "Created $created in ${System.currentTimeMillis() - _timer} ms")
+
+        return created
     }
 
-    fun getAll(): List<Task> {
-        info(this, "Fetching all tasks")
-        val tasks: List<Task> = _taskRepository.findAll()
+    @Cacheable
+    fun getById(id: UUID): Task {
+        info(this, "Fetching task with id $id")
+        _timer = System.currentTimeMillis()
+        val task: Task = _taskRepository.findOrThrow(id)
 
-        info(this, "Found $tasks")
-        return tasks
+        info(this, "Found $task in ${System.currentTimeMillis() - _timer} ms")
+        return task
     }
 
     fun getAll(pageable: Pageable): Page<Task> {
         info(this, "Fetching all tasks")
+        _timer = System.currentTimeMillis()
         val tasks: Page<Task> = _taskRepository.findAll(pageable)
 
-        info(this, "Found $tasks")
+        info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks
     }
 
-    fun getById(id: UUID): Task {
-        info(this, "Fetching task with id $id")
-        val task: Task = _taskRepository.findOrThrow(id)
+    @Cacheable
+    fun getAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Task> {
+        info(this, "Fetching all tasks for calendar with id $calendarId")
+        _timer = System.currentTimeMillis()
+        val tasks: Page<Task> = _taskRepository.findAllByCalendarId(calendarId, pageable)
 
-        info(this, "Found $task")
-        return task
+        info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
+        return tasks
     }
 
     fun filter(filter: TaskFilterDto, pageable: Pageable): Page<Task> {
         info(this, "Filtering tasks with $filter")
+        _timer = System.currentTimeMillis()
         val filteredTasks: Page<Task> = _taskRepository.filter(
             name = filter.name,
             description = filter.description,
@@ -76,17 +89,18 @@ class TaskService(
             pageable = pageable
         )
 
-        info(this, "Found $filteredTasks")
+        info(this, "Found $filteredTasks in ${System.currentTimeMillis() - _timer} ms")
         return filteredTasks
     }
 
+    @CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId")
     fun update(id: UUID, dto: TaskDto): Task {
         info(this, "Updating $dto")
+        _timer = System.currentTimeMillis()
         val existing: Task = getById(id)
-        val calendar: Calendar? = dto.calendarId?.let { _calendarRepository.findOrThrow(id = it) }
+        val calendar: Calendar = dto.calendarId.let { _calendarRepository.findOrThrow(id = it) }
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
-
-        val updated: Task = existing.copy(
+        val changed: Task = existing.copy(
             name = dto.name,
             description = dto.description,
             startDate = dto.startDate,
@@ -97,16 +111,20 @@ class TaskService(
             category = category
         )
 
-        info(this, "Updated $updated")
-        return _taskRepository.save(updated)
+        val updated: Task = _taskRepository.save(changed)
+        info(this, "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
+
+        return updated
     }
 
+    @CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId")
     fun delete(id: UUID) {
         info(this, "Deleting task with id $id.")
+        _timer = System.currentTimeMillis()
         val task: Task = getById(id)
 
-        info(this, "Deleting task $task")
         _taskRepository.delete(task)
+        info(this, "Deleting task $task in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }

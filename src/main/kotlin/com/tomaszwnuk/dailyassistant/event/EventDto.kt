@@ -38,7 +38,7 @@ data class EventDto(
     override val recurringPattern: RecurringPattern = RecurringPattern.NONE,
 
     @field:NotNull(message = "Calendar ID is required.")
-    val calendarId: UUID,
+    override val calendarId: UUID,
 
     override val categoryId: UUID? = null
 

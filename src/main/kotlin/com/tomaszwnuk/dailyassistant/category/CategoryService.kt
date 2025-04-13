@@ -3,6 +3,9 @@ package com.tomaszwnuk.dailyassistant.category
 import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.validation.assertNameDoesNotExist
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -13,60 +16,66 @@ class CategoryService(
     private val _categoryRepository: CategoryRepository
 ) {
 
+    private var _timer: Long = 0
+
     fun create(dto: CategoryDto): Category {
         info(this, "Creating $dto")
+        _timer = System.currentTimeMillis()
         _categoryRepository.assertNameDoesNotExist(
             name = dto.name,
             existsByName = { _categoryRepository.existsByName(it) }
         )
-
         val category = Category(
             name = dto.name,
             color = dto.color
         )
 
-        info(this, "Created $category")
-        return _categoryRepository.save(category)
+        val created: Category = _categoryRepository.save(category)
+        info(this, "Created $created in ${System.currentTimeMillis() - _timer} ms")
+
+        return created
     }
 
-    fun getAll(): List<Category> {
-        info(this, "Fetching all categories")
-        val categories: List<Category> = _categoryRepository.findAll()
-
-        info(this, "Found $categories")
-        return categories
-    }
-
+    @Cacheable(cacheNames = ["allCategories"])
     fun getAll(pageable: Pageable): Page<Category> {
         info(this, "Fetching all categories")
+        _timer = System.currentTimeMillis()
         val categories: Page<Category> = _categoryRepository.findAll(pageable)
 
-        info(this, "Found $categories")
+        info(this, "Found $categories in ${System.currentTimeMillis() - _timer} ms")
         return categories
     }
 
+    @Cacheable(cacheNames = ["categoryById"], key = "#id")
     fun getById(id: UUID): Category {
         info(this, "Fetching category with id $id")
+        _timer = System.currentTimeMillis()
         val category: Category = _categoryRepository.findOrThrow(id)
 
-        info(this, "Found $category")
+        info(this, "Found $category in ${System.currentTimeMillis() - _timer} ms")
         return category
     }
 
     fun filter(filter: CategoryFilterDto, pageable: Pageable): Page<Category> {
         info(this, "Filtering categories with $filter")
+        _timer = System.currentTimeMillis()
         val categories: Page<Category> = _categoryRepository.filter(
             name = filter.name,
             color = filter.color,
             pageable = pageable
         )
 
-        info(this, "Found $categories")
+        info(this, "Found $categories in ${System.currentTimeMillis() - _timer} ms")
         return categories
     }
 
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["allCategories"], allEntries = true),
+        CacheEvict(cacheNames = ["categoryById"], key = "#id")
+    ])
     fun update(id: UUID, dto: CategoryDto): Category {
         info(this, "Updating $dto")
+        _timer = System.currentTimeMillis()
         val existing: Category = getById(id)
 
         val isNameChanged: Boolean = !(dto.name.equals(existing.name, ignoreCase = true))
@@ -77,21 +86,24 @@ class CategoryService(
             )
         }
 
-        val updated: Category = existing.copy(
+        val changed: Category = existing.copy(
             name = dto.name,
             color = dto.color
         )
 
-        info(this, "Updated $updated")
-        return _categoryRepository.save(updated)
+        val updated: Category = _categoryRepository.save(changed)
+        info(this, "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
+
+        return updated
     }
 
     fun delete(id: UUID) {
         info(this, "Deleting category with id $id.")
+        _timer = System.currentTimeMillis()
         val existing: Category = getById(id)
 
-        info(this, "Deleting category $existing")
         _categoryRepository.delete(existing)
+        info(this, "Deleting category $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }

@@ -174,10 +174,12 @@ class CategoryControllerTest {
     @Test
     fun `should return notes by category id with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
+        val sampleCalendar = Calendar(name = "Calendar")
         val note = Note(
             id = UUID.randomUUID(),
             name = "Note",
             description = "Description",
+            calendar = sampleCalendar,
             category = _sampleCategory
         )
         val notes: List<Note> = listOf(note, note, note)
@@ -219,6 +221,7 @@ class CategoryControllerTest {
             id = UUID.randomUUID(),
             name = "Note",
             description = "Description",
+            calendar = sampleCalendar,
             category = _sampleCategory
         )
 

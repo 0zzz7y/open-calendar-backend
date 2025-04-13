@@ -2,6 +2,8 @@ package com.tomaszwnuk.dailyassistant.note
 
 import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_SIZE
+import com.tomaszwnuk.dailyassistant.calendar.Calendar
+import com.tomaszwnuk.dailyassistant.calendar.CalendarRepository
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
 import org.junit.jupiter.api.BeforeEach
@@ -28,10 +30,15 @@ class NoteServiceTest {
     private lateinit var _noteRepository: NoteRepository
 
     @Mock
+    private lateinit var _calendarRepository: CalendarRepository
+
+    @Mock
     private lateinit var _categoryRepository: CategoryRepository
 
     @InjectMocks
     private lateinit var _noteService: NoteService
+
+    private lateinit var _sampleCalendar: Calendar
 
     private lateinit var _sampleCategory: Category
 
@@ -43,11 +50,13 @@ class NoteServiceTest {
 
     @BeforeEach
     fun setup() {
+        _sampleCalendar = Calendar(name = "Personal")
         _sampleCategory = Category(name = "Shopping List")
         _sampleNote = Note(
             id = UUID.randomUUID(),
             name = "Groceries",
             description = "Buy milk, eggs, and bread",
+            calendar = _sampleCalendar,
             category = _sampleCategory
         )
         _sampleDto = _sampleNote.toDto()
@@ -56,6 +65,7 @@ class NoteServiceTest {
 
     @Test
     fun `should return created note`() {
+        whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
         whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(_sampleNote).whenever(_noteRepository).save(any())
         val result: Note = _noteService.create(_sampleDto)
@@ -96,6 +106,7 @@ class NoteServiceTest {
                 eq(filter.name),
                 isNull(),
                 isNull(),
+                isNull(),
                 eq(_pageable)
             )
         ).thenReturn(PageImpl(notes))
@@ -104,6 +115,7 @@ class NoteServiceTest {
         assertEquals(notes.size, result.totalElements.toInt())
         verify(_noteRepository).filter(
             eq(filter.name),
+            isNull(),
             isNull(),
             isNull(),
             eq(_pageable)
@@ -116,6 +128,7 @@ class NoteServiceTest {
         val updated: Note = _sampleNote.copy(name = "Updated note")
 
         whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
+        whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
         whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(updated).whenever(_noteRepository).save(any())
         val result: Note = _noteService.update(id, _sampleDto)

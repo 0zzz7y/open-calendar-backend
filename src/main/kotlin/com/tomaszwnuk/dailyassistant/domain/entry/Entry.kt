@@ -1,5 +1,6 @@
 package com.tomaszwnuk.dailyassistant.domain.entry
 
+import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.category.Category
 import com.tomaszwnuk.dailyassistant.domain.entity.Entity
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
@@ -21,6 +22,10 @@ abstract class Entry(
     open val description: String? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "calendar_id", nullable = false)
+    open val calendar: Calendar,
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
     open val category: Category? = null
 
@@ -31,6 +36,7 @@ abstract class Entry(
             id = id,
             name = name,
             description = description,
+            calendarId = calendar.id,
             categoryId = category?.id
         )
     }

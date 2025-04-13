@@ -39,7 +39,7 @@ data class Event(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "calendar_id", nullable = false)
-    val calendar: Calendar,
+    override val calendar: Calendar,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
@@ -49,6 +49,7 @@ data class Event(
     id = id,
     name = name,
     description = description,
+    calendar = calendar,
     category = category
 ), Schedulable {
 

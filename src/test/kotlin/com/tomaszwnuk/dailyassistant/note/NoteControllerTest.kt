@@ -2,6 +2,7 @@ package com.tomaszwnuk.dailyassistant.note
 
 import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_SIZE
+import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.category.Category
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -39,11 +40,13 @@ class NoteControllerTest {
 
     @BeforeEach
     fun setup() {
+        val sampleCalendar = Calendar(name = "Personal")
         val sampleCategory = Category(name = "Shopping")
         _sampleNote = Note(
             id = UUID.randomUUID(),
             name = "Groceries",
             description = "Buy milk, eggs, and bread",
+            calendar = sampleCalendar,
             category = sampleCategory
         )
         _sampleDto = _sampleNote.toDto()
@@ -92,6 +95,7 @@ class NoteControllerTest {
         whenever(_noteService.filter(eq(filter), eq(_pageable))).thenReturn(PageImpl(notes))
         val response: ResponseEntity<Page<NoteDto>> = _noteController.filter(
             eq(filter.name),
+            null,
             null,
             null,
             eq(_pageable)

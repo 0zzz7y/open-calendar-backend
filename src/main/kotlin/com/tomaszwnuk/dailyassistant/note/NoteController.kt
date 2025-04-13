@@ -45,12 +45,14 @@ class NoteController(
     fun filter(
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) description: String?,
+        @RequestParam(required = false) calendarId: UUID?,
         @RequestParam(required = false) categoryId: UUID?,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
         val filter = NoteFilterDto(
             name = name,
             description = description,
+            calendarId = calendarId,
             categoryId = categoryId
         )
         val notes: Page<NoteDto> = _noteService.filter(filter, pageable).map { it.toDto() }

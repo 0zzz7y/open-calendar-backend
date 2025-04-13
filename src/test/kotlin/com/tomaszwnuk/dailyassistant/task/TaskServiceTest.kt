@@ -56,7 +56,7 @@ class TaskServiceTest {
         _sampleCategory = Category(name = "Training")
         _sampleTask = Task(
             id = UUID.randomUUID(),
-            name = "Gym Workout",
+            name = "Daily Standup",
             description = null,
             startDate = LocalDateTime.now(),
             endDate = LocalDateTime.now().plusHours(1),
@@ -71,7 +71,7 @@ class TaskServiceTest {
 
     @Test
     fun `should return created task`() {
-        whenever(_calendarRepository.findById(_sampleDto.calendarId!!)).thenReturn(Optional.of(_sampleCalendar))
+        whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
         whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(_sampleTask).whenever(_taskRepository).save(any())
         val result: Task = _taskService.create(_sampleDto)
@@ -142,7 +142,7 @@ class TaskServiceTest {
         val updated: Task = _sampleTask.copy(name = "Updated Task")
 
         whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
-        whenever(_calendarRepository.findById(_sampleDto.calendarId!!)).thenReturn(Optional.of(_sampleCalendar))
+        whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
         whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(updated).whenever(_taskRepository).save(any())
         val result: Task = _taskService.update(id, _sampleDto)

@@ -35,7 +35,7 @@ class TestDataLoader(
         val calendars: Map<String, Calendar> = createCalendars()
         val categories: Map<String, Category> = createCategories()
 
-        createNotes(categories)
+        createNotes(calendars, categories)
         createTasks(calendars, categories)
         createEvents(calendars, categories)
 
@@ -143,11 +143,12 @@ class TestDataLoader(
         _taskRepository.saveAll(listOf(bicepsAndBackTraining, tricepsAndChestTraining, coreTraining, legsTraining))
     }
 
-    private fun createNotes(categories: Map<String, Category>) {
+    private fun createNotes(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         val startTime: Long = System.currentTimeMillis()
         val shoppingList = Note(
             name = "Shopping List",
             description = "Milk, Eggs, Bread",
+            calendar = calendars["personal"]!!,
             category = categories["casual"]
         )
 

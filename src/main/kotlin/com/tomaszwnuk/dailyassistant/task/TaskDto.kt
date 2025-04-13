@@ -38,7 +38,8 @@ data class TaskDto(
     @field:NotNull(message = "Task status is required.")
     val status: TaskStatus = TaskStatus.TODO,
 
-    val calendarId: UUID? = null,
+    @field:NotNull(message = "Calendar ID is required.")
+    override val calendarId: UUID,
 
     override val categoryId: UUID? = null
 
