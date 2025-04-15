@@ -2,48 +2,79 @@ name: Update Dependencies
 
 on:
   schedule:
-    - cron: "0 3 * * 1"
+    # Every Monday at 03:00 UTC
+    - cron: "0 3 * * 1" 
   workflow_dispatch:
 
 jobs:
-  build:
 
+  checkout:
+    name: Checkout Repository
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
+    outputs:
+      repo-path: ${{ steps.set-path.outputs.repo-path }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: 17
-        distribution: temurin
+      - name: Checkout
+        uses: actions/checkout@v4
+      - id: set-path
+        run: echo "repo-path=." >> $GITHUB_OUTPUT
 
-    - name: Run dependency update
-      run: ./gradlew dependencyUpdates -Drevision=release
+  setup-jdk:
+    name: Set Up JDK
+    needs: checkout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
 
-    - name: Update dependencies
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add .
-        git diff-index --quiet HEAD || git commit -m "chore: auto-update Gradle dependencies"
-        git push
+  run-dependency-check:
+    name: Run Dependency Check
+    needs: setup-jdk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Run Gradle Versions Plugin
+        run: ./gradlew dependencyUpdates -Drevision=release
+
+  update-dependencies:
+    name: Commit Dependency Updates
+    needs: run-dependency-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Commit and Push if Changes Exist
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff-index --quiet HEAD || git commit -m "chore: auto-update Gradle dependencies"
+          git push
 
   dependency-submission:
-
+    name: Submit Dependency Graph
+    needs: update-dependencies
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: 17
-        distribution: temurin
-
-    - name: Generate and submit dependency graph
-      uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Submit dependency graph
+        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
