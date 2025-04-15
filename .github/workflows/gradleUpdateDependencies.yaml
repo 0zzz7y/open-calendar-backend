@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: "temurin"
+          distribution: temurin
 
   run-dependency-check:
     name: Run Dependency Check
@@ -40,7 +40,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: "temurin"
+          distribution: temurin
       - name: Run Gradle Versions Plugin
         run: ./gradlew dependencyUpdates -Drevision=release
 
@@ -54,7 +54,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: "temurin"
+          distribution: temurin
       - name: Commit and Push if Changes Exist
         run: |
           git config user.name "github-actions[bot]"
@@ -75,6 +75,6 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: "temurin"
+          distribution: temurin
       - name: Submit dependency graph
         uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
