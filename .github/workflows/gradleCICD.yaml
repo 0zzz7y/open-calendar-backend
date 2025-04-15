@@ -20,7 +20,7 @@ jobs:
         run: echo "repo-path=." >> $GITHUB_OUTPUT
 
   setup-java:
-    name: Set Up Java
+    name: Set Up JDK
     needs: checkout
     runs-on: ubuntu-latest
     outputs:
