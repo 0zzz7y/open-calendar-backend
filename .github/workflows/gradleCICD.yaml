@@ -1,4 +1,4 @@
-name: Continous Integration
+name: Continous Integration / Continous Delpoyment
 
 on:
   push:
