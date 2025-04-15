@@ -1,4 +1,4 @@
-name: Continous Integration / Continous Delpoyment
+name: Continous Integration / Continous Deployment
 
 on:
   push:
@@ -7,45 +7,79 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
 
+  checkout:
+    name: Checkout Repository
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-
+    outputs:
+      repo-path: ${{ steps.set-path.outputs.repo-path }}
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - id: set-path
+        run: echo "repo-path=." >> $GITHUB_OUTPUT
 
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: 21
-        distribution: temurin"
+  setup-java:
+    name: Set Up Java
+    needs: checkout
+    runs-on: ubuntu-latest
+    outputs:
+      java-version: 21
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
 
-    - name: Setup
-      uses: gradle/actions/setup-gradle@v4
+  setup-gradle:
+    name: Set Up Gradle
+    needs: setup-java
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gradle Setup
+        uses: gradle/actions/setup-gradle@v4
 
-    - name: Build
-      run: ./gradlew clean build --info --stacktrace
+  build:
+    name: Build Application
+    needs: setup-gradle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Build
+        run: ./gradlew clean build --info --stacktrace
 
-    - name: Test
-      run: ./gradlew test
+  test:
+    name: Run Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Test
+        run: ./gradlew test
 
   dependency-submission:
-
+    name: Submit Dependency Graph
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK
-      uses: actions/setup-java@v4
-      with:
-        java-version: "21"
-        distribution: "temurin"
-
-    - name: Generate and submit dependency graph
-      uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Submit dependency graph
+        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
