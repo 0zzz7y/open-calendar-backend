@@ -1,4 +1,4 @@
-name: Run Tests Only
+name: Run Tests
 
 on:
   push:
@@ -34,10 +34,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
+
       - name: Run Tests
         run: ./gradlew test --stacktrace
+
+      - name: Publish JUnit Test Report to GitHub UI
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: JUnit Tests
+          path: build/test-results/test/TEST-*.xml
+          reporter: java-junit
+
+      - name: Upload JUnit HTML Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-html-report
+          path: build/reports/tests/test
