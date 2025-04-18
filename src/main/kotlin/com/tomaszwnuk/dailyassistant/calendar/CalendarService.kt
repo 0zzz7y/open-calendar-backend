@@ -18,6 +18,9 @@ class CalendarService(
 
     private var _timer: Long = 0
 
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
+    ])
     fun create(dto: CalendarDto): Calendar {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -85,7 +88,11 @@ class CalendarService(
                 existsByName = { _calendarRepository.existsByName(it) }
             )
         }
-        val changed = existing.copy(name = dto.name)
+
+        val changed: Calendar = existing.copy(
+            name = dto.name,
+            emoji = dto.emoji
+        )
 
         val updated: Calendar = _calendarRepository.save(changed)
         info(this, "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
@@ -93,13 +100,17 @@ class CalendarService(
         return updated
     }
 
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarById"], key = "#id"),
+        CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
+    ])
     fun delete(id: UUID) {
         info(this, "Deleting calendar with id $id.")
         _timer = System.currentTimeMillis()
         val existing: Calendar = getById(id)
 
         _calendarRepository.delete(existing)
-        info(this, "Deleting calendar $existing in ${System.currentTimeMillis() - _timer} ms")
+        info(this, "Deleted calendar $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }

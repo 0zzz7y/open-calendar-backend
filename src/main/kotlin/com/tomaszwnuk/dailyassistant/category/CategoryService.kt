@@ -18,6 +18,9 @@ class CategoryService(
 
     private var _timer: Long = 0
 
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["allCategories"], allEntries = true)
+    ])
     fun create(dto: CategoryDto): Category {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -97,13 +100,17 @@ class CategoryService(
         return updated
     }
 
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["allCategories"], allEntries = true),
+        CacheEvict(cacheNames = ["categoryById"], key = "#id")
+    ])
     fun delete(id: UUID) {
         info(this, "Deleting category with id $id.")
         _timer = System.currentTimeMillis()
         val existing: Category = getById(id)
 
         _categoryRepository.delete(existing)
-        info(this, "Deleting category $existing in ${System.currentTimeMillis() - _timer} ms")
+        info(this, "Deleted category $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }

@@ -8,6 +8,7 @@ import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -17,12 +18,14 @@ import java.util.*
 class NoteService(
     private val _noteRepository: NoteRepository,
     private val _calendarRepository: CalendarRepository,
-    private val _categoryRepository: CategoryRepository,
+    private val _categoryRepository: CategoryRepository
 ) {
 
     private var _timer: Long = 0
 
-    @CacheEvict(cacheNames = ["calendarNotes"], key = "#dto.calendarId")
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarNotes"], allEntries = true)
+    ])
     fun create(dto: NoteDto): Note {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -41,7 +44,7 @@ class NoteService(
         return created
     }
 
-    @Cacheable
+    @Cacheable(cacheNames = ["noteById"], key = "#id")
     fun getById(id: UUID): Note {
         info(this, "Fetching note with id $id")
         _timer = System.currentTimeMillis()
@@ -51,19 +54,20 @@ class NoteService(
         return note
     }
 
-    fun getAll(pageable: Pageable): Page<Note> {
-        info(this, "Fetching all notes")
-        val notes: Page<Note> = _noteRepository.findAll(pageable)
-
-        info(this, "Found $notes")
-        return notes
-    }
-
-    @Cacheable
+    @Cacheable(cacheNames = ["calendarNotes"], key = "#calendarId")
     fun getAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Note> {
         info(this, "Fetching all notes for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
         val notes: Page<Note> = _noteRepository.findAllByCalendarId(calendarId, pageable)
+
+        info(this, "Found $notes in ${System.currentTimeMillis() - _timer} ms")
+        return notes
+    }
+
+    fun getAll(pageable: Pageable): Page<Note> {
+        info(this, "Fetching all notes")
+        _timer = System.currentTimeMillis()
+        val notes: Page<Note> = _noteRepository.findAll(pageable)
 
         info(this, "Found $notes in ${System.currentTimeMillis() - _timer} ms")
         return notes
@@ -111,7 +115,7 @@ class NoteService(
         val existing: Note = getById(id)
 
         _noteRepository.delete(existing)
-        info(this, "Deleting note $existing in ${System.currentTimeMillis() - _timer} ms")
+        info(this, "Deleted note $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }

@@ -8,6 +8,7 @@ import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -17,12 +18,14 @@ import java.util.*
 class EventService(
     private val _eventRepository: EventRepository,
     private val _calendarRepository: CalendarRepository,
-    private val _categoryRepository: CategoryRepository,
+    private val _categoryRepository: CategoryRepository
 ) {
 
     private var _timer: Long = 0
 
-    @CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId")
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId")
+    ])
     fun create(dto: EventDto): Event {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -44,7 +47,7 @@ class EventService(
         return created
     }
 
-    @Cacheable
+    @Cacheable(cacheNames = ["eventById"], key = "#id")
     fun getById(id: UUID): Event {
         info(this, "Fetching event with id $id")
         _timer = System.currentTimeMillis()
@@ -63,7 +66,7 @@ class EventService(
         return events
     }
 
-    @Cacheable
+    @Cacheable(cacheNames = ["calendarEvents"], key = "#calendarId")
     fun getAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Event> {
         info(this, "Fetching all events for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
@@ -91,14 +94,19 @@ class EventService(
         return filtered
     }
 
-    @CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId")
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId"),
+        CacheEvict(cacheNames = ["eventById"], key = "#id")
+    ])
     fun update(id: UUID, dto: EventDto): Event {
         info(this, "Updating $dto")
         _timer = System.currentTimeMillis()
+
         val existing: Event = getById(id)
         val calendar: Calendar = _calendarRepository.findOrThrow(id = dto.calendarId)
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
-        val changed: Event = existing.copy(
+
+        val updated = existing.copy(
             name = dto.name,
             description = dto.description,
             startDate = dto.startDate,
@@ -108,20 +116,23 @@ class EventService(
             category = category
         )
 
-        val updated: Event = _eventRepository.save(changed)
-        info(this, "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
+        val saved: Event = _eventRepository.save(updated)
+        info(this, "Updated $saved in ${System.currentTimeMillis() - _timer} ms")
 
-        return updated
+        return saved
     }
 
-    @CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId")
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId"),
+        CacheEvict(cacheNames = ["eventById"], key = "#id")
+    ])
     fun delete(id: UUID) {
         info(this, "Deleting event with id $id.")
         _timer = System.currentTimeMillis()
-        val event: Event = getById(id)
+        val existing: Event = getById(id)
 
-        _eventRepository.delete(event)
-        info(this, "Deleting event $event in ${System.currentTimeMillis() - _timer} ms")
+        _eventRepository.delete(existing)
+        info(this, "Deleted event $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }

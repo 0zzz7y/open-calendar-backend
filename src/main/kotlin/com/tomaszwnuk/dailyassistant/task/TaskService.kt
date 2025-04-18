@@ -8,6 +8,7 @@ import com.tomaszwnuk.dailyassistant.domain.utility.info
 import com.tomaszwnuk.dailyassistant.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.annotation.Caching
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -17,12 +18,14 @@ import java.util.*
 class TaskService(
     private val _taskRepository: TaskRepository,
     private val _calendarRepository: CalendarRepository,
-    private val _categoryRepository: CategoryRepository,
+    private val _categoryRepository: CategoryRepository
 ) {
 
     private var _timer: Long = 0
 
-    @CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId")
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarTasks"], allEntries = true)
+    ])
     fun create(dto: TaskDto): Task {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -45,7 +48,7 @@ class TaskService(
         return created
     }
 
-    @Cacheable
+    @Cacheable(cacheNames = ["taskById"], key = "#id")
     fun getById(id: UUID): Task {
         info(this, "Fetching task with id $id")
         _timer = System.currentTimeMillis()
@@ -64,7 +67,7 @@ class TaskService(
         return tasks
     }
 
-    @Cacheable
+    @Cacheable(cacheNames = ["calendarTasks"], key = "#calendarId")
     fun getAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Task> {
         info(this, "Fetching all tasks for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
@@ -124,7 +127,6 @@ class TaskService(
         val task: Task = getById(id)
 
         _taskRepository.delete(task)
-        info(this, "Deleting task $task in ${System.currentTimeMillis() - _timer} ms")
+        info(this, "Deleted task $task in ${System.currentTimeMillis() - _timer} ms")
     }
-
 }
