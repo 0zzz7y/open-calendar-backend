@@ -19,9 +19,10 @@ class RedisConfiguration {
     @Bean
     fun cacheManager(redisConnectionFactory: RedisConnectionFactory): CacheManager {
         return try {
-
             val configuration = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(5))
+
+            redisConnectionFactory.connection.ping()
 
             RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(configuration)
@@ -29,7 +30,7 @@ class RedisConfiguration {
                     info(this, "Redis cache manager initialized successfully.")
                 }
         } catch (exception: Exception) {
-            info(this, "Redis cache manager not available. Caching will be disabled.")
+            info(this, "Redis cache manager is not available. Falling back to in-memory cache")
             ConcurrentMapCacheManager()
         }
     }

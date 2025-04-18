@@ -20,7 +20,7 @@ data class Calendar(
     @Column(columnDefinition = COLUMN_DEFINITION_NAME, unique = true, nullable = false)
     val name: String,
 
-    @Column(columnDefinition = COLUMN_DEFINITION_EMOJI, unique = true, nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_EMOJI, unique = false, nullable = false)
     val emoji: String
 
 ) : com.tomaszwnuk.dailyassistant.domain.entity.Entity() {
