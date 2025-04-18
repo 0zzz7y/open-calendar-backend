@@ -125,7 +125,7 @@ class CategoryControllerTest {
     @Test
     fun `should return events by category id with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
-        val sampleCalendar = Calendar(name = "Calendar")
+        val sampleCalendar = Calendar(name = "Calendar", emoji = "📅")
         val event = Event(
             id = UUID.randomUUID(),
             name = "Event",
@@ -149,7 +149,11 @@ class CategoryControllerTest {
     @Test
     fun `should return tasks by category id with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
-        val sampleCalendar = Calendar(name = "Calendar")
+        val sampleCalendar = Calendar(
+            id = UUID.randomUUID(),
+            name = "Calendar",
+            emoji = "📅"
+        )
         val task = Task(
             id = UUID.randomUUID(),
             name = "Task",
@@ -174,7 +178,11 @@ class CategoryControllerTest {
     @Test
     fun `should return notes by category id with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
-        val sampleCalendar = Calendar(name = "Calendar")
+        val sampleCalendar = Calendar(
+            id = UUID.randomUUID(),
+            name = "Calendar",
+            emoji = "📅"
+        )
         val note = Note(
             id = UUID.randomUUID(),
             name = "Note",
@@ -195,7 +203,11 @@ class CategoryControllerTest {
     @Test
     fun `should return category items by category id with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
-        val sampleCalendar = Calendar(name = "Calendar")
+        val sampleCalendar = Calendar(
+            id = UUID.randomUUID(),
+            name = "Calendar",
+            emoji = "📅"
+        )
         val event = Event(
             id = UUID.randomUUID(),
             name = "Event",

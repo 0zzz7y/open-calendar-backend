@@ -15,10 +15,13 @@ interface CalendarRepository : JpaRepository<Calendar, UUID> {
         """
     SELECT c FROM Calendar c
     WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT("%", :name, "%")))
-    """
+      AND (:emoji IS NULL OR LOWER(c.emoji) LIKE LOWER(CONCAT("%", :emoji, "%")))
+    """,
+        nativeQuery = false
     )
     fun filter(
         @Param("name") name: String?,
+        @Param("emoji") emoji: String?,
         pageable: Pageable
     ): Page<Calendar>
 

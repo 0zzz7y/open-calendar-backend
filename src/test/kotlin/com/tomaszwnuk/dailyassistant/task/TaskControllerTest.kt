@@ -4,6 +4,7 @@ import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.category.Category
+import com.tomaszwnuk.dailyassistant.category.CategoryColors
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.awt.Color
 import java.time.LocalDateTime
 import java.util.*
 
@@ -42,8 +44,16 @@ class TaskControllerTest {
 
     @BeforeEach
     fun setup() {
-        val sampleCalendar = Calendar(name = "Personal")
-        val sampleCategory = Category(name = "Training")
+        val sampleCalendar = Calendar(
+            id = UUID.randomUUID(),
+            name = "Personal",
+            emoji = "🏠"
+        )
+        val sampleCategory = Category(
+            id = UUID.randomUUID(),
+            name = "Training",
+            color = CategoryColors.toHex(Color.GREEN)
+        )
         _sampleTask = Task(
             id = UUID.randomUUID(),
             name = "Gym Workout",

@@ -4,6 +4,7 @@ import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.category.Category
+import com.tomaszwnuk.dailyassistant.category.CategoryColors
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.awt.Color
 import java.time.LocalDateTime
 import java.util.*
 
@@ -42,8 +44,16 @@ class EventControllerTest {
 
     @BeforeEach
     fun setup() {
-        val sampleCalendar = Calendar(name = "Work")
-        val sampleCategory = Category(name = "Meetings")
+        val sampleCalendar = Calendar(
+            id = UUID.randomUUID(),
+            name = "Work",
+            emoji = "🏢"
+        )
+        val sampleCategory = Category(
+            id = UUID.randomUUID(),
+            name = "Meetings",
+            color = CategoryColors.toHex(Color.BLUE)
+        )
         _sampleEvent = Event(
             id = UUID.randomUUID(),
             name = "Daily Standup",

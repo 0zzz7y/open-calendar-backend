@@ -2,6 +2,7 @@ package com.tomaszwnuk.dailyassistant.calendar
 
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_ID
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_NAME
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.COLUMN_DEFINITION_EMOJI
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -17,14 +18,18 @@ data class Calendar(
     override val id: UUID = UUID.randomUUID(),
 
     @Column(columnDefinition = COLUMN_DEFINITION_NAME, unique = true, nullable = false)
-    val name: String
+    val name: String,
+
+    @Column(columnDefinition = COLUMN_DEFINITION_EMOJI, unique = true, nullable = false)
+    val emoji: String
 
 ) : com.tomaszwnuk.dailyassistant.domain.entity.Entity() {
 
     fun toDto(): CalendarDto {
         return CalendarDto(
             id = id,
-            name = name
+            name = name,
+            emoji = emoji
         )
     }
 

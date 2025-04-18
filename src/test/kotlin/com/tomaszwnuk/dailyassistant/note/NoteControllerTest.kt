@@ -4,6 +4,7 @@ import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.category.Category
+import com.tomaszwnuk.dailyassistant.category.CategoryColors
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -20,6 +21,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.awt.Color
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
@@ -40,8 +42,16 @@ class NoteControllerTest {
 
     @BeforeEach
     fun setup() {
-        val sampleCalendar = Calendar(name = "Personal")
-        val sampleCategory = Category(name = "Shopping")
+        val sampleCalendar = Calendar(
+            id = UUID.randomUUID(),
+            name = "Personal",
+            emoji = "🏠"
+        )
+        val sampleCategory = Category(
+            id = UUID.randomUUID(),
+            name = "Shopping",
+            color = CategoryColors.toHex(Color.YELLOW)
+        )
         _sampleNote = Note(
             id = UUID.randomUUID(),
             name = "Groceries",

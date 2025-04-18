@@ -61,7 +61,8 @@ class CalendarControllerTest {
     fun setup() {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Personal"
+            name = "Personal",
+            emoji = "🏠"
         )
         _sampleDto = _sampleCalendar.toDto()
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)

@@ -1,5 +1,6 @@
 package com.tomaszwnuk.dailyassistant.calendar
 
+import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.EMOJI_MAXIMUM_LENGTH
 import com.tomaszwnuk.dailyassistant.validation.FieldConstraints.NAME_MAXIMUM_LENGTH
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -14,6 +15,13 @@ data class CalendarDto(
         max = NAME_MAXIMUM_LENGTH,
         message = "Description cannot be longer than $NAME_MAXIMUM_LENGTH characters."
     )
-    val name: String
+    val name: String,
+
+    @field:NotBlank(message = "Emoji cannot be blank.")
+    @field:Size(
+        max = EMOJI_MAXIMUM_LENGTH,
+        message = "Emoji cannot be longer than $EMOJI_MAXIMUM_LENGTH characters."
+    )
+    val emoji: String
 
 )

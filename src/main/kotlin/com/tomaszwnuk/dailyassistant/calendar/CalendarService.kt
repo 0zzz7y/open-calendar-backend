@@ -25,7 +25,10 @@ class CalendarService(
             name = dto.name,
             existsByName = { _calendarRepository.existsByName(it) }
         )
-        val calendar = Calendar(name = dto.name)
+        val calendar = Calendar(
+            name = dto.name,
+            emoji = dto.emoji
+        )
 
         val created: Calendar = _calendarRepository.save(calendar)
         info(this, "Created $created in ${System.currentTimeMillis() - _timer} ms")
@@ -58,6 +61,7 @@ class CalendarService(
         _timer = System.currentTimeMillis()
         val calendars: Page<Calendar> = _calendarRepository.filter(
             name = filter.name,
+            emoji = filter.emoji,
             pageable = pageable
         )
 

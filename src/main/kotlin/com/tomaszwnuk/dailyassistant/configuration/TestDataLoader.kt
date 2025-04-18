@@ -44,8 +44,8 @@ class TestDataLoader(
 
     private fun createCalendars(): Map<String, Calendar> {
         val startTime: Long = System.currentTimeMillis()
-        val personal: Calendar = _calendarRepository.save(Calendar(name = "Personal"))
-        val work: Calendar = _calendarRepository.save(Calendar(name = "Work"))
+        val personal: Calendar = _calendarRepository.save(Calendar(name = "Personal", emoji = "🏠"))
+        val work: Calendar = _calendarRepository.save(Calendar(name = "Work", emoji = "💼"))
         val calendars: Map<String, Calendar> = mapOf(
             "personal" to personal,
             "work" to work

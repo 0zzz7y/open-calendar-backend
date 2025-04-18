@@ -38,7 +38,8 @@ class CalendarServiceTest {
     fun setup() {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Personal"
+            name = "Personal",
+            emoji = "🏠"
         )
         _sampleDto = _sampleCalendar.toDto()
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
@@ -84,6 +85,7 @@ class CalendarServiceTest {
         whenever(
             _calendarRepository.filter(
                 eq(filter.name),
+                eq(filter.emoji),
                 eq(_pageable)
             )
         ).thenReturn(PageImpl(calendars))
@@ -92,6 +94,7 @@ class CalendarServiceTest {
         assertEquals(calendars.size, result.totalElements.toInt())
         verify(_calendarRepository).filter(
             eq(filter.name),
+            eq(filter.emoji),
             eq(_pageable)
         )
     }
