@@ -43,7 +43,6 @@ class NoteControllerTest {
     @BeforeEach
     fun setup() {
         val sampleCalendar = Calendar(
-            id = UUID.randomUUID(),
             name = "Personal",
             emoji = "🏠"
         )

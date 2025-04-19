@@ -5,6 +5,7 @@ import com.tomaszwnuk.dailyassistant.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.dailyassistant.calendar.Calendar
 import com.tomaszwnuk.dailyassistant.calendar.CalendarRepository
 import com.tomaszwnuk.dailyassistant.category.Category
+import com.tomaszwnuk.dailyassistant.category.CategoryColors
 import com.tomaszwnuk.dailyassistant.category.CategoryRepository
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
+import java.awt.Color
 import java.time.LocalDateTime
 import java.util.*
 
@@ -52,8 +54,16 @@ class TaskServiceTest {
 
     @BeforeEach
     fun setup() {
-        _sampleCalendar = Calendar(name = "Personal")
-        _sampleCategory = Category(name = "Training")
+        _sampleCalendar = Calendar(
+            id = UUID.randomUUID(),
+            name = "Personal",
+            emoji = "🏠"
+        )
+        _sampleCategory = Category(
+            id = UUID.randomUUID(),
+            name = "Training",
+            color = CategoryColors.toHex(Color.GREEN)
+        )
         _sampleTask = Task(
             id = UUID.randomUUID(),
             name = "Daily Standup",
