@@ -64,6 +64,15 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    mainClass.set("com.tomaszwnuk.dailyassistant.ApplicationKt")
+
+    manifest {
+        attributes["Main-Class"] = "com.tomaszwnuk.dailyassistant.ApplicationKt"
+    }
+}
+
 tasks.register("runAllTests", Test::class) {
     group = "verification"
     description = "Runs all tests."
