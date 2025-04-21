@@ -95,7 +95,7 @@ class EventService(
     }
 
     @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId"),
+        CacheEvict(cacheNames = ["calendarEvents"], key = "#existing.calendar.id"),
         CacheEvict(cacheNames = ["eventById"], key = "#id")
     ])
     fun update(id: UUID, dto: EventDto): Event {
@@ -123,7 +123,7 @@ class EventService(
     }
 
     @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId"),
+        CacheEvict(cacheNames = ["calendarEvents"], key = "#existing.calendarId"),
         CacheEvict(cacheNames = ["eventById"], key = "#id")
     ])
     fun delete(id: UUID) {
@@ -150,4 +150,5 @@ class EventService(
         _eventRepository.deleteAll(events)
         info(this, "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
+
 }

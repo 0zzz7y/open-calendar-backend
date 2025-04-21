@@ -108,7 +108,10 @@ class NoteService(
         return updated
     }
 
-    @CacheEvict(cacheNames = ["calendarNotes"], key = "#dto.calendarId")
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarNotes"], key = "#existing.calendar.id"),
+        CacheEvict(cacheNames = ["noteById"], key = "#id")
+    ])
     fun delete(id: UUID) {
         info(this, "Deleting note with id $id.")
         _timer = System.currentTimeMillis()

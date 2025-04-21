@@ -120,7 +120,10 @@ class TaskService(
         return updated
     }
 
-    @CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId")
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarTasks"], key = "#existing.calendar.id"),
+        CacheEvict(cacheNames = ["taskById"], key = "#id")
+    ])
     fun delete(id: UUID) {
         info(this, "Deleting task with id $id.")
         _timer = System.currentTimeMillis()
