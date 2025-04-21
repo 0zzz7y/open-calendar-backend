@@ -64,6 +64,16 @@ class NoteService(
         return notes
     }
 
+    @Cacheable(cacheNames = ["categoryNotes"], key = "#categoryId")
+    fun getAllByCategoryId(categoryId: UUID, pageable: Pageable): Page<Note> {
+        info(this, "Fetching all notes for calendar with id $categoryId")
+        _timer = System.currentTimeMillis()
+        val notes: Page<Note> = _noteRepository.findAllByCategoryId(categoryId, pageable)
+
+        info(this, "Found $notes in ${System.currentTimeMillis() - _timer} ms")
+        return notes
+    }
+
     fun getAll(pageable: Pageable): Page<Note> {
         info(this, "Fetching all notes")
         _timer = System.currentTimeMillis()
@@ -136,4 +146,25 @@ class NoteService(
         _noteRepository.deleteAll(notes)
         info(this, "Deleted all notes for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
+
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["categoryNotes"], key = "#categoryId"),
+        CacheEvict(cacheNames = ["noteById"], allEntries = true)
+    ])
+    fun deleteAllCategoryByCategoryId(categoryId: UUID) {
+        info(this, "Updating all notes for category with id $categoryId.")
+        _timer = System.currentTimeMillis()
+        val notes: Page<Note> = _noteRepository.findAllByCategoryId(
+            categoryId = categoryId,
+            pageable = Pageable.unpaged()
+        )
+
+        notes.content.forEach { note ->
+            val withoutCategory = note.copy(category = null)
+            _noteRepository.save(withoutCategory)
+        }
+
+        info(this, "Updated category to null for all notes in ${System.currentTimeMillis() - _timer} ms")
+    }
+
 }

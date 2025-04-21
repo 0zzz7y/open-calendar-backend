@@ -76,6 +76,16 @@ class EventService(
         return events
     }
 
+    @Cacheable(cacheNames = ["categoryEvents"], key = "#categoryId")
+    fun getAllByCategoryId(categoryId: UUID, pageable: Pageable): Page<Event> {
+        info(this, "Fetching all events for calendar with id $categoryId")
+        _timer = System.currentTimeMillis()
+        val events: Page<Event> = _eventRepository.findAllByCategoryId(categoryId, pageable)
+
+        info(this, "Found $events in ${System.currentTimeMillis() - _timer} ms")
+        return events
+    }
+
     fun filter(filter: EventFilterDto, pageable: Pageable): Page<Event> {
         info(this, "Filtering events with $filter")
         _timer = System.currentTimeMillis()
@@ -139,16 +149,37 @@ class EventService(
         CacheEvict(cacheNames = ["calendarEvents"], key = "#calendarId"),
         CacheEvict(cacheNames = ["eventById"], allEntries = true)
     ])
-    fun deleteAllByCalendarId(calendarId: UUID) {
-        info(this, "Deleting all events for calendar with id $calendarId.")
+    fun deleteAllByCalendarId(id: UUID) {
+        info(this, "Deleting all events for calendar with id $id.")
         _timer = System.currentTimeMillis()
         val events: Page<Event> = _eventRepository.findAllByCalendarId(
-            calendarId = calendarId,
+            calendarId = id,
             pageable = Pageable.unpaged()
         )
 
         _eventRepository.deleteAll(events)
-        info(this, "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
+        info(this, "Deleted all events for calendar with id $id in ${System.currentTimeMillis() - _timer} ms")
+    }
+
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["categoryEvents"], key = "#categoryId"),
+        CacheEvict(cacheNames = ["eventById"], allEntries = true)
+    ])
+    fun deleteAllCategoryByCategoryId(id: UUID) {
+        info(this, "Deleting all events for category with id $id.")
+        _timer = System.currentTimeMillis()
+        val events: Page<Event> = _eventRepository.findAllByCategoryId(
+            categoryId = id,
+            pageable = Pageable.unpaged()
+        )
+
+        events.content.forEach { event ->
+            val withoutCategory = event.copy(category = null)
+            _eventRepository.save(withoutCategory)
+        }
+
+        _eventRepository.deleteAll(events)
+        info(this, "Deleted all events for category with id $id in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }

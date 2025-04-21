@@ -77,6 +77,16 @@ class TaskService(
         return tasks
     }
 
+    @Cacheable(cacheNames = ["categoryTasks"], key = "#categoryId")
+    fun getAllByCategoryId(categoryId: UUID, pageable: Pageable): Page<Task> {
+        info(this, "Fetching all tasks for calendar with id $categoryId")
+        _timer = System.currentTimeMillis()
+        val tasks: Page<Task> = _taskRepository.findAllByCategoryId(categoryId, pageable)
+
+        info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
+        return tasks
+    }
+
     fun filter(filter: TaskFilterDto, pageable: Pageable): Page<Task> {
         info(this, "Filtering tasks with $filter")
         _timer = System.currentTimeMillis()
@@ -147,6 +157,26 @@ class TaskService(
 
         _taskRepository.deleteAll(tasks)
         info(this, "Deleted all tasks for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
+    }
+
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["categoryTasks"], key = "#categoryId"),
+        CacheEvict(cacheNames = ["taskById"], allEntries = true)
+    ])
+    fun deleteAllCategoryByCategoryId(categoryId: UUID) {
+        info(this, "Updating all tasks for category with id $categoryId.")
+        _timer = System.currentTimeMillis()
+        val tasks: Page<Task> = _taskRepository.findAllByCategoryId(
+            categoryId = categoryId,
+            pageable = Pageable.unpaged()
+        )
+
+        tasks.content.forEach { task ->
+            val withoutCategory = task.copy(category = null)
+            _taskRepository.save(withoutCategory)
+        }
+
+        info(this, "Updated category to null for all tasks in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }
