@@ -40,8 +40,8 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
-    implementation("org.xerial:sqlite-jdbc:3.41.2.2")
     implementation("com.h2database:h2")
+    implementation("org.xerial:sqlite-jdbc:3.41.2.2")
 
     implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0")
 

@@ -122,6 +122,9 @@ class CalendarController(
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
         _calendarService.delete(id)
+        _eventService.deleteAllByCalendarId(id)
+        _taskService.deleteAllByCalendarId(id)
+        _noteService.deleteAllByCalendarId(id)
         return ResponseEntity.noContent().build()
     }
 

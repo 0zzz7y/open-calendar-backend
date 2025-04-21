@@ -5,13 +5,19 @@ app:
 
 spring:
   profiles:
-    active: dev
+    active: dev, sqlite
 
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:db
     driver-class-name: org.h2.Driver
     username: sa
     password:
+
+  secondary:
+    url: jdbc:sqlite:db
+    driver-class-name: org.sqlite.JDBC
+    jpa:
+      database-platform: org.hibernate.dialect.SQLiteDialect
 
   jpa:
     show-sql: true

@@ -118,4 +118,19 @@ class NoteService(
         info(this, "Deleted note $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarNotes"], key = "#calendarid"),
+        CacheEvict(cacheNames = ["noteById"], allEntries = true)
+    ])
+    fun deleteAllByCalendarId(calendarId: UUID) {
+        info(this, "Deleting all notes for calendar with id $calendarId.")
+        _timer = System.currentTimeMillis()
+        val notes: Page<Note> = _noteRepository.findAllByCalendarId(
+            calendarId = calendarId,
+            pageable = Pageable.unpaged()
+        )
+
+        _noteRepository.deleteAll(notes)
+        info(this, "Deleted all notes for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
+    }
 }

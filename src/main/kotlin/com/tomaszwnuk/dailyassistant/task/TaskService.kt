@@ -129,4 +129,21 @@ class TaskService(
         _taskRepository.delete(task)
         info(this, "Deleted task $task in ${System.currentTimeMillis() - _timer} ms")
     }
+
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarTask"], key = "#calendarid"),
+        CacheEvict(cacheNames = ["taskById"], allEntries = true)
+    ])
+    fun deleteAllByCalendarId(calendarId: UUID) {
+        info(this, "Deleting all tasks for calendar with id $calendarId.")
+        _timer = System.currentTimeMillis()
+        val tasks: Page<Task> = _taskRepository.findAllByCalendarId(
+            calendarId = calendarId,
+            pageable = Pageable.unpaged()
+        )
+
+        _taskRepository.deleteAll(tasks)
+        info(this, "Deleted all tasks for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
+    }
+
 }

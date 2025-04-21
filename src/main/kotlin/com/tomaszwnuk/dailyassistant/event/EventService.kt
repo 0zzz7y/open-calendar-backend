@@ -135,4 +135,19 @@ class EventService(
         info(this, "Deleted event $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarEvents"], key = "#calendarId"),
+        CacheEvict(cacheNames = ["eventById"], allEntries = true)
+    ])
+    fun deleteAllByCalendarId(calendarId: UUID) {
+        info(this, "Deleting all events for calendar with id $calendarId.")
+        _timer = System.currentTimeMillis()
+        val events: Page<Event> = _eventRepository.findAllByCalendarId(
+            calendarId = calendarId,
+            pageable = Pageable.unpaged()
+        )
+
+        _eventRepository.deleteAll(events)
+        info(this, "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
+    }
 }
