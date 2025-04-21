@@ -26,7 +26,8 @@ class RedisConfiguration {
 
             RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(configuration)
-                .build().also {
+                .build()
+                .also {
                     info(this, "Redis cache manager initialized successfully.")
                 }
         } catch (exception: Exception) {

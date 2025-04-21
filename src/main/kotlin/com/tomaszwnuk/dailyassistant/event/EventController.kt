@@ -2,7 +2,6 @@ package com.tomaszwnuk.dailyassistant.event
 
 import com.tomaszwnuk.dailyassistant.domain.RecurringPattern
 import jakarta.validation.Valid
-import org.springframework.cache.annotation.CacheEvict
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -22,7 +21,6 @@ class EventController(
 ) {
 
     @PostMapping
-    @CacheEvict
     fun create(@Valid @RequestBody dto: EventDto): ResponseEntity<EventDto> {
         val created: EventDto = _eventService.create(dto).toDto()
         return ResponseEntity.status(HttpStatus.CREATED).body(created)

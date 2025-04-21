@@ -33,13 +33,13 @@ spring:
       enabled: true
 
   cache:
-    type: redis
     host: localhost
     port: 6379
 
 logging:
   level:
     org.springframework.web: DEBUG
+    org.springframework.cache: DEBUG
     org.springframework.http.converter: DEBUG
 
   pattern:
