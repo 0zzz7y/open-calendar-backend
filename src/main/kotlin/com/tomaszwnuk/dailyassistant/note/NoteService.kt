@@ -122,7 +122,7 @@ class NoteService(
     }
 
     @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarNotes"], key = "#existing.calendar.id"),
+        CacheEvict(cacheNames = ["calendarNotes"], allEntries = true),
         CacheEvict(cacheNames = ["noteById"], key = "#id")
     ])
     fun delete(id: UUID) {

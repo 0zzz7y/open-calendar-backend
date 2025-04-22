@@ -134,7 +134,7 @@ class TaskService(
     }
 
     @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarTasks"], key = "#existing.calendar.id"),
+        CacheEvict(cacheNames = ["calendarTasks"], allEntries = true),
         CacheEvict(cacheNames = ["taskById"], key = "#id")
     ])
     fun delete(id: UUID) {

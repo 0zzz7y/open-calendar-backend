@@ -133,7 +133,7 @@ class EventService(
     }
 
     @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarEvents"], key = "#existing.calendarId"),
+        CacheEvict(cacheNames = ["calendarEvents"], allEntries = true),
         CacheEvict(cacheNames = ["eventById"], key = "#id")
     ])
     fun delete(id: UUID) {
