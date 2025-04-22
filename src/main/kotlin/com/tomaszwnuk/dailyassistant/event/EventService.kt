@@ -147,29 +147,29 @@ class EventService(
 
     @Caching(evict = [
         CacheEvict(cacheNames = ["calendarEvents"], key = "#calendarId"),
-        CacheEvict(cacheNames = ["eventById"], allEntries = true)
+        CacheEvict(cacheNames = ["eventsById"], allEntries = true)
     ])
-    fun deleteAllByCalendarId(id: UUID) {
-        info(this, "Deleting all events for calendar with id $id.")
+    fun deleteAllByCalendarId(calendarId: UUID) {
+        info(this, "Deleting all events for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
         val events: Page<Event> = _eventRepository.findAllByCalendarId(
-            calendarId = id,
+            calendarId = calendarId,
             pageable = Pageable.unpaged()
         )
 
         _eventRepository.deleteAll(events)
-        info(this, "Deleted all events for calendar with id $id in ${System.currentTimeMillis() - _timer} ms")
+        info(this, "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
 
     @Caching(evict = [
         CacheEvict(cacheNames = ["categoryEvents"], key = "#categoryId"),
         CacheEvict(cacheNames = ["eventById"], allEntries = true)
     ])
-    fun deleteAllCategoryByCategoryId(id: UUID) {
-        info(this, "Deleting all events for category with id $id.")
+    fun deleteAllCategoryByCategoryId(categoryId: UUID) {
+        info(this, "Deleting all events for category with id $categoryId.")
         _timer = System.currentTimeMillis()
         val events: Page<Event> = _eventRepository.findAllByCategoryId(
-            categoryId = id,
+            categoryId = categoryId,
             pageable = Pageable.unpaged()
         )
 
@@ -179,7 +179,7 @@ class EventService(
         }
 
         _eventRepository.deleteAll(events)
-        info(this, "Deleted all events for category with id $id in ${System.currentTimeMillis() - _timer} ms")
+        info(this, "Deleted all events for category with id $categoryId in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }
