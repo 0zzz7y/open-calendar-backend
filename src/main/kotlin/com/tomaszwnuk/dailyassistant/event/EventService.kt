@@ -105,7 +105,7 @@ class EventService(
     }
 
     @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarEvents"], key = "#existing.calendar.id"),
+        CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId"),
         CacheEvict(cacheNames = ["eventById"], key = "#id")
     ])
     fun update(id: UUID, dto: EventDto): Event {

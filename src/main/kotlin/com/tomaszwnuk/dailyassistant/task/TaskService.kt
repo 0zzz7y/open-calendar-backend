@@ -106,7 +106,10 @@ class TaskService(
         return filteredTasks
     }
 
-    @CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId")
+    @Caching(evict = [
+        CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId"),
+        CacheEvict(cacheNames = ["taskById"], key = "#id")
+    ])
     fun update(id: UUID, dto: TaskDto): Task {
         info(this, "Updating $dto")
         _timer = System.currentTimeMillis()
