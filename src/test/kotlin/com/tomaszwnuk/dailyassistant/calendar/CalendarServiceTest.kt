@@ -39,7 +39,7 @@ class CalendarServiceTest {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
             name = "Personal",
-            emoji = "🏠"
+            emoji = "\uD83C\uDFE0"
         )
         _sampleDto = _sampleCalendar.toDto()
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
@@ -52,35 +52,46 @@ class CalendarServiceTest {
         val result: Calendar = _calendarService.create(_sampleDto)
 
         assertEquals(_sampleCalendar.name, result.name)
+        assertEquals(_sampleCalendar.emoji, result.emoji)
         verify(_calendarRepository).save(any())
     }
 
     @Test
     fun `should return paginated list of calendars`() {
-        val calendars = listOf(_sampleCalendar, _sampleCalendar, _sampleCalendar)
+        val calendars: List<Calendar> = listOf(
+            _sampleCalendar,
+            _sampleCalendar.copy(id = UUID.randomUUID()),
+            _sampleCalendar.copy(id = UUID.randomUUID())
+        )
 
         whenever(_calendarRepository.findAll(_pageable)).thenReturn(PageImpl(calendars))
         val result: Page<Calendar> = _calendarService.getAll(_pageable)
 
         assertEquals(calendars.size, result.totalElements.toInt())
+        assertEquals(calendars.map { it.id }, result.content.map { it.id })
         verify(_calendarRepository).findAll(_pageable)
     }
 
     @Test
     fun `should return calendar by id`() {
-        val id = _sampleCalendar.id
+        val id: UUID = _sampleCalendar.id
 
         whenever(_calendarRepository.findById(id)).thenReturn(Optional.of(_sampleCalendar))
         val result: Calendar = _calendarService.getById(id)
 
         assertEquals(_sampleCalendar.id, result.id)
+        assertEquals(_sampleCalendar.name, result.name)
         verify(_calendarRepository).findById(id)
     }
 
     @Test
     fun `should return filtered calendars`() {
         val filter = CalendarFilterDto(name = "Personal")
-        val calendars: List<Calendar> = listOf(_sampleCalendar, _sampleCalendar, _sampleCalendar)
+        val calendars: List<Calendar> = listOf(
+            _sampleCalendar,
+            _sampleCalendar.copy(id = UUID.randomUUID()),
+            _sampleCalendar.copy(id = UUID.randomUUID())
+        )
 
         whenever(
             _calendarRepository.filter(
@@ -92,11 +103,8 @@ class CalendarServiceTest {
         val result: Page<Calendar> = _calendarService.filter(filter, _pageable)
 
         assertEquals(calendars.size, result.totalElements.toInt())
-        verify(_calendarRepository).filter(
-            eq(filter.name),
-            eq(filter.emoji),
-            eq(_pageable)
-        )
+        assertEquals(calendars.map { it.name }, result.content.map { it.name })
+        verify(_calendarRepository).filter(eq(filter.name), eq(filter.emoji), eq(_pageable))
     }
 
     @Test
@@ -123,4 +131,5 @@ class CalendarServiceTest {
 
         verify(_calendarRepository).delete(_sampleCalendar)
     }
+
 }

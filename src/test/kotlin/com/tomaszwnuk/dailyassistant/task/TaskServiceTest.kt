@@ -57,7 +57,7 @@ class TaskServiceTest {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
             name = "Personal",
-            emoji = "🏠"
+            emoji = "\\uD83C\\uDFE0"
         )
         _sampleCategory = Category(
             id = UUID.randomUUID(),

@@ -47,7 +47,7 @@ class TaskControllerTest {
         val sampleCalendar = Calendar(
             id = UUID.randomUUID(),
             name = "Personal",
-            emoji = "🏠"
+            emoji = "\\uD83C\\uDFE0"
         )
         val sampleCategory = Category(
             id = UUID.randomUUID(),

@@ -9,7 +9,10 @@ import com.tomaszwnuk.dailyassistant.event.EventService
 import com.tomaszwnuk.dailyassistant.note.Note
 import com.tomaszwnuk.dailyassistant.note.NoteDto
 import com.tomaszwnuk.dailyassistant.note.NoteService
-import com.tomaszwnuk.dailyassistant.task.*
+import com.tomaszwnuk.dailyassistant.task.Task
+import com.tomaszwnuk.dailyassistant.task.TaskDto
+import com.tomaszwnuk.dailyassistant.task.TaskService
+import com.tomaszwnuk.dailyassistant.task.TaskStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -62,7 +65,7 @@ class CalendarControllerTest {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
             name = "Personal",
-            emoji = "🏠"
+            emoji = "\\uD83C\\uDFE0"
         )
         _sampleDto = _sampleCalendar.toDto()
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
@@ -74,7 +77,8 @@ class CalendarControllerTest {
         val response: ResponseEntity<CalendarDto> = _calendarController.create(_sampleDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleDto.name, response.body?.name)
+        assertEquals(_sampleCalendar.name, response.body?.name)
+        assertEquals(_sampleCalendar.emoji, response.body?.emoji)
         verify(_calendarService).create(_sampleDto)
     }
 
@@ -87,6 +91,7 @@ class CalendarControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(calendars.size, response.body?.totalElements?.toInt())
+        assertEquals(calendars.map { it.id }, response.body?.content?.map { it.id })
         verify(_calendarService).getAll(_pageable)
     }
 
@@ -100,6 +105,7 @@ class CalendarControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(calendars.size, response.body?.totalElements?.toInt())
+        assertEquals(filter.name, response.body?.content?.firstOrNull()?.name)
         verify(_calendarService).filter(filter, _pageable)
     }
 
@@ -112,18 +118,20 @@ class CalendarControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(id, response.body?.id)
+        assertEquals(_sampleCalendar.name, response.body?.name)
         verify(_calendarService).getById(id)
     }
 
     @Test
     fun `should return paginated list of events by calendar id with status code 200 OK`() {
         val id: UUID = _sampleCalendar.id
+        val now = LocalDateTime.now()
         val event = Event(
             id = UUID.randomUUID(),
             name = "Event",
             description = "Description",
-            startDate = LocalDateTime.now(),
-            endDate = LocalDateTime.now().plusHours(1),
+            startDate = now,
+            endDate = now.plusHours(1),
             recurringPattern = RecurringPattern.NONE,
             calendar = _sampleCalendar,
             category = null
@@ -136,17 +144,19 @@ class CalendarControllerTest {
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(events.size, response.body?.totalElements?.toInt())
         assertEquals(events[0].name, response.body?.content?.get(0)?.name)
+        verify(_eventService).getAllByCalendarId(id, _pageable)
     }
 
     @Test
     fun `should return paginated list of tasks by calendar id with status code 200 OK`() {
         val id: UUID = _sampleCalendar.id
+        val now = LocalDateTime.now()
         val task = Task(
             id = UUID.randomUUID(),
             name = "Task",
             description = "Description",
-            startDate = LocalDateTime.now(),
-            endDate = LocalDateTime.now().plusHours(1),
+            startDate = now,
+            endDate = now.plusHours(1),
             recurringPattern = RecurringPattern.NONE,
             status = TaskStatus.TODO,
             calendar = _sampleCalendar,
@@ -160,6 +170,7 @@ class CalendarControllerTest {
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(tasks.size, response.body?.totalElements?.toInt())
         assertEquals(tasks[0].name, response.body?.content?.get(0)?.name)
+        verify(_taskService).getAllByCalendarId(id, _pageable)
     }
 
     @Test
@@ -172,7 +183,7 @@ class CalendarControllerTest {
             calendar = _sampleCalendar,
             category = null
         )
-        val notes: List<Note> = listOf(note, note, note)
+        val notes: List<Note> = listOf(note)
 
         whenever(_noteService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(notes))
         val response: ResponseEntity<Page<NoteDto>> = _calendarController.getNotes(id, _pageable)
@@ -180,17 +191,19 @@ class CalendarControllerTest {
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(notes.size, response.body?.totalElements?.toInt())
         assertEquals(notes[0].name, response.body?.content?.get(0)?.name)
+        verify(_noteService).getAllByCalendarId(id, _pageable)
     }
 
     @Test
     fun `should return calendar items by calendar id with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+        val id = _sampleCalendar.id
+        val now = LocalDateTime.now()
         val event = Event(
             id = UUID.randomUUID(),
             name = "Event",
             description = "Description",
-            startDate = LocalDateTime.now(),
-            endDate = LocalDateTime.now().plusHours(1),
+            startDate = now,
+            endDate = now.plusHours(1),
             recurringPattern = RecurringPattern.NONE,
             calendar = _sampleCalendar,
             category = null
@@ -199,8 +212,8 @@ class CalendarControllerTest {
             id = UUID.randomUUID(),
             name = "Task",
             description = "Description",
-            startDate = LocalDateTime.now(),
-            endDate = LocalDateTime.now().plusHours(1),
+            startDate = now,
+            endDate = now.plusHours(1),
             recurringPattern = RecurringPattern.NONE,
             status = TaskStatus.TODO,
             calendar = _sampleCalendar,
@@ -217,20 +230,21 @@ class CalendarControllerTest {
         whenever(_eventService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(event)))
         whenever(_taskService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(task)))
         whenever(_noteService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(note)))
+
         val response: ResponseEntity<List<Map<String, Any>>> = _calendarController.getAllItems(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(3, response.body?.size)
 
-        val types: List<Any?> = response.body?.map { it["type"] } ?: emptyList()
-        assertTrue(types.containsAll(listOf("event", "task")))
+        val types: List<String> = response.body?.mapNotNull { it["type"] as? String } ?: emptyList()
+        assertTrue(types.containsAll(listOf("event", "task", "note")))
     }
 
     @Test
     fun `should return updated calendar with status code 200 OK`() {
-        val updated: Calendar = _sampleCalendar.copy(name = "Updated Calendar")
-
+        val updated: Calendar = _sampleCalendar.copy(name = "Updated")
         whenever(_calendarService.update(_sampleCalendar.id, _sampleDto)).thenReturn(updated)
+
         val response: ResponseEntity<CalendarDto> = _calendarController.update(_sampleCalendar.id, _sampleDto)
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -241,6 +255,7 @@ class CalendarControllerTest {
     @Test
     fun `should delete calendar with status code 204 No Content`() {
         doNothing().whenever(_calendarService).delete(_sampleCalendar.id)
+
         val response: ResponseEntity<Void> = _calendarController.delete(_sampleCalendar.id)
 
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)

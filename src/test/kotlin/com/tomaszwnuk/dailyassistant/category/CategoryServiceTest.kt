@@ -53,17 +53,23 @@ class CategoryServiceTest {
         val result: Category = _categoryService.create(_sampleDto)
 
         assertEquals(_sampleCategory.id, result.id)
+        assertEquals(_sampleCategory.color, result.color)
         verify(_categoryRepository).save(any())
     }
 
     @Test
     fun `should return paginated list of categories`() {
-        val categories: List<Category> = listOf(_sampleCategory, _sampleCategory, _sampleCategory)
+        val categories: List<Category> = listOf(
+            _sampleCategory,
+            _sampleCategory.copy(id = UUID.randomUUID()),
+            _sampleCategory.copy(id = UUID.randomUUID())
+        )
 
         whenever(_categoryRepository.findAll(_pageable)).thenReturn(PageImpl(categories))
         val result: Page<Category> = _categoryService.getAll(_pageable)
 
         assertEquals(categories.size, result.totalElements.toInt())
+        assertEquals(categories.map { it.id }, result.content.map { it.id })
         verify(_categoryRepository).findAll(_pageable)
     }
 
@@ -75,13 +81,18 @@ class CategoryServiceTest {
         val result: Category = _categoryService.getById(id)
 
         assertEquals(_sampleCategory.id, result.id)
+        assertEquals(_sampleCategory.name, result.name)
         verify(_categoryRepository).findById(id)
     }
 
     @Test
     fun `should return filtered categories`() {
         val filter = CategoryFilterDto(name = "Personal")
-        val categories: List<Category> = listOf(_sampleCategory, _sampleCategory, _sampleCategory)
+        val categories: List<Category> = listOf(
+            _sampleCategory,
+            _sampleCategory.copy(id = UUID.randomUUID()),
+            _sampleCategory.copy(id = UUID.randomUUID())
+        )
 
         whenever(
             _categoryRepository.filter(
@@ -93,11 +104,8 @@ class CategoryServiceTest {
         val result: Page<Category> = _categoryService.filter(filter, _pageable)
 
         assertEquals(categories.size, result.totalElements.toInt())
-        verify(_categoryRepository).filter(
-            eq(filter.name),
-            isNull(),
-            eq(_pageable)
-        )
+        assertEquals(categories.map { it.name }, result.content.map { it.name })
+        verify(_categoryRepository).filter(eq(filter.name), isNull(), eq(_pageable))
     }
 
     @Test

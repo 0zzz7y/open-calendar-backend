@@ -44,7 +44,7 @@ class NoteControllerTest {
     fun setup() {
         val sampleCalendar = Calendar(
             name = "Personal",
-            emoji = "🏠"
+            emoji = "\\uD83C\\uDFE0"
         )
         val sampleCategory = Category(
             id = UUID.randomUUID(),

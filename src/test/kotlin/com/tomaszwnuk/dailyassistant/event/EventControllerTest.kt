@@ -47,7 +47,7 @@ class EventControllerTest {
         val sampleCalendar = Calendar(
             id = UUID.randomUUID(),
             name = "Work",
-            emoji = "🏢"
+            emoji = "\uD83C\uDFE2"
         )
         val sampleCategory = Category(
             id = UUID.randomUUID(),
