@@ -60,8 +60,12 @@ allOpen {
     annotation("jakarta.persistence.Embeddable")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+tasks.withType<Jar> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes["Main-Class"] = "com.tomaszwnuk.dailyassistant.ApplicationKt"
+    }
 }
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
@@ -71,6 +75,10 @@ tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     manifest {
         attributes["Main-Class"] = "com.tomaszwnuk.dailyassistant.ApplicationKt"
     }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 tasks.register("runAllTests", Test::class) {
