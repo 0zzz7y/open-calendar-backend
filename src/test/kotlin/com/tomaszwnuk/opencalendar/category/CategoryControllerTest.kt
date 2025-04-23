@@ -6,11 +6,11 @@ import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.RecurringPattern
 import com.tomaszwnuk.opencalendar.event.Event
 import com.tomaszwnuk.opencalendar.event.EventDto
-import com.tomaszwnuk.opencalendar.event.EventRepository
+import com.tomaszwnuk.opencalendar.event.EventService
 import com.tomaszwnuk.opencalendar.note.Note
-import com.tomaszwnuk.opencalendar.note.NoteRepository
+import com.tomaszwnuk.opencalendar.note.NoteService
 import com.tomaszwnuk.opencalendar.task.Task
-import com.tomaszwnuk.opencalendar.task.TaskRepository
+import com.tomaszwnuk.opencalendar.task.TaskService
 import com.tomaszwnuk.opencalendar.task.TaskStatus
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -41,13 +41,13 @@ class CategoryControllerTest {
     private lateinit var _categoryService: CategoryService
 
     @Mock
-    private lateinit var _eventRepository: EventRepository
+    private lateinit var _eventService: EventService
 
     @Mock
-    private lateinit var _taskRepository: TaskRepository
+    private lateinit var _taskService: TaskService
 
     @Mock
-    private lateinit var _noteRepository: NoteRepository
+    private lateinit var _noteService: NoteService
 
     @InjectMocks
     private lateinit var _categoryController: CategoryController
@@ -71,7 +71,7 @@ class CategoryControllerTest {
 
     @Test
     fun `should return created category with status code 201 Created`() {
-        whenever(_categoryService.create(any())).thenReturn(_sampleCategory)
+        whenever(_categoryService.create(_sampleDto)).thenReturn(_sampleCategory)
         val response: ResponseEntity<CategoryDto> = _categoryController.create(_sampleDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
@@ -137,7 +137,7 @@ class CategoryControllerTest {
         )
         val events = listOf(event)
 
-        whenever(_eventRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(events))
+        whenever(_eventService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(events))
         val response: ResponseEntity<Page<EventDto>> = _categoryController.getEvents(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -167,7 +167,7 @@ class CategoryControllerTest {
         )
         val tasks = listOf(task)
 
-        whenever(_taskRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(tasks))
+        whenever(_taskService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(tasks))
         val response = _categoryController.getTasks(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -192,7 +192,7 @@ class CategoryControllerTest {
         )
         val notes: List<Note> = listOf(note)
 
-        whenever(_noteRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(notes))
+        whenever(_noteService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(notes))
         val response = _categoryController.getNotes(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -238,9 +238,9 @@ class CategoryControllerTest {
             category = _sampleCategory
         )
 
-        whenever(_eventRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(event)))
-        whenever(_taskRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(task)))
-        whenever(_noteRepository.findAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(note)))
+        whenever(_eventService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(event)))
+        whenever(_taskService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(task)))
+        whenever(_noteService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(note)))
         val response = _categoryController.getAllItems(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
