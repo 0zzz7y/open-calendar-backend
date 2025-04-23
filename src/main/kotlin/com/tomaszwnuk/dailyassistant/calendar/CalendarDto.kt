@@ -17,7 +17,6 @@ data class CalendarDto(
     )
     val name: String,
 
-    @field:NotBlank(message = "Emoji cannot be blank.")
     @field:Size(
         max = EMOJI_MAXIMUM_LENGTH,
         message = "Emoji cannot be longer than $EMOJI_MAXIMUM_LENGTH characters."

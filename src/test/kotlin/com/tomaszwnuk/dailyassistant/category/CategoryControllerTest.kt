@@ -105,7 +105,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    fun `should return filtered categories with status code 200 OK`() {
+    fun `should return paginated list of filtered categories with status code 200 OK`() {
         val filter = CategoryFilterDto(name = "Personal")
         val categories: List<Category> = listOf(_sampleCategory, _sampleCategory, _sampleCategory)
 
