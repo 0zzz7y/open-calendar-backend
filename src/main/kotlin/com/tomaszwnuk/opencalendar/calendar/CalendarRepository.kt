@@ -15,7 +15,7 @@ interface CalendarRepository : JpaRepository<Calendar, UUID> {
         """
     SELECT c FROM Calendar c
     WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT("%", :name, "%")))
-      AND (:emoji IS NULL OR LOWER(c.emoji) LIKE LOWER(CONCAT("%", :emoji, "%")))
+      AND (:emoji IS NULL OR c.emoji = :emoji)
     """,
         nativeQuery = false
     )
