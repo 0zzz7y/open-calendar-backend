@@ -12,8 +12,8 @@ import javax.sql.DataSource
 @Configuration
 @EnableJpaRepositories(
     basePackages = [
-        "com.tomaszwnuk.dailyassistant.calendar", "com.tomaszwnuk.dailyassistant.category",
-        "com.tomaszwnuk.dailyassistant.task", "com.tomaszwnuk.dailyassistant.note", "com.tomaszwnuk.dailyassistant.event"],
+        "com.tomaszwnuk.opencalendar.calendar", "com.tomaszwnuk.opencalendar.category",
+        "com.tomaszwnuk.opencalendar.task", "com.tomaszwnuk.opencalendar.note", "com.tomaszwnuk.opencalendar.event"],
     entityManagerFactoryRef = "entityManagerFactory"
 ) class DatabaseConfiguration {
 

@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableCaching
-@EntityScan(basePackages = ["com.tomaszwnuk.dailyassistant"])
+@EntityScan(basePackages = ["com.tomaszwnuk.opencalendar"])
 class Application
 
 fun main(args: Array<String>) {

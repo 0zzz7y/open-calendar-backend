@@ -1,4 +1,4 @@
-# Daily-Assistant-Backend
+# OpenCalendar-Backend
 
 ```sh
 # Build the image
