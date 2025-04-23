@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: com.tomaszwnuk.dailyassistant.ApplicationKt
+Main-Class: com.tomaszwnuk.opencalendar.ApplicationKt

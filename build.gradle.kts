@@ -28,7 +28,7 @@ plugins {
 }
 
 application {
-    mainClass.set("com.tomaszwnuk.dailyassistant.ApplicationKt")
+    mainClass.set("com.tomaszwnuk.opencalendar.ApplicationKt")
 }
 
 dependencies {
@@ -70,16 +70,16 @@ tasks.withType<Jar> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     manifest {
-        attributes["Main-Class"] = "com.tomaszwnuk.dailyassistant.ApplicationKt"
+        attributes["Main-Class"] = "com.tomaszwnuk.opencalendar.ApplicationKt"
     }
 }
 
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    mainClass.set("com.tomaszwnuk.dailyassistant.ApplicationKt")
+    mainClass.set("com.tomaszwnuk.opencalendar.ApplicationKt")
 
     manifest {
-        attributes["Main-Class"] = "com.tomaszwnuk.dailyassistant.ApplicationKt"
+        attributes["Main-Class"] = "com.tomaszwnuk.opencalendar.ApplicationKt"
     }
 }
 

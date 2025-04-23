@@ -1,0 +1,26 @@
+package com.tomaszwnuk.opencalendar.calendar
+
+import com.tomaszwnuk.opencalendar.validation.FieldConstraints.EMOJI_MAXIMUM_LENGTH
+import com.tomaszwnuk.opencalendar.validation.FieldConstraints.NAME_MAXIMUM_LENGTH
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Size
+import java.util.*
+
+data class CalendarDto(
+
+    val id: UUID? = null,
+
+    @field:NotBlank(message = "Name cannot be blank.")
+    @field:Size(
+        max = NAME_MAXIMUM_LENGTH,
+        message = "Description cannot be longer than $NAME_MAXIMUM_LENGTH characters."
+    )
+    val name: String,
+
+    @field:Size(
+        max = EMOJI_MAXIMUM_LENGTH,
+        message = "Emoji cannot be longer than $EMOJI_MAXIMUM_LENGTH characters."
+    )
+    val emoji: String
+
+)

@@ -1,5 +1,5 @@
 app:
-  name: Daily Assistant Application
+  name: OpenCalendar Application
   description: Application for supporting daily routine - calendar, events, tasks, and notes.
   version: 1.0.0
 

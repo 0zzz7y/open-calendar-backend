@@ -1,1 +1,1 @@
-rootProject.name = "dailyassistant"
+rootProject.name = "opencalendar"
