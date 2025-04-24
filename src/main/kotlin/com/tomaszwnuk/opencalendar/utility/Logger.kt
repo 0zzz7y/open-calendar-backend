@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package com.tomaszwnuk.opencalendar.domain.utility
+package com.tomaszwnuk.opencalendar.utility
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

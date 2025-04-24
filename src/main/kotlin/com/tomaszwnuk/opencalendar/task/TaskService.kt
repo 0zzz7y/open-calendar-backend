@@ -4,7 +4,7 @@ import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.category.Category
 import com.tomaszwnuk.opencalendar.category.CategoryRepository
-import com.tomaszwnuk.opencalendar.domain.utility.info
+import com.tomaszwnuk.opencalendar.utility.info
 import com.tomaszwnuk.opencalendar.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable

@@ -1,6 +1,6 @@
 package com.tomaszwnuk.opencalendar.configuration
 
-import com.tomaszwnuk.opencalendar.domain.utility.info
+import com.tomaszwnuk.opencalendar.utility.info
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager

@@ -1,6 +1,6 @@
 package com.tomaszwnuk.opencalendar.calendar
 
-import com.tomaszwnuk.opencalendar.domain.utility.info
+import com.tomaszwnuk.opencalendar.utility.info
 import com.tomaszwnuk.opencalendar.validation.assertNameDoesNotExist
 import com.tomaszwnuk.opencalendar.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict

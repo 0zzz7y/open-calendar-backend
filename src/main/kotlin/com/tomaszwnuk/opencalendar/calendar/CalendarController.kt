@@ -1,6 +1,6 @@
 package com.tomaszwnuk.opencalendar.calendar
 
-import com.tomaszwnuk.opencalendar.domain.utility.ItemTypeMapper.toMapWithType
+import com.tomaszwnuk.opencalendar.utility.ItemTypeMapper.toMapWithType
 import com.tomaszwnuk.opencalendar.event.EventDto
 import com.tomaszwnuk.opencalendar.event.EventService
 import com.tomaszwnuk.opencalendar.note.NoteDto

@@ -1,6 +1,6 @@
 package com.tomaszwnuk.opencalendar.validation
 
-import com.tomaszwnuk.opencalendar.domain.utility.logger
+import com.tomaszwnuk.opencalendar.utility.logger
 import org.springframework.data.jpa.repository.JpaRepository
 
 inline fun <reified T, ID : Any> JpaRepository<T, ID>.findOrThrow(

@@ -1,4 +1,4 @@
-package com.tomaszwnuk.opencalendar.domain.utility
+package com.tomaszwnuk.opencalendar.utility
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.convertValue

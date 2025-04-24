@@ -5,7 +5,7 @@ import com.tomaszwnuk.opencalendar.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.category.Category
 import com.tomaszwnuk.opencalendar.category.CategoryRepository
 import com.tomaszwnuk.opencalendar.domain.RecurringPattern
-import com.tomaszwnuk.opencalendar.domain.utility.info
+import com.tomaszwnuk.opencalendar.utility.info
 import com.tomaszwnuk.opencalendar.event.Event
 import com.tomaszwnuk.opencalendar.event.EventRepository
 import com.tomaszwnuk.opencalendar.note.Note
@@ -31,7 +31,7 @@ class TestDataLoader(
 
     private var _timer: Long = System.currentTimeMillis()
 
-    override fun run(vararg args: String?) {
+    override fun run(vararg arguments: String?) {
         _timer = System.currentTimeMillis()
         val calendars: Map<String, Calendar> = createCalendars()
         val categories: Map<String, Category> = createCategories()
