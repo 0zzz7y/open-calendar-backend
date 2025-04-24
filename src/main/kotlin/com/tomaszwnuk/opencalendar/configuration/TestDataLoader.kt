@@ -29,8 +29,10 @@ class TestDataLoader(
     private val _noteRepository: NoteRepository
 ) : CommandLineRunner {
 
+    private var _timer: Long = System.currentTimeMillis()
+
     override fun run(vararg args: String?) {
-        val startTime: Long = System.currentTimeMillis()
+        _timer = System.currentTimeMillis()
         val calendars: Map<String, Calendar> = createCalendars()
         val categories: Map<String, Category> = createCategories()
 
@@ -38,11 +40,11 @@ class TestDataLoader(
         createTasks(calendars, categories)
         createEvents(calendars, categories)
 
-        info(this, "Test data loaded in ${System.currentTimeMillis() - startTime} ms")
+        info(this, "Test data loaded in ${System.currentTimeMillis() - _timer} ms")
     }
 
     private fun createCalendars(): Map<String, Calendar> {
-        val startTime: Long = System.currentTimeMillis()
+        _timer = System.currentTimeMillis()
         val personal: Calendar =
             _calendarRepository.save(Calendar(id = UUID.randomUUID(), name = "Personal", emoji = "🏠"))
         val work: Calendar = _calendarRepository.save(Calendar(id = UUID.randomUUID(), name = "Work", emoji = "💼"))
@@ -51,12 +53,12 @@ class TestDataLoader(
             "work" to work
         )
 
-        info(this, "Calendars created in ${System.currentTimeMillis() - startTime} ms")
+        info(this, "Calendars created in ${System.currentTimeMillis() - _timer} ms")
         return calendars
     }
 
     private fun createCategories(): Map<String, Category> {
-        val startTime: Long = System.currentTimeMillis()
+        _timer = System.currentTimeMillis()
         val personal: Category =
             _categoryRepository.save(Category(name = "Personal", color = "#EFEF39"))
         val work: Category =
@@ -69,13 +71,13 @@ class TestDataLoader(
             "university" to university
         )
 
-        info(this, "Categories created in ${System.currentTimeMillis() - startTime} ms")
+        info(this, "Categories created in ${System.currentTimeMillis() - _timer} ms")
         return categories
     }
 
     private fun createEvents(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
-        val startTime: Long = System.currentTimeMillis()
-        val now: LocalDateTime = LocalDateTime.now()
+        _timer = System.currentTimeMillis()
+        val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
         val dailyStandup = Event(
             name = "Daily Standup",
             description = "Team sync-up.",
@@ -104,13 +106,13 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.YEARLY
         )
 
-        info(this, "Events created in ${System.currentTimeMillis() - startTime} ms")
+        info(this, "Events created in ${System.currentTimeMillis() - _timer} ms")
         _eventRepository.saveAll(listOf(dailyStandup, birthdayParty, studyForExam))
     }
 
     private fun createTasks(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
-        val startTime: Long = System.currentTimeMillis()
-        val now: LocalDateTime = LocalDateTime.now()
+        _timer = System.currentTimeMillis()
+        val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
         val doShopping = Task(
             name = "Do Shopping",
             description = "There is nothing in the fridge.",
@@ -139,12 +141,12 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.NONE
         )
 
-        info(this, "Tasks created in ${System.currentTimeMillis() - startTime} ms")
+        info(this, "Tasks created in ${System.currentTimeMillis() - _timer} ms")
         _taskRepository.saveAll(listOf(doShopping, walkTheDog, studyForExam))
     }
 
     private fun createNotes(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
-        val startTime: Long = System.currentTimeMillis()
+        _timer = System.currentTimeMillis()
         val shoppingList = Note(
             name = "Shopping List",
             description = "Milk, Eggs, Bread",
@@ -152,7 +154,7 @@ class TestDataLoader(
             category = categories["personal"]
         )
 
-        info(this, "Notes created in ${System.currentTimeMillis() - startTime} ms")
+        info(this, "Notes created in ${System.currentTimeMillis() - _timer} ms")
         _noteRepository.save(shoppingList)
     }
 
