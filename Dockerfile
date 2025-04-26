@@ -1,4 +1,4 @@
-# Stage 1
+# ──────────────────── Stage 1 ────────────────────
 FROM gradle:8.5-jdk21 AS dependencies
 
 WORKDIR /app
@@ -9,7 +9,7 @@ COPY gradle ./gradle
 
 RUN gradle dependencies --no-daemon
 
-# Stage 2
+# ──────────────────── Stage 2 ────────────────────
 FROM gradle:8.5-jdk21 AS builder
 
 WORKDIR /app
@@ -18,7 +18,7 @@ COPY . .
 
 RUN gradle bootJar --no-daemon
 
-# Stage 3
+# ──────────────────── Stage 3 ────────────────────
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
