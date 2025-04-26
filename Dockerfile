@@ -1,4 +1,4 @@
-# ──────────────────── Stage 1 ────────────────────
+# ──────────────────── Dependencies ────────────────────
 FROM gradle:8.5-jdk21 AS dependencies
 
 WORKDIR /app
@@ -9,7 +9,7 @@ COPY gradle ./gradle
 
 RUN gradle dependencies --no-daemon
 
-# ──────────────────── Stage 2 ────────────────────
+# ──────────────────── Build ────────────────────
 FROM gradle:8.5-jdk21 AS builder
 
 WORKDIR /app
@@ -18,13 +18,13 @@ COPY . .
 
 RUN gradle bootJar --no-daemon
 
-# ──────────────────── Stage 3 ────────────────────
+# ──────────────────── Production ────────────────────
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 0000
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=0000", "--spring.profiles.active=production"]
