@@ -1,7 +1,11 @@
 .gradle
-build
-out
-*.log
-.idea
+build/
+out/
+.idea/
+
 *.iml
+*.log
 *.jar
+
+.DS_Store
+Thumbs.db

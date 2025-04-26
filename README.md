@@ -1,10 +1,8 @@
 # OpenCalendar-Backend
 
 ```sh
-# Build the image
-docker build -t kotlin-spring-app .
+docker build -t opencalendar-app .
 ```
 ```sh
-# Run the container
-docker run -p 8080:8080 kotlin-spring-app
+docker run -p 8080:8080 opencalendar-app
 ```

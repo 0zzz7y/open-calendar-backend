@@ -19,12 +19,12 @@ kotlin {
 
 
 plugins {
-    application
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.jpa") version "1.9.25"
     id("org.springframework.boot") version "3.4.4"
     id("io.spring.dependency-management") version "1.1.7"
+    application
 }
 
 application {
@@ -66,17 +66,8 @@ allOpen {
     annotation("jakarta.persistence.Embeddable")
 }
 
-tasks.withType<Jar> {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-    manifest {
-        attributes["Main-Class"] = "com.tomaszwnuk.opencalendar.ApplicationKt"
-    }
-}
-
 tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    mainClass.set("com.tomaszwnuk.opencalendar.ApplicationKt")
 
     manifest {
         attributes["Main-Class"] = "com.tomaszwnuk.opencalendar.ApplicationKt"
