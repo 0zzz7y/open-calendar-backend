@@ -36,20 +36,20 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:_")
 
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     implementation("com.h2database:h2")
-    implementation("org.xerial:sqlite-jdbc:3.41.2.2")
+    implementation("org.xerial:sqlite-jdbc:_")
 
-    implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:7.6.0")
+    implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:_")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.mockito:mockito-core:5.12.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.mockito:mockito-core:_")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:_")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.mockito", module = "mockito-core")
     }

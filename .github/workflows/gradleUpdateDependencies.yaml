@@ -2,59 +2,30 @@ name: Update Dependencies
 
 on:
   schedule:
-    # Every Monday at 03:00 UTC
-    - cron: "0 3 * * 1" 
+    - cron: "0 3 * * 1"
   workflow_dispatch:
 
 jobs:
-
-  checkout:
-    name: Checkout Repository
+  update-dependencies:
+    name: Auto-update Gradle Dependencies
     runs-on: ubuntu-latest
-    outputs:
-      repo-path: ${{ steps.set-path.outputs.repo-path }}
+
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      - id: set-path
-        run: echo "repo-path=." >> $GITHUB_OUTPUT
 
-  setup-jdk:
-    name: Set Up JDK
-    needs: checkout
-    runs-on: ubuntu-latest
-    steps:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
 
-  run-dependency-check:
-    name: Run Dependency Check
-    needs: setup-jdk
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Run Gradle Versions Plugin
+      - name: Refresh Versions
+        run: ./gradlew refreshVersionsUpdate
+
+      - name: Generate Dependency Update Report
         run: ./gradlew dependencyUpdates -Drevision=release
 
-  update-dependencies:
-    name: Commit Dependency Updates
-    needs: run-dependency-check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
       - name: Commit and Push if Changes Exist
         run: |
           git config user.name "github-actions[bot]"
@@ -62,19 +33,3 @@ jobs:
           git add .
           git diff-index --quiet HEAD || git commit -m "chore: auto-update Gradle dependencies"
           git push
-
-  dependency-submission:
-    name: Submit Dependency Graph
-    needs: update-dependencies
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Submit dependency graph
-        uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
