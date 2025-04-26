@@ -1,4 +1,4 @@
-name: Update Dependencies
+name: Automatically Update Dependencies
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   update-dependencies:
-    name: Auto-update Gradle Dependencies
+    name: Automatic Gradle Dependencies Update
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +26,7 @@ jobs:
       - name: Generate Dependency Update Report
         run: ./gradlew dependencyUpdates -Drevision=release
 
-      - name: Commit and Push if Changes Exist
+      - name: Commit and Push if Updates Needed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
