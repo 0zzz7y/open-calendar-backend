@@ -89,8 +89,8 @@ class TestDataLoader(
         val dailyMeeting = Event(
             name = "Daily Meeting",
             description = "Daily organizational team meeting.",
-            startDate = now.withHour(10),
-            endDate = now.withHour(10).plusMinutes(30).withMinute(0),
+            startDate = now.withHour(10).withMinute(0),
+            endDate = now.withHour(10).withMinute(30),
             calendar = calendars["first"]!!,
             category = categories["work"],
             recurringPattern = RecurringPattern.DAILY
@@ -176,7 +176,6 @@ class TestDataLoader(
             startDate = now.plusDays(10).withHour(16).withMinute(0),
             endDate = now.plusDays(10).withHour(23).withMinute(59),
             calendar = calendars["first"]!!,
-            category = categories["personal"],
             recurringPattern = RecurringPattern.YEARLY
         )
 
