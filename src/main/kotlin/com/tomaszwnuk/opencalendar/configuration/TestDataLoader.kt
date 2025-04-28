@@ -46,7 +46,7 @@ class TestDataLoader(
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
         val first: Calendar =
-            _calendarRepository.save(Calendar(id = UUID.randomUUID(), name = "#1", emoji = "1\uFE0F⃣"))
+            _calendarRepository.save(Calendar(id = UUID.randomUUID(), name = "#1", emoji = "\uD83D\uDCA5"))
         val calendars: Map<String, Calendar> = mapOf(
             "first" to first,
         )
