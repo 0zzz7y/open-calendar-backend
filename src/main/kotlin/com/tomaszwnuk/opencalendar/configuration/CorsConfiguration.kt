@@ -12,7 +12,7 @@ class CorsConfiguration : WebMvcConfigurer {
 
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
-            .allowedOriginPatterns(FRONTEND_PRODUCTION_URL, FRONTEND_DEVELOPMENT_URL)
+            .allowedOrigins(FRONTEND_PRODUCTION_URL, FRONTEND_DEVELOPMENT_URL)
             .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
             .allowedHeaders("*")
             .allowCredentials(true)

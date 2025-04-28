@@ -5,13 +5,13 @@ import com.tomaszwnuk.opencalendar.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.category.Category
 import com.tomaszwnuk.opencalendar.category.CategoryRepository
 import com.tomaszwnuk.opencalendar.domain.RecurringPattern
-import com.tomaszwnuk.opencalendar.utility.info
 import com.tomaszwnuk.opencalendar.event.Event
 import com.tomaszwnuk.opencalendar.event.EventRepository
 import com.tomaszwnuk.opencalendar.note.Note
 import com.tomaszwnuk.opencalendar.note.NoteRepository
 import com.tomaszwnuk.opencalendar.task.Task
 import com.tomaszwnuk.opencalendar.task.TaskRepository
+import com.tomaszwnuk.opencalendar.utility.info
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Suppress("unused")
-@Profile("dev", "test")
+@Profile("production", "development", "test")
 @Component
 class TestDataLoader(
     private val _calendarRepository: CalendarRepository,
@@ -45,12 +45,10 @@ class TestDataLoader(
 
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
-        val personal: Calendar =
-            _calendarRepository.save(Calendar(id = UUID.randomUUID(), name = "Personal", emoji = "🏠"))
-        val work: Calendar = _calendarRepository.save(Calendar(id = UUID.randomUUID(), name = "Work", emoji = "💼"))
+        val first: Calendar =
+            _calendarRepository.save(Calendar(id = UUID.randomUUID(), name = "#1", emoji = "1\uFE0F⃣"))
         val calendars: Map<String, Calendar> = mapOf(
-            "personal" to personal,
-            "work" to work
+            "first" to first,
         )
 
         info(this, "Calendars created in ${System.currentTimeMillis() - _timer} ms")
@@ -78,66 +76,157 @@ class TestDataLoader(
     private fun createEvents(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
         val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
-        val dailyStandup = Event(
-            name = "Daily Standup",
-            description = "Team sync-up.",
-            startDate = now.withHour(9),
-            endDate = now.withHour(9).plusMinutes(30),
-            calendar = calendars["work"]!!,
+
+        val workingAtTheOffice = Event(
+            name = "Working at the Office",
+            description = "Drinking coffee and checking emails.",
+            startDate = now.withHour(8).withMinute(0),
+            endDate = now.withHour(12).withMinute(0),
+            calendar = calendars["first"]!!,
             category = categories["work"],
             recurringPattern = RecurringPattern.DAILY
         )
+        val dailyMeeting = Event(
+            name = "Daily Meeting",
+            description = "Daily organizational team meeting.",
+            startDate = now.withHour(10),
+            endDate = now.withHour(10).plusMinutes(30).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["work"],
+            recurringPattern = RecurringPattern.DAILY
+        )
+
+        val universityClasses01 = Event(
+            name = "University classes",
+            description = "University classes - 01.",
+            startDate = now.plusDays(1).withHour(16).withMinute(0),
+            endDate = now.plusDays(1).withHour(18).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["university"],
+            recurringPattern = RecurringPattern.WEEKLY
+        )
+        val universityClasses02 = Event(
+            name = "University classes",
+            description = "University classes - 02.",
+            startDate = now.plusDays(2).withHour(13).withMinute(0),
+            endDate = now.plusDays(2).withHour(18).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["university"],
+            recurringPattern = RecurringPattern.WEEKLY
+        )
+        val universityClasses03 = Event(
+            name = "University classes",
+            description = "University classes - 03.",
+            startDate = now.plusDays(3).withHour(12).withMinute(0),
+            endDate = now.plusDays(3).withHour(15).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["university"],
+            recurringPattern = RecurringPattern.WEEKLY
+        )
+        val universityClasses04 = Event(
+            name = "University classes",
+            description = "University classes - 04.",
+            startDate = now.plusDays(4).withHour(12).withMinute(0),
+            endDate = now.plusDays(4).withHour(14).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["personal"],
+            recurringPattern = RecurringPattern.WEEKLY
+        )
+
+        val gymBicepsAndBackWorkout = Event(
+            name = "Gym",
+            description = "Biceps and back workout at the gym.",
+            startDate = now.plusDays(1).withHour(18).withMinute(0),
+            endDate = now.plusDays(1).withHour(20).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["personal"],
+            recurringPattern = RecurringPattern.WEEKLY
+        )
+        val gymTricepsAndChestWorkout = Event(
+            name = "Gym",
+            description = "Triceps and chest workout at the gym.",
+            startDate = now.plusDays(2).withHour(18).withMinute(0),
+            endDate = now.plusDays(2).withHour(20).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["personal"],
+            recurringPattern = RecurringPattern.WEEKLY
+        )
+        val gymCoreWorkout = Event(
+            name = "Gym",
+            description = "Core workout at the gym.",
+            startDate = now.plusDays(4).withHour(18).withMinute(0),
+            endDate = now.plusDays(4).withHour(20).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["personal"],
+            recurringPattern = RecurringPattern.WEEKLY
+        )
+        val gymLegWorkout = Event(
+            name = "Gym",
+            description = "Leg workout at the gym.",
+            startDate = now.plusDays(5).withHour(18).withMinute(0),
+            endDate = now.plusDays(5).withHour(20).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["personal"],
+            recurringPattern = RecurringPattern.WEEKLY
+        )
+
         val birthdayParty = Event(
             name = "Birthday Party",
             description = "Friend's birthday celebration.",
-            startDate = now.plusDays(10).withHour(18),
-            endDate = now.plusDays(10).withHour(23),
-            calendar = calendars["personal"]!!,
+            startDate = now.plusDays(10).withHour(16).withMinute(0),
+            endDate = now.plusDays(10).withHour(23).withMinute(59),
+            calendar = calendars["first"]!!,
             category = categories["personal"],
-            recurringPattern = RecurringPattern.YEARLY
-        )
-        val studyForExam = Event(
-            name = "Study for Exam",
-            description = "Study for final term exam.",
-            startDate = now.plusDays(10).withHour(18),
-            endDate = now.plusDays(10).withHour(23),
-            calendar = calendars["personal"]!!,
-            category = categories["university"],
             recurringPattern = RecurringPattern.YEARLY
         )
 
         info(this, "Events created in ${System.currentTimeMillis() - _timer} ms")
-        _eventRepository.saveAll(listOf(dailyStandup, birthdayParty, studyForExam))
+        _eventRepository.saveAll(
+            listOf(
+                workingAtTheOffice,
+                dailyMeeting,
+                universityClasses01,
+                universityClasses02,
+                universityClasses03,
+                universityClasses04,
+                gymBicepsAndBackWorkout,
+                gymTricepsAndChestWorkout,
+                gymCoreWorkout,
+                gymLegWorkout,
+                birthdayParty
+            )
+        )
     }
 
     private fun createTasks(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
         val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
+
+        val walkTheDog = Task(
+            name = "Walk the Dog",
+            description = "After my morning coffee.",
+            startDate = now.withHour(6).withMinute(0),
+            endDate = now.withHour(7).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["personal"],
+            recurringPattern = RecurringPattern.DAILY
+        )
         val doShopping = Task(
             name = "Do Shopping",
             description = "There is nothing in the fridge.",
-            startDate = now.plusDays(1).withHour(17),
-            endDate = now.plusDays(1).withHour(18),
-            calendar = calendars["personal"]!!,
+            startDate = now.plusDays(1).withHour(17).withMinute(0),
+            endDate = now.plusDays(1).withHour(18).withMinute(0),
+            calendar = calendars["first"]!!,
             category = categories["personal"],
             recurringPattern = RecurringPattern.WEEKLY
-        )
-        val walkTheDog = Task(
-            name = "Walk the Dog",
-            description = "Walk the dog.",
-            startDate = now.plusDays(2).withHour(17),
-            endDate = now.plusDays(2).withHour(18),
-            calendar = calendars["personal"]!!,
-            category = categories["personal"],
-            recurringPattern = RecurringPattern.DAILY
         )
         val studyForExam = Task(
             name = "Study for Exam",
             description = "Study for final term exam.",
-            startDate = now.plusDays(5).withHour(17),
-            endDate = now.plusDays(5).withHour(18),
-            calendar = calendars["personal"]!!,
-            category = categories["personal"],
+            startDate = now.plusDays(1).withHour(12).withMinute(0),
+            endDate = now.plusDays(1).withHour(20).withMinute(0),
+            calendar = calendars["first"]!!,
+            category = categories["university"],
             recurringPattern = RecurringPattern.NONE
         )
 
@@ -147,10 +236,11 @@ class TestDataLoader(
 
     private fun createNotes(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
+
         val shoppingList = Note(
             name = "Shopping List",
             description = "Milk, Eggs, Bread",
-            calendar = calendars["personal"]!!,
+            calendar = calendars["first"]!!,
             category = categories["personal"]
         )
 
