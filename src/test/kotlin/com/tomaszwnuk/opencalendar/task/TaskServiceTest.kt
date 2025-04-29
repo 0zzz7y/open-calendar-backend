@@ -8,6 +8,7 @@ import com.tomaszwnuk.opencalendar.category.Category
 import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.category.CategoryRepository
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -29,136 +30,154 @@ import java.util.*
 class TaskServiceTest {
 
     @Mock
-    private lateinit var _taskRepository: TaskRepository
+    private lateinit var taskRepository: TaskRepository
 
     @Mock
-    private lateinit var _calendarRepository: CalendarRepository
+    private lateinit var calendarRepository: CalendarRepository
 
     @Mock
-    private lateinit var _categoryRepository: CategoryRepository
+    private lateinit var categoryRepository: CategoryRepository
 
     @InjectMocks
-    private lateinit var _taskService: TaskService
+    private lateinit var taskService: TaskService
 
-    private lateinit var _sampleCalendar: Calendar
+    private lateinit var sampleCalendar: Calendar
 
-    private lateinit var _sampleCategory: Category
+    private lateinit var sampleCategory: Category
 
-    private lateinit var _pageable: Pageable
+    private lateinit var sampleTask: Task
 
-    private lateinit var _sampleTask: Task
+    private lateinit var sampleTaskDto: TaskDto
 
-    private lateinit var _sampleDto: TaskDto
+    private lateinit var pageable: Pageable
 
     @BeforeEach
     fun setup() {
-        _sampleCalendar = Calendar(
+        sampleCalendar = Calendar(
             id = UUID.randomUUID(),
             title = "Personal",
-            emoji = "\\uD83C\\uDFE0"
+            emoji = "\uD83C\uDFE0"
         )
-        _sampleCategory = Category(
+        sampleCategory = Category(
             id = UUID.randomUUID(),
             title = "Training",
             color = CategoryColorHelper.toHex(Color.GREEN)
         )
-        _sampleTask = Task(
+        sampleTask = Task(
             id = UUID.randomUUID(),
             title = "Daily Standup",
             description = null,
             status = TaskStatus.TODO,
-            calendar = _sampleCalendar,
-            category = _sampleCategory
+            calendar = sampleCalendar,
+            category = sampleCategory
         )
-        _sampleDto = _sampleTask.toDto()
-        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+        sampleTaskDto = sampleTask.toDto()
+        pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
     }
 
     @Test
     fun `should return created task`() {
-        whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
-        whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
-        doReturn(_sampleTask).whenever(_taskRepository).save(any())
-        val result: Task = _taskService.create(_sampleDto)
+        whenever(calendarRepository.findById(sampleTaskDto.calendarId)).thenReturn(Optional.of(sampleCalendar))
+        whenever(categoryRepository.findById(sampleTaskDto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
+        doReturn(sampleTask).whenever(taskRepository).save(any())
 
-        assertEquals(_sampleTask.id, result.id)
-        verify(_taskRepository).save(any())
+        val result: Task = taskService.create(sampleTaskDto)
+
+        assertNotNull(result)
+        assertEquals(sampleTask.id, result.id)
+        assertEquals(sampleTask.title, result.title)
+        assertEquals(sampleTask.status, result.status)
+
+        verify(taskRepository).save(any())
     }
 
     @Test
-    fun `should return paginated list of tasks`() {
-        val tasks: List<Task> = listOf(_sampleTask, _sampleTask, _sampleTask)
+    fun `should return paginated list of all tasks`() {
+        val tasks: List<Task> = listOf(sampleTask, sampleTask.copy(), sampleTask.copy())
+        whenever(taskRepository.findAll(pageable)).thenReturn(PageImpl(tasks))
 
-        whenever(_taskRepository.findAll(_pageable)).thenReturn(PageImpl(tasks))
-        val result: Page<Task> = _taskService.getAll(_pageable)
+        val result: Page<Task> = taskService.getAll(pageable)
 
         assertEquals(tasks.size, result.totalElements.toInt())
-        verify(_taskRepository).findAll(_pageable)
+        assertEquals(tasks.map { it.id }, result.content.map { it.id })
+        assertEquals(tasks.map { it.title }, result.content.map { it.title })
+
+        verify(taskRepository).findAll(pageable)
     }
 
     @Test
     fun `should return task by id`() {
-        val id: UUID = _sampleTask.id
+        val id: UUID = sampleTask.id
+        whenever(taskRepository.findById(id)).thenReturn(Optional.of(sampleTask))
 
-        whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
-        val result: Task = _taskService.getById(id)
+        val result: Task = taskService.getById(id)
 
-        assertEquals(_sampleTask.title, result.title)
-        verify(_taskRepository).findById(id)
+        assertNotNull(result)
+        assertEquals(sampleTask.id, result.id)
+        assertEquals(sampleTask.title, result.title)
+        assertEquals(sampleTask.status, result.status)
+
+        verify(taskRepository).findById(id)
     }
 
     @Test
-    fun `should return filtered tasks`() {
+    fun `should return paginated list of filtered tasks`() {
         val filter = TaskFilterDto(title = "Task")
-        val tasks: List<Task> = listOf(_sampleTask, _sampleTask, _sampleTask)
+        val tasks: List<Task> = listOf(sampleTask, sampleTask.copy(), sampleTask.copy())
 
         whenever(
-            _taskRepository.filter(
+            taskRepository.filter(
                 eq(filter.title),
                 isNull(),
                 isNull(),
                 isNull(),
                 isNull(),
-                eq(_pageable)
+                eq(pageable)
             )
         ).thenReturn(PageImpl(tasks))
-        val result: Page<Task> = _taskService.filter(filter, _pageable)
+
+        val result: Page<Task> = taskService.filter(filter, pageable)
 
         assertEquals(tasks.size, result.totalElements.toInt())
-        verify(_taskRepository).filter(
+        assertEquals(tasks.map { it.title }, result.content.map { it.title })
+
+        verify(taskRepository).filter(
             eq(filter.title),
             isNull(),
             isNull(),
             isNull(),
             isNull(),
-            eq(_pageable)
+            eq(pageable)
         )
     }
 
     @Test
     fun `should return updated task`() {
-        val id: UUID = _sampleTask.id
-        val updated: Task = _sampleTask.copy(title = "Updated Task")
+        val updatedTask: Task = sampleTask.copy(title = "Updated Task")
 
-        whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
-        whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
-        whenever(_categoryRepository.findById(_sampleDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
-        doReturn(updated).whenever(_taskRepository).save(any())
-        val result: Task = _taskService.update(id, _sampleDto)
+        whenever(taskRepository.findById(sampleTask.id)).thenReturn(Optional.of(sampleTask))
+        whenever(calendarRepository.findById(sampleTaskDto.calendarId)).thenReturn(Optional.of(sampleCalendar))
+        whenever(categoryRepository.findById(sampleTaskDto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
+        doReturn(updatedTask).whenever(taskRepository).save(any())
 
-        assertEquals(updated.title, result.title)
-        verify(_taskRepository).save(any())
+        val result: Task = taskService.update(sampleTask.id, sampleTaskDto)
+
+        assertNotNull(result)
+        assertEquals(updatedTask.id, result.id)
+        assertEquals("Updated Task", result.title)
+
+        verify(taskRepository).save(any())
     }
 
     @Test
-    fun `should delete task`() {
-        val id: UUID = _sampleTask.id
+    fun `should delete task by id`() {
+        val id: UUID = sampleTask.id
+        whenever(taskRepository.findById(id)).thenReturn(Optional.of(sampleTask))
+        doNothing().whenever(taskRepository).delete(sampleTask)
 
-        whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
-        doNothing().whenever(_taskRepository).delete(_sampleTask)
-        _taskService.delete(id)
+        taskService.delete(id)
 
-        verify(_taskRepository).delete(_sampleTask)
+        verify(taskRepository).delete(sampleTask)
     }
 
 }

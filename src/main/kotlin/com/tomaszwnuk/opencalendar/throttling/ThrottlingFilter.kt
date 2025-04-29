@@ -11,8 +11,8 @@ import jakarta.servlet.ServletResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.stereotype.Component
-import java.util.concurrent.ConcurrentHashMap
 import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 
 @Component
 class ThrottlingFilter : Filter {
@@ -34,7 +34,10 @@ class ThrottlingFilter : Filter {
     }
 
     private fun createBucket(): Bucket {
-        val limit = Bandwidth.classic(MAXIMUM_REQUESTS_PER_MINUTE, Refill.greedy(MAXIMUM_REQUESTS_PER_MINUTE, Duration.ofMinutes(1)))
+        val limit = Bandwidth.classic(
+            MAXIMUM_REQUESTS_PER_MINUTE,
+            Refill.greedy(MAXIMUM_REQUESTS_PER_MINUTE, Duration.ofMinutes(1))
+        )
         return Bucket.builder().addLimit(limit).build()
     }
 

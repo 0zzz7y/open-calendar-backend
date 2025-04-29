@@ -1,12 +1,12 @@
 package com.tomaszwnuk.opencalendar.calendar
 
-import com.tomaszwnuk.opencalendar.utility.ItemTypeMapper.toMapWithType
 import com.tomaszwnuk.opencalendar.event.EventDto
 import com.tomaszwnuk.opencalendar.event.EventService
 import com.tomaszwnuk.opencalendar.note.NoteDto
 import com.tomaszwnuk.opencalendar.note.NoteService
 import com.tomaszwnuk.opencalendar.task.TaskDto
 import com.tomaszwnuk.opencalendar.task.TaskService
+import com.tomaszwnuk.opencalendar.utility.ItemTypeMapper.toMapWithType
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

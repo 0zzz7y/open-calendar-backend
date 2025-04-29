@@ -23,9 +23,11 @@ class EventService(
 
     private var _timer: Long = 0
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId")
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId")
+        ]
+    )
     fun create(dto: EventDto): Event {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -104,10 +106,12 @@ class EventService(
         return filtered
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId"),
-        CacheEvict(cacheNames = ["eventById"], key = "#id")
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarEvents"], key = "#dto.calendarId"),
+            CacheEvict(cacheNames = ["eventById"], key = "#id")
+        ]
+    )
     fun update(id: UUID, dto: EventDto): Event {
         info(this, "Updating $dto")
         _timer = System.currentTimeMillis()
@@ -132,10 +136,12 @@ class EventService(
         return saved
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarEvents"], allEntries = true),
-        CacheEvict(cacheNames = ["eventById"], key = "#id")
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarEvents"], allEntries = true),
+            CacheEvict(cacheNames = ["eventById"], key = "#id")
+        ]
+    )
     fun delete(id: UUID) {
         info(this, "Deleting event with id $id.")
         _timer = System.currentTimeMillis()
@@ -145,10 +151,12 @@ class EventService(
         info(this, "Deleted event $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarEvents"], key = "#calendarId"),
-        CacheEvict(cacheNames = ["eventsById"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarEvents"], key = "#calendarId"),
+            CacheEvict(cacheNames = ["eventsById"], allEntries = true)
+        ]
+    )
     fun deleteAllByCalendarId(calendarId: UUID) {
         info(this, "Deleting all events for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
@@ -161,10 +169,12 @@ class EventService(
         info(this, "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["categoryEvents"], key = "#categoryId"),
-        CacheEvict(cacheNames = ["eventById"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["categoryEvents"], key = "#categoryId"),
+            CacheEvict(cacheNames = ["eventById"], allEntries = true)
+        ]
+    )
     fun deleteAllCategoryByCategoryId(categoryId: UUID) {
         info(this, "Deleting all events for category with id $categoryId.")
         _timer = System.currentTimeMillis()

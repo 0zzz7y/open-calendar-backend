@@ -3,11 +3,7 @@ package com.tomaszwnuk.opencalendar.domain.entity
 import com.tomaszwnuk.opencalendar.domain.date.LocalDateTimeConverter
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DATE
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
-import jakarta.persistence.Column
-import jakarta.persistence.Convert
-import jakarta.persistence.EntityListeners
-import jakarta.persistence.Id
-import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener

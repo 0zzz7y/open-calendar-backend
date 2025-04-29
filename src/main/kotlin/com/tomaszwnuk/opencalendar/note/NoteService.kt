@@ -23,9 +23,11 @@ class NoteService(
 
     private var _timer: Long = 0
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarNotes"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarNotes"], allEntries = true)
+        ]
+    )
     fun create(dto: NoteDto): Note {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -98,10 +100,12 @@ class NoteService(
         return filtered
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarNotes"], key = "#dto.calendarId"),
-        CacheEvict(cacheNames = ["noteById"], key = "#id")
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarNotes"], key = "#dto.calendarId"),
+            CacheEvict(cacheNames = ["noteById"], key = "#id")
+        ]
+    )
     fun update(id: UUID, dto: NoteDto): Note {
         info(this, "Updating $dto")
         _timer = System.currentTimeMillis()
@@ -121,10 +125,12 @@ class NoteService(
         return updated
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarNotes"], allEntries = true),
-        CacheEvict(cacheNames = ["noteById"], key = "#id")
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarNotes"], allEntries = true),
+            CacheEvict(cacheNames = ["noteById"], key = "#id")
+        ]
+    )
     fun delete(id: UUID) {
         info(this, "Deleting note with id $id.")
         _timer = System.currentTimeMillis()
@@ -134,10 +140,12 @@ class NoteService(
         info(this, "Deleted note $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarNotes"], key = "#calendarId"),
-        CacheEvict(cacheNames = ["noteById"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarNotes"], key = "#calendarId"),
+            CacheEvict(cacheNames = ["noteById"], allEntries = true)
+        ]
+    )
     fun deleteAllByCalendarId(calendarId: UUID) {
         info(this, "Deleting all notes for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
@@ -150,10 +158,12 @@ class NoteService(
         info(this, "Deleted all notes for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["categoryNotes"], key = "#categoryId"),
-        CacheEvict(cacheNames = ["noteById"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["categoryNotes"], key = "#categoryId"),
+            CacheEvict(cacheNames = ["noteById"], allEntries = true)
+        ]
+    )
     fun deleteAllCategoryByCategoryId(categoryId: UUID) {
         info(this, "Updating all notes for category with id $categoryId.")
         _timer = System.currentTimeMillis()

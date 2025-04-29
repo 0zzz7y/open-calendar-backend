@@ -13,8 +13,7 @@ import com.tomaszwnuk.opencalendar.task.Task
 import com.tomaszwnuk.opencalendar.task.TaskDto
 import com.tomaszwnuk.opencalendar.task.TaskService
 import com.tomaszwnuk.opencalendar.task.TaskStatus
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -40,222 +39,231 @@ import java.util.*
 class CalendarControllerTest {
 
     @Mock
-    private lateinit var _calendarService: CalendarService
+    private lateinit var calendarService: CalendarService
 
     @Mock
-    private lateinit var _eventService: EventService
+    private lateinit var eventService: EventService
 
     @Mock
-    private lateinit var _taskService: TaskService
+    private lateinit var taskService: TaskService
 
     @Mock
-    private lateinit var _noteService: NoteService
+    private lateinit var noteService: NoteService
 
     @InjectMocks
-    private lateinit var _calendarController: CalendarController
+    private lateinit var calendarController: CalendarController
 
-    private lateinit var _sampleCalendar: Calendar
+    private lateinit var sampleCalendar: Calendar
 
-    private lateinit var _sampleDto: CalendarDto
+    private lateinit var sampleCalendarDto: CalendarDto
 
-    private lateinit var _pageable: Pageable
+    private lateinit var pageable: Pageable
 
     @BeforeEach
     fun setup() {
-        _sampleCalendar = Calendar(
+        sampleCalendar = Calendar(
             id = UUID.randomUUID(),
             title = "Personal",
             emoji = "\\uD83C\\uDFE0"
         )
-        _sampleDto = _sampleCalendar.toDto()
-        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+        sampleCalendarDto = sampleCalendar.toDto()
+        pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
     }
 
     @Test
     fun `should return created calendar with status code 201 Created`() {
-        whenever(_calendarService.create(_sampleDto)).thenReturn(_sampleCalendar)
-        val response: ResponseEntity<CalendarDto> = _calendarController.create(_sampleDto)
+        val id: UUID = UUID.randomUUID()
+        val title = "Personal"
+        val emoji = "\\uD83C\\uDFE0"
+        val sampleCalendar = Calendar(id = id, title = title, emoji = emoji)
+        val sampleCalendarDto: CalendarDto = sampleCalendar.toDto()
+
+        whenever(calendarService.create(sampleCalendarDto)).thenReturn(sampleCalendar)
+
+        val response: ResponseEntity<CalendarDto> = calendarController.create(sampleCalendarDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleCalendar.title, response.body?.title)
-        assertEquals(_sampleCalendar.emoji, response.body?.emoji)
-        verify(_calendarService).create(_sampleDto)
+        assertNotNull(response.body)
+        assertEquals(sampleCalendar.id, response.body?.id)
+        assertEquals(sampleCalendar.title, response.body?.title)
+        assertEquals(sampleCalendar.emoji, response.body?.emoji)
+
+        verify(calendarService).create(sampleCalendarDto)
     }
 
     @Test
-    fun `should return paginated list of calendars with status code 200 OK`() {
-        val calendars: List<Calendar> = listOf(_sampleCalendar, _sampleCalendar, _sampleCalendar)
+    fun `should return paginated list of all calendars with status code 200 OK`() {
+        val calendars: List<Calendar> = listOf(sampleCalendar, sampleCalendar.copy(), sampleCalendar.copy())
+        whenever(calendarService.getAll(pageable)).thenReturn(PageImpl(calendars))
 
-        whenever(_calendarService.getAll(_pageable)).thenReturn(PageImpl(calendars))
-        val response: ResponseEntity<Page<CalendarDto>> = _calendarController.getAll(_pageable)
+        val response: ResponseEntity<Page<CalendarDto>> = calendarController.getAll(pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(calendars.size, response.body?.totalElements?.toInt())
+        assertEquals(calendars.size.toLong(), response.body?.totalElements)
         assertEquals(calendars.map { it.id }, response.body?.content?.map { it.id })
-        verify(_calendarService).getAll(_pageable)
-    }
+        assertEquals(calendars.map { it.title }, response.body?.content?.map { it.title })
 
-//    @Test
-//    fun `should return paginated list of filtered calendars with status code 200 OK`() {
-//        val filter = CalendarFilterDto(name = "Personal")
-//        val calendars: List<Calendar> = listOf(_sampleCalendar, _sampleCalendar, _sampleCalendar)
-//
-//        whenever(_calendarService.filter(filter, _pageable)).thenReturn(PageImpl(calendars))
-//        val response: ResponseEntity<Page<CalendarDto>> = _calendarController.filter(
-//            eq(filter.name),
-//            null,
-//            eq(_pageable)
-//        )
-//
-//        assertEquals(HttpStatus.OK, response.statusCode)
-//        assertEquals(calendars.size, response.body?.totalElements?.toInt())
-//        assertEquals(filter.name, response.body?.content?.firstOrNull()?.name)
-//        verify(_calendarService).filter(filter, _pageable)
-//    }
+        verify(calendarService).getAll(pageable)
+    }
 
     @Test
     fun `should return calendar by id with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+        val id: UUID = sampleCalendar.id
+        whenever(calendarService.getById(id)).thenReturn(sampleCalendar)
 
-        whenever(_calendarService.getById(id)).thenReturn(_sampleCalendar)
-        val response: ResponseEntity<CalendarDto> = _calendarController.getById(id)
+        val response: ResponseEntity<CalendarDto> = calendarController.getById(id)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(id, response.body?.id)
-        assertEquals(_sampleCalendar.title, response.body?.title)
-        verify(_calendarService).getById(id)
+        assertEquals(sampleCalendar.title, response.body?.title)
+        assertEquals(sampleCalendar.emoji, response.body?.emoji)
+
+        verify(calendarService).getById(id)
     }
 
     @Test
-    fun `should return paginated list of events by calendar id with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
-        val now = LocalDateTime.now()
+    fun `should return paginated list of all calendar events with status code 200 OK`() {
+        val id: UUID = sampleCalendar.id
+        val now: LocalDateTime = LocalDateTime.now()
         val event = Event(
             id = UUID.randomUUID(),
-            title = "Event",
-            description = "Description",
+            title = "Event title",
+            description = "Event description",
             startDate = now,
             endDate = now.plusHours(1),
             recurringPattern = RecurringPattern.NONE,
-            calendar = _sampleCalendar,
+            calendar = sampleCalendar,
             category = null
         )
         val events: List<Event> = listOf(event, event, event)
 
-        whenever(_eventService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(events))
-        val response: ResponseEntity<Page<EventDto>> = _calendarController.getEvents(id, _pageable)
+        whenever(eventService.getAllByCalendarId(id, pageable)).thenReturn(PageImpl(events))
+
+        val response: ResponseEntity<Page<EventDto>> = calendarController.getEvents(id, pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(events.size, response.body?.totalElements?.toInt())
-        assertEquals(events[0].title, response.body?.content?.get(0)?.title)
-        verify(_eventService).getAllByCalendarId(id, _pageable)
+        assertEquals(events.size.toLong(), response.body?.totalElements)
+        assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
+
+        verify(eventService).getAllByCalendarId(id, pageable)
     }
 
     @Test
-    fun `should return paginated list of tasks by calendar id with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+    fun `should return paginated list of all calendar tasks with status code 200 OK`() {
+        val id: UUID = sampleCalendar.id
         val task = Task(
             id = UUID.randomUUID(),
-            title = "Task",
-            description = "Description",
+            title = "Task title",
+            description = "Task description",
             status = TaskStatus.TODO,
-            calendar = _sampleCalendar,
-            category = null,
+            calendar = sampleCalendar,
+            category = null
         )
         val tasks: List<Task> = listOf(task, task, task)
 
-        whenever(_taskService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(tasks))
-        val response: ResponseEntity<Page<TaskDto>> = _calendarController.getTasks(id, _pageable)
+        whenever(taskService.getAllByCalendarId(id, pageable)).thenReturn(PageImpl(tasks))
+
+        val response: ResponseEntity<Page<TaskDto>> = calendarController.getTasks(id, pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(tasks.size, response.body?.totalElements?.toInt())
-        assertEquals(tasks[0].title, response.body?.content?.get(0)?.title)
-        verify(_taskService).getAllByCalendarId(id, _pageable)
+        assertEquals(tasks.size.toLong(), response.body?.totalElements)
+        assertEquals(tasks.map { it.title }, response.body?.content?.map { it.title })
+
+        verify(taskService).getAllByCalendarId(id, pageable)
     }
 
     @Test
-    fun `should return paginated list of notes by calendar id with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+    fun `should return paginated of all calendar notes with status code 200 OK`() {
+        val id: UUID = sampleCalendar.id
         val note = Note(
             id = UUID.randomUUID(),
-            title = "Note",
-            description = "Description",
-            calendar = _sampleCalendar,
+            title = "Note title",
+            description = "Note description",
+            calendar = sampleCalendar,
             category = null
         )
-        val notes: List<Note> = listOf(note)
+        val notes: List<Note> = listOf(note, note.copy())
 
-        whenever(_noteService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(notes))
-        val response: ResponseEntity<Page<NoteDto>> = _calendarController.getNotes(id, _pageable)
+        whenever(noteService.getAllByCalendarId(id, pageable)).thenReturn(PageImpl(notes))
+
+        val response: ResponseEntity<Page<NoteDto>> = calendarController.getNotes(id, pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(notes.size, response.body?.totalElements?.toInt())
-        assertEquals(notes[0].title, response.body?.content?.get(0)?.title)
-        verify(_noteService).getAllByCalendarId(id, _pageable)
+        assertEquals(notes.size.toLong(), response.body?.totalElements)
+        assertEquals(notes.map { it.title }, response.body?.content?.map { it.title })
+
+        verify(noteService).getAllByCalendarId(id, pageable)
     }
 
     @Test
-    fun `should return calendar items by calendar id with status code 200 OK`() {
-        val id = _sampleCalendar.id
-        val now = LocalDateTime.now()
+    fun `should return combined list of all calendar events, tasks and notes with status code 200 OK`() {
+        val id: UUID = sampleCalendar.id
+        val now: LocalDateTime = LocalDateTime.now()
+
         val event = Event(
             id = UUID.randomUUID(),
-            title = "Event",
-            description = "Description",
+            title = "Sample Event",
+            description = "Event description",
             startDate = now,
-            endDate = now.plusHours(1),
+            endDate = now.plusHours(2),
             recurringPattern = RecurringPattern.NONE,
-            calendar = _sampleCalendar,
+            calendar = sampleCalendar,
             category = null
         )
         val task = Task(
             id = UUID.randomUUID(),
-            title = "Task",
-            description = "Description",
+            title = "Sample Task",
+            description = "Task description",
             status = TaskStatus.TODO,
-            calendar = _sampleCalendar,
-            category = null,
+            calendar = sampleCalendar,
+            category = null
         )
         val note = Note(
             id = UUID.randomUUID(),
-            title = "Note",
-            description = "Description",
-            calendar = _sampleCalendar,
+            title = "Sample Note",
+            description = "Note description",
+            calendar = sampleCalendar,
             category = null
         )
 
-        whenever(_eventService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(event)))
-        whenever(_taskService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(task)))
-        whenever(_noteService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(note)))
+        whenever(eventService.getAllByCalendarId(id, pageable)).thenReturn(PageImpl(listOf(event)))
+        whenever(taskService.getAllByCalendarId(id, pageable)).thenReturn(PageImpl(listOf(task)))
+        whenever(noteService.getAllByCalendarId(id, pageable)).thenReturn(PageImpl(listOf(note)))
 
-        val response: ResponseEntity<List<Map<String, Any>>> = _calendarController.getAllItems(id, _pageable)
+        val response: ResponseEntity<List<Map<String, Any>>> = calendarController.getAllItems(id, pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(3, response.body?.size)
 
-        val types: List<String> = response.body?.mapNotNull { it["type"] as? String } ?: emptyList()
+        val types: List<String?> = response.body?.map { it["type"] as? String }.orEmpty()
         assertTrue(types.containsAll(listOf("event", "task", "note")))
     }
 
     @Test
     fun `should return updated calendar with status code 200 OK`() {
-        val updated: Calendar = _sampleCalendar.copy(title = "Updated")
-        whenever(_calendarService.update(_sampleCalendar.id, _sampleDto)).thenReturn(updated)
+        val updatedCalendar = sampleCalendar.copy(title = "Updated Title")
 
-        val response: ResponseEntity<CalendarDto> = _calendarController.update(_sampleCalendar.id, _sampleDto)
+        whenever(calendarService.update(sampleCalendar.id, sampleCalendarDto)).thenReturn(updatedCalendar)
+
+        val response = calendarController.update(sampleCalendar.id, sampleCalendarDto)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(updated.title, response.body?.title)
-        verify(_calendarService).update(_sampleCalendar.id, _sampleDto)
+        assertNotNull(response.body)
+        assertEquals(updatedCalendar.id, response.body?.id)
+        assertEquals("Updated Title", response.body?.title)
+
+        verify(calendarService).update(sampleCalendar.id, sampleCalendarDto)
     }
 
     @Test
-    fun `should delete calendar with status code 204 No Content`() {
-        doNothing().whenever(_calendarService).delete(_sampleCalendar.id)
+    fun `should delete calendar and return status code 204 No Content`() {
+        doNothing().whenever(calendarService).delete(sampleCalendar.id)
 
-        val response: ResponseEntity<Void> = _calendarController.delete(_sampleCalendar.id)
+        val response = calendarController.delete(sampleCalendar.id)
 
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-        verify(_calendarService).delete(_sampleCalendar.id)
+
+        verify(calendarService).delete(sampleCalendar.id)
     }
+
 }

@@ -23,9 +23,11 @@ class TaskService(
 
     private var _timer: Long = 0
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarTasks"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarTasks"], allEntries = true)
+        ]
+    )
     fun create(dto: TaskDto): Task {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -100,10 +102,12 @@ class TaskService(
         return filteredTasks
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId"),
-        CacheEvict(cacheNames = ["taskById"], key = "#id")
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarTasks"], key = "#dto.calendarId"),
+            CacheEvict(cacheNames = ["taskById"], key = "#id")
+        ]
+    )
     fun update(id: UUID, dto: TaskDto): Task {
         info(this, "Updating $dto")
         _timer = System.currentTimeMillis()
@@ -124,10 +128,12 @@ class TaskService(
         return updated
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarTasks"], allEntries = true),
-        CacheEvict(cacheNames = ["taskById"], key = "#id")
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarTasks"], allEntries = true),
+            CacheEvict(cacheNames = ["taskById"], key = "#id")
+        ]
+    )
     fun delete(id: UUID) {
         info(this, "Deleting task with id $id.")
         _timer = System.currentTimeMillis()
@@ -137,10 +143,12 @@ class TaskService(
         info(this, "Deleted task $task in ${System.currentTimeMillis() - _timer} ms")
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarTasks"], key = "#calendarId"),
-        CacheEvict(cacheNames = ["taskById"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarTasks"], key = "#calendarId"),
+            CacheEvict(cacheNames = ["taskById"], allEntries = true)
+        ]
+    )
     fun deleteAllByCalendarId(calendarId: UUID) {
         info(this, "Deleting all tasks for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
@@ -153,10 +161,12 @@ class TaskService(
         info(this, "Deleted all tasks for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["categoryTasks"], key = "#categoryId"),
-        CacheEvict(cacheNames = ["taskById"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["categoryTasks"], key = "#categoryId"),
+            CacheEvict(cacheNames = ["taskById"], allEntries = true)
+        ]
+    )
     fun deleteAllCategoryByCategoryId(categoryId: UUID) {
         info(this, "Updating all tasks for category with id $categoryId.")
         _timer = System.currentTimeMillis()

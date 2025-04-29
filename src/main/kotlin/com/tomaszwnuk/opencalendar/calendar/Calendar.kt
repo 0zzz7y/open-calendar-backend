@@ -1,8 +1,8 @@
 package com.tomaszwnuk.opencalendar.calendar
 
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_EMOJI
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_TITLE
-import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_EMOJI
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id

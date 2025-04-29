@@ -18,9 +18,11 @@ class CalendarService(
 
     private var _timer: Long = 0
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
+        ]
+    )
     fun create(dto: CalendarDto): Calendar {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
@@ -72,10 +74,12 @@ class CalendarService(
         return calendars
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarById"], key = "#id"),
-        CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarById"], key = "#id"),
+            CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
+        ]
+    )
     fun update(id: UUID, dto: CalendarDto): Calendar {
         info(this, "Updating $dto")
         _timer = System.currentTimeMillis()
@@ -100,10 +104,12 @@ class CalendarService(
         return updated
     }
 
-    @Caching(evict = [
-        CacheEvict(cacheNames = ["calendarById"], key = "#id"),
-        CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
-    ])
+    @Caching(
+        evict = [
+            CacheEvict(cacheNames = ["calendarById"], key = "#id"),
+            CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
+        ]
+    )
     fun delete(id: UUID) {
         info(this, "Deleting calendar with id $id.")
         _timer = System.currentTimeMillis()

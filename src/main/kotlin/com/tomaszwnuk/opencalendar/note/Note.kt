@@ -2,10 +2,10 @@ package com.tomaszwnuk.opencalendar.note
 
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.domain.record.Record
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_TITLE
+import com.tomaszwnuk.opencalendar.domain.record.Record
 import jakarta.persistence.*
 import java.util.*
 

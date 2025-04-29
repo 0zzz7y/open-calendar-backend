@@ -3,6 +3,7 @@ package com.tomaszwnuk.opencalendar.category
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,113 +25,123 @@ import java.util.*
 class CategoryServiceTest {
 
     @Mock
-    private lateinit var _categoryRepository: CategoryRepository
+    private lateinit var categoryRepository: CategoryRepository
 
     @InjectMocks
-    private lateinit var _categoryService: CategoryService
+    private lateinit var categoryService: CategoryService
 
-    private lateinit var _sampleCategory: Category
+    private lateinit var sampleCategory: Category
 
-    private lateinit var _sampleDto: CategoryDto
+    private lateinit var sampleCategoryDto: CategoryDto
 
-    private lateinit var _pageable: Pageable
+    private lateinit var pageable: Pageable
 
     @BeforeEach
     fun setup() {
-        _sampleCategory = Category(
+        sampleCategory = Category(
             id = UUID.randomUUID(),
             title = "Personal",
             color = CategoryColorHelper.toHex(Color.GREEN)
         )
-        _sampleDto = _sampleCategory.toDto()
-        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+        sampleCategoryDto = sampleCategory.toDto()
+        pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
     }
 
     @Test
     fun `should return created category`() {
-        whenever(_categoryRepository.existsByTitle(_sampleDto.title)).thenReturn(false)
-        doReturn(_sampleCategory).whenever(_categoryRepository).save(any())
-        val result: Category = _categoryService.create(_sampleDto)
+        whenever(categoryRepository.existsByTitle(sampleCategoryDto.title)).thenReturn(false)
+        doReturn(sampleCategory).whenever(categoryRepository).save(any())
 
-        assertEquals(_sampleCategory.id, result.id)
-        assertEquals(_sampleCategory.color, result.color)
-        verify(_categoryRepository).save(any())
+        val result: Category = categoryService.create(sampleCategoryDto)
+
+        assertNotNull(result)
+        assertEquals(sampleCategory.id, result.id)
+        assertEquals(sampleCategory.title, result.title)
+        assertEquals(sampleCategory.color, result.color)
+
+        verify(categoryRepository).save(any())
     }
 
     @Test
-    fun `should return paginated list of categories`() {
+    fun `should return paginated list of all categories`() {
         val categories: List<Category> = listOf(
-            _sampleCategory,
-            _sampleCategory.copy(id = UUID.randomUUID()),
-            _sampleCategory.copy(id = UUID.randomUUID())
+            sampleCategory,
+            sampleCategory.copy(id = UUID.randomUUID()),
+            sampleCategory.copy(id = UUID.randomUUID())
         )
+        whenever(categoryRepository.findAll(pageable)).thenReturn(PageImpl(categories))
 
-        whenever(_categoryRepository.findAll(_pageable)).thenReturn(PageImpl(categories))
-        val result: Page<Category> = _categoryService.getAll(_pageable)
+        val result: Page<Category> = categoryService.getAll(pageable)
 
         assertEquals(categories.size, result.totalElements.toInt())
         assertEquals(categories.map { it.id }, result.content.map { it.id })
-        verify(_categoryRepository).findAll(_pageable)
+        assertEquals(categories.map { it.title }, result.content.map { it.title })
+
+        verify(categoryRepository).findAll(pageable)
     }
 
     @Test
     fun `should return category by id`() {
-        val id: UUID = _sampleCategory.id
+        val id: UUID = sampleCategory.id
+        whenever(categoryRepository.findById(id)).thenReturn(Optional.of(sampleCategory))
 
-        whenever(_categoryRepository.findById(id)).thenReturn(Optional.of(_sampleCategory))
-        val result: Category = _categoryService.getById(id)
+        val result: Category = categoryService.getById(id)
 
-        assertEquals(_sampleCategory.id, result.id)
-        assertEquals(_sampleCategory.title, result.title)
-        verify(_categoryRepository).findById(id)
+        assertNotNull(result)
+        assertEquals(sampleCategory.id, result.id)
+        assertEquals(sampleCategory.title, result.title)
+        assertEquals(sampleCategory.color, result.color)
+
+        verify(categoryRepository).findById(id)
     }
 
     @Test
-    fun `should return filtered categories`() {
+    fun `should return paginated list of filtered categories`() {
         val filter = CategoryFilterDto(title = "Personal")
         val categories: List<Category> = listOf(
-            _sampleCategory,
-            _sampleCategory.copy(id = UUID.randomUUID()),
-            _sampleCategory.copy(id = UUID.randomUUID())
+            sampleCategory,
+            sampleCategory.copy(id = UUID.randomUUID()),
+            sampleCategory.copy(id = UUID.randomUUID())
         )
+        whenever(categoryRepository.filter(eq(filter.title), isNull(), eq(pageable)))
+            .thenReturn(PageImpl(categories))
 
-        whenever(
-            _categoryRepository.filter(
-                eq(filter.title),
-                isNull(),
-                eq(_pageable)
-            )
-        ).thenReturn(PageImpl(categories))
-        val result: Page<Category> = _categoryService.filter(filter, _pageable)
+        val result: Page<Category> = categoryService.filter(filter, pageable)
 
         assertEquals(categories.size, result.totalElements.toInt())
         assertEquals(categories.map { it.title }, result.content.map { it.title })
-        verify(_categoryRepository).filter(eq(filter.title), isNull(), eq(_pageable))
+
+        verify(categoryRepository).filter(eq(filter.title), isNull(), eq(pageable))
     }
 
     @Test
     fun `should return updated category`() {
-        val id: UUID = _sampleCategory.id
-        val updated = _sampleCategory.copy(title = "Work")
+        val id: UUID = sampleCategory.id
+        val updatedCategory: Category = sampleCategory.copy(title = "Work")
 
-        whenever(_categoryRepository.findById(id)).thenReturn(Optional.of(_sampleCategory))
-        whenever(_categoryRepository.existsByTitle(updated.title)).thenReturn(false)
-        doReturn(updated).whenever(_categoryRepository).save(any())
-        val result: Category = _categoryService.update(_sampleCategory.id, updated.toDto())
+        whenever(categoryRepository.findById(id)).thenReturn(Optional.of(sampleCategory))
+        whenever(categoryRepository.existsByTitle(updatedCategory.title)).thenReturn(false)
+        doReturn(updatedCategory).whenever(categoryRepository).save(any())
 
-        assertEquals(updated.title, result.title)
-        verify(_categoryRepository).save(any())
+        val result: Category = categoryService.update(id, updatedCategory.toDto())
+
+        assertNotNull(result)
+        assertEquals(updatedCategory.id, result.id)
+        assertEquals("Work", result.title)
+        assertEquals(updatedCategory.color, result.color)
+
+        verify(categoryRepository).save(any())
     }
 
     @Test
-    fun `should delete category`() {
-        val id: UUID = _sampleCategory.id
+    fun `should delete category by id`() {
+        val id: UUID = sampleCategory.id
+        whenever(categoryRepository.findById(id)).thenReturn(Optional.of(sampleCategory))
+        doNothing().whenever(categoryRepository).delete(sampleCategory)
 
-        whenever(_categoryRepository.findById(id)).thenReturn(Optional.of(_sampleCategory))
-        doNothing().whenever(_categoryRepository).delete(_sampleCategory)
-        _categoryService.delete(id)
+        categoryService.delete(id)
 
-        verify(_categoryRepository).delete(_sampleCategory)
+        verify(categoryRepository).delete(sampleCategory)
     }
 
 }

@@ -9,8 +9,10 @@ import java.time.ZoneId
 @Converter(autoApply = true)
 class LocalDateTimeConverter : AttributeConverter<LocalDateTime, Long> {
 
-    override fun convertToDatabaseColumn(attribute: LocalDateTime?): Long? = attribute?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
+    override fun convertToDatabaseColumn(attribute: LocalDateTime?): Long? =
+        attribute?.atZone(ZoneId.systemDefault())?.toInstant()?.toEpochMilli()
 
-    override fun convertToEntityAttribute(dbData: Long?): LocalDateTime? = dbData?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime() }
+    override fun convertToEntityAttribute(dbData: Long?): LocalDateTime? =
+        dbData?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime() }
 
 }
