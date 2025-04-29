@@ -1,8 +1,10 @@
 package com.tomaszwnuk.opencalendar.domain.entity
 
+import com.tomaszwnuk.opencalendar.domain.date.LocalDateTimeConverter
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DATE
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
@@ -24,10 +26,12 @@ abstract class Entity(
 ) {
 
     @CreatedDate
+    @Convert(converter = LocalDateTimeConverter::class)
     @Column(columnDefinition = COLUMN_DEFINITION_DATE, updatable = false, nullable = false)
     var createdAt: LocalDateTime = LocalDateTime.now()
 
     @LastModifiedDate
+    @Convert(converter = LocalDateTimeConverter::class)
     @Column(columnDefinition = COLUMN_DEFINITION_DATE, updatable = false, nullable = false)
     var updatedAt: LocalDateTime = LocalDateTime.now()
 
