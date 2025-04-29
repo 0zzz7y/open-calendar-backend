@@ -4,11 +4,12 @@ import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.category.Category
 import com.tomaszwnuk.opencalendar.domain.RecurringPattern
 import com.tomaszwnuk.opencalendar.domain.Schedulable
-import com.tomaszwnuk.opencalendar.domain.record.Record
+import com.tomaszwnuk.opencalendar.domain.date.LocalDateTimeConverter
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DATE
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_TITLE
+import com.tomaszwnuk.opencalendar.domain.record.Record
 import jakarta.persistence.*
 import java.time.LocalDateTime
 import java.util.*
@@ -27,9 +28,11 @@ data class Event(
     @Column(columnDefinition = COLUMN_DEFINITION_DESCRIPTION, nullable = true)
     override val description: String? = null,
 
+    @Convert(converter = LocalDateTimeConverter::class)
     @Column(columnDefinition = COLUMN_DEFINITION_DATE, nullable = false)
     override val startDate: LocalDateTime,
 
+    @Convert(converter = LocalDateTimeConverter::class)
     @Column(columnDefinition = COLUMN_DEFINITION_DATE, nullable = false)
     override val endDate: LocalDateTime,
 

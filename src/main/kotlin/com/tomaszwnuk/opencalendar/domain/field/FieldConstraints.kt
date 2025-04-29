@@ -20,6 +20,6 @@ object FieldConstraints {
 
     const val COLUMN_DEFINITION_COLOR: String = "CHAR(7)"
 
-    const val COLUMN_DEFINITION_DATE: String = "TIMESTAMP"
+    const val COLUMN_DEFINITION_DATE: String = "TEXT"
 
 }
