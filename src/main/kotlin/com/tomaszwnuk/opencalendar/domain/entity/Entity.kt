@@ -1,6 +1,6 @@
 package com.tomaszwnuk.opencalendar.domain.entity
 
-import com.tomaszwnuk.opencalendar.domain.date.LocalDateTimeConverter
+import com.tomaszwnuk.opencalendar.common.date.LocalDateTimeConverter
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DATE
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import jakarta.persistence.*

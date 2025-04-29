@@ -12,11 +12,11 @@ import javax.sql.DataSource
 @Configuration
 @EnableJpaRepositories(
     basePackages = [
-        "com.tomaszwnuk.opencalendar.calendar",
-        "com.tomaszwnuk.opencalendar.category",
-        "com.tomaszwnuk.opencalendar.task",
-        "com.tomaszwnuk.opencalendar.note",
-        "com.tomaszwnuk.opencalendar.event"
+        "com.tomaszwnuk.opencalendar.domain.calendar",
+        "com.tomaszwnuk.opencalendar.domain.category",
+        "com.tomaszwnuk.opencalendar.domain.task",
+        "com.tomaszwnuk.opencalendar.domain.note",
+        "com.tomaszwnuk.opencalendar.domain.event"
     ]
 )
 class DatabaseConfiguration(

@@ -11,6 +11,7 @@ spring:
     redis:
       host: ${SPRING_CACHE_HOST:localhost}
       port: ${SPRING_CACHE_PORT:6379}
+      time-to-live: 300000
 
 logging:
   level:

@@ -1,6 +1,7 @@
 package com.tomaszwnuk.opencalendar.configuration.database
 
-import com.tomaszwnuk.opencalendar.utility.info
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.tomaszwnuk.opencalendar.utility.logger.info
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
@@ -16,12 +17,14 @@ import java.time.Duration
 @Suppress("unused")
 @Configuration
 @EnableCaching
-class RedisConfiguration {
+class RedisConfiguration(
+    private val _objectMapper: ObjectMapper
+) {
 
     @Bean
     fun cacheManager(redisConnectionFactory: RedisConnectionFactory): CacheManager {
         return try {
-            val redisSerializer = GenericJackson2JsonRedisSerializer()
+            val redisSerializer = GenericJackson2JsonRedisSerializer(_objectMapper)
             val configuration = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(5))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer))

@@ -2,10 +2,15 @@ package com.tomaszwnuk.opencalendar.event
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
-import com.tomaszwnuk.opencalendar.calendar.Calendar
-import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
-import com.tomaszwnuk.opencalendar.domain.RecurringPattern
+import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
+import com.tomaszwnuk.opencalendar.domain.category.Category
+import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
+import com.tomaszwnuk.opencalendar.domain.event.Event
+import com.tomaszwnuk.opencalendar.domain.event.EventController
+import com.tomaszwnuk.opencalendar.domain.event.EventDto
+import com.tomaszwnuk.opencalendar.domain.event.EventFilterDto
+import com.tomaszwnuk.opencalendar.domain.event.EventService
+import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -28,23 +33,23 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.awt.Color
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EventControllerTest {
 
     @Mock
-    private lateinit var eventService: EventService
+    private lateinit var _eventService: EventService
 
     @InjectMocks
-    private lateinit var eventController: EventController
+    private lateinit var _eventController: EventController
 
-    private lateinit var sampleEvent: Event
+    private lateinit var _sampleEvent: Event
 
-    private lateinit var sampleEventDto: EventDto
+    private lateinit var _sampleEventDto: EventDto
 
-    private lateinit var pageable: Pageable
+    private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setup() {
@@ -58,7 +63,7 @@ class EventControllerTest {
             title = "Meetings",
             color = CategoryColorHelper.toHex(Color.BLUE)
         )
-        sampleEvent = Event(
+        _sampleEvent = Event(
             id = UUID.randomUUID(),
             title = "Daily Standup",
             description = "Team sync",
@@ -68,47 +73,47 @@ class EventControllerTest {
             calendar = sampleCalendar,
             category = sampleCategory
         )
-        sampleEventDto = sampleEvent.toDto()
-        pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+        _sampleEventDto = _sampleEvent.toDto()
+        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
     }
 
     @Test
     fun `should return created event with status code 201 Created`() {
-        whenever(eventService.create(sampleEventDto)).thenReturn(sampleEvent)
+        whenever(_eventService.create(_sampleEventDto)).thenReturn(_sampleEvent)
 
-        val response: ResponseEntity<EventDto> = eventController.create(sampleEventDto)
+        val response: ResponseEntity<EventDto> = _eventController.create(_sampleEventDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
         assertNotNull(response.body)
-        assertEquals(sampleEvent.id, response.body?.id)
-        assertEquals(sampleEvent.title, response.body?.title)
-        assertEquals(sampleEvent.description, response.body?.description)
+        assertEquals(_sampleEvent.id, response.body?.id)
+        assertEquals(_sampleEvent.title, response.body?.title)
+        assertEquals(_sampleEvent.description, response.body?.description)
 
-        verify(eventService).create(sampleEventDto)
+        verify(_eventService).create(_sampleEventDto)
     }
 
     @Test
     fun `should return paginated list of all events with status code 200 OK`() {
-        val events: List<Event> = listOf(sampleEvent, sampleEvent.copy(), sampleEvent.copy())
-        whenever(eventService.getAll(pageable)).thenReturn(PageImpl(events))
+        val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
+        whenever(_eventService.getAll(_pageable)).thenReturn(PageImpl(events))
 
-        val response: ResponseEntity<Page<EventDto>> = eventController.getAll(pageable)
+        val response: ResponseEntity<Page<EventDto>> = _eventController.getAll(_pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.id }, response.body?.content?.map { it.id })
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(eventService).getAll(pageable)
+        verify(_eventService).getAll(_pageable)
     }
 
     @Test
     fun `should return paginated list of filtered events with status code 200 OK`() {
         val filter = EventFilterDto(title = "Standup")
-        val events: List<Event> = listOf(sampleEvent, sampleEvent.copy(), sampleEvent.copy())
-        whenever(eventService.filter(eq(filter), eq(pageable))).thenReturn(PageImpl(events))
+        val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
+        whenever(_eventService.filter(eq(filter), eq(_pageable))).thenReturn(PageImpl(events))
 
-        val response: ResponseEntity<Page<EventDto>> = eventController.filter(
+        val response: ResponseEntity<Page<EventDto>> = _eventController.filter(
             filter.title,
             null,
             null,
@@ -116,38 +121,38 @@ class EventControllerTest {
             null,
             null,
             null,
-            pageable
+            _pageable
         )
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(eventService).filter(eq(filter), eq(pageable))
+        verify(_eventService).filter(eq(filter), eq(_pageable))
     }
 
     @Test
     fun `should return event by id with status code 200 OK`() {
-        val id: UUID = sampleEvent.id
-        whenever(eventService.getById(id)).thenReturn(sampleEvent)
+        val id: UUID = _sampleEvent.id
+        whenever(_eventService.getById(id)).thenReturn(_sampleEvent)
 
-        val response: ResponseEntity<EventDto> = eventController.getById(id)
+        val response: ResponseEntity<EventDto> = _eventController.getById(id)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertNotNull(response.body)
-        assertEquals(sampleEvent.id, response.body?.id)
-        assertEquals(sampleEvent.title, response.body?.title)
-        assertEquals(sampleEvent.description, response.body?.description)
+        assertEquals(_sampleEvent.id, response.body?.id)
+        assertEquals(_sampleEvent.title, response.body?.title)
+        assertEquals(_sampleEvent.description, response.body?.description)
 
-        verify(eventService).getById(id)
+        verify(_eventService).getById(id)
     }
 
     @Test
     fun `should return updated event with status code 200 OK`() {
-        val updatedEvent: Event = sampleEvent.copy(title = "Updated Event")
-        whenever(eventService.update(sampleEvent.id, sampleEventDto)).thenReturn(updatedEvent)
+        val updatedEvent: Event = _sampleEvent.copy(title = "Updated Event")
+        whenever(_eventService.update(_sampleEvent.id, _sampleEventDto)).thenReturn(updatedEvent)
 
-        val response: ResponseEntity<EventDto> = eventController.update(sampleEvent.id, sampleEventDto)
+        val response: ResponseEntity<EventDto> = _eventController.update(_sampleEvent.id, _sampleEventDto)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertNotNull(response.body)
@@ -155,18 +160,18 @@ class EventControllerTest {
         assertEquals("Updated Event", response.body?.title)
         assertEquals(updatedEvent.description, response.body?.description)
 
-        verify(eventService).update(sampleEvent.id, sampleEventDto)
+        verify(_eventService).update(_sampleEvent.id, _sampleEventDto)
     }
 
     @Test
     fun `should delete event with status code 204 No Content`() {
-        doNothing().whenever(eventService).delete(sampleEvent.id)
+        doNothing().whenever(_eventService).delete(_sampleEvent.id)
 
-        val response: ResponseEntity<Void> = eventController.delete(sampleEvent.id)
+        val response: ResponseEntity<Void> = _eventController.delete(_sampleEvent.id)
 
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
 
-        verify(eventService).delete(sampleEvent.id)
+        verify(_eventService).delete(_sampleEvent.id)
     }
 
 }

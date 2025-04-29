@@ -2,12 +2,17 @@ package com.tomaszwnuk.opencalendar.event
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
-import com.tomaszwnuk.opencalendar.calendar.Calendar
-import com.tomaszwnuk.opencalendar.calendar.CalendarRepository
-import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
-import com.tomaszwnuk.opencalendar.category.CategoryRepository
-import com.tomaszwnuk.opencalendar.domain.RecurringPattern
+import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
+import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
+import com.tomaszwnuk.opencalendar.domain.category.Category
+import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
+import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
+import com.tomaszwnuk.opencalendar.domain.event.Event
+import com.tomaszwnuk.opencalendar.domain.event.EventDto
+import com.tomaszwnuk.opencalendar.domain.event.EventFilterDto
+import com.tomaszwnuk.opencalendar.domain.event.EventRepository
+import com.tomaszwnuk.opencalendar.domain.event.EventService
+import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -25,115 +30,116 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import java.awt.Color
 import java.time.LocalDateTime
-import java.util.*
+import java.util.Optional
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EventServiceTest {
 
     @Mock
-    private lateinit var eventRepository: EventRepository
+    private lateinit var _eventRepository: EventRepository
 
     @Mock
-    private lateinit var calendarRepository: CalendarRepository
+    private lateinit var _calendarRepository: CalendarRepository
 
     @Mock
-    private lateinit var categoryRepository: CategoryRepository
+    private lateinit var _categoryRepository: CategoryRepository
 
     @InjectMocks
-    private lateinit var eventService: EventService
+    private lateinit var _eventService: EventService
 
-    private lateinit var sampleCalendar: Calendar
+    private lateinit var _sampleCalendar: Calendar
 
-    private lateinit var sampleCategory: Category
+    private lateinit var _sampleCategory: Category
 
-    private lateinit var pageable: Pageable
+    private lateinit var _pageable: Pageable
 
-    private lateinit var sampleEvent: Event
+    private lateinit var _sampleEvent: Event
 
-    private lateinit var sampleEventDto: EventDto
+    private lateinit var _sampleEventDto: EventDto
 
     @BeforeEach
     fun setup() {
-        sampleCalendar = Calendar(
+        _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
             title = "Work",
             emoji = "💼"
         )
-        sampleCategory = Category(
+        _sampleCategory = Category(
             id = UUID.randomUUID(),
             title = "Meeting",
             color = CategoryColorHelper.toHex(Color.GREEN),
         )
-        sampleEvent = Event(
+        _sampleEvent = Event(
             id = UUID.randomUUID(),
             title = "Daily Standup",
             description = "Team sync",
             startDate = LocalDateTime.now(),
             endDate = LocalDateTime.now().plusHours(1),
             recurringPattern = RecurringPattern.DAILY,
-            calendar = sampleCalendar,
-            category = sampleCategory
+            calendar = _sampleCalendar,
+            category = _sampleCategory
         )
-        sampleEventDto = sampleEvent.toDto()
-        pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+        _sampleEventDto = _sampleEvent.toDto()
+        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
     }
 
     @Test
     fun `should return created event`() {
-        whenever(calendarRepository.findById(sampleEventDto.calendarId)).thenReturn(Optional.of(sampleCalendar))
-        whenever(categoryRepository.findById(sampleEventDto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
-        doReturn(sampleEvent).whenever(eventRepository).save(any())
+        whenever(_calendarRepository.findById(_sampleEventDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
+        whenever(_categoryRepository.findById(_sampleEventDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
+        doReturn(_sampleEvent).whenever(_eventRepository).save(any())
 
-        val result: Event = eventService.create(sampleEventDto)
+        val result: Event = _eventService.create(_sampleEventDto)
 
         assertNotNull(result)
-        assertEquals(sampleEvent.id, result.id)
-        assertEquals(sampleEvent.title, result.title)
-        assertEquals(sampleEvent.description, result.description)
-        assertEquals(sampleEvent.startDate, result.startDate)
-        assertEquals(sampleEvent.endDate, result.endDate)
-        assertEquals(sampleEvent.recurringPattern, result.recurringPattern)
+        assertEquals(_sampleEvent.id, result.id)
+        assertEquals(_sampleEvent.title, result.title)
+        assertEquals(_sampleEvent.description, result.description)
+        assertEquals(_sampleEvent.startDate, result.startDate)
+        assertEquals(_sampleEvent.endDate, result.endDate)
+        assertEquals(_sampleEvent.recurringPattern, result.recurringPattern)
 
-        verify(eventRepository).save(any())
+        verify(_eventRepository).save(any())
     }
 
     @Test
     fun `should return paginated list of all events`() {
-        val events: List<Event> = listOf(sampleEvent, sampleEvent.copy(), sampleEvent.copy())
-        whenever(eventRepository.findAll(pageable)).thenReturn(PageImpl(events))
+        val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
+        whenever(_eventRepository.findAll(_pageable)).thenReturn(PageImpl(events))
 
-        val result: Page<Event> = eventService.getAll(pageable)
+        val result: Page<Event> = _eventService.getAll(_pageable)
 
         assertEquals(events.size, result.totalElements.toInt())
         assertEquals(events.map { it.id }, result.content.map { it.id })
         assertEquals(events.map { it.title }, result.content.map { it.title })
 
-        verify(eventRepository).findAll(pageable)
+        verify(_eventRepository).findAll(_pageable)
     }
 
     @Test
     fun `should return event by id`() {
-        val id: UUID = sampleEvent.id
-        whenever(eventRepository.findById(id)).thenReturn(Optional.of(sampleEvent))
+        val id: UUID = _sampleEvent.id
+        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
 
-        val result: Event = eventService.getById(id)
+        val result: Event = _eventService.getById(id)
 
         assertNotNull(result)
-        assertEquals(sampleEvent.id, result.id)
-        assertEquals(sampleEvent.title, result.title)
-        assertEquals(sampleEvent.description, result.description)
+        assertEquals(_sampleEvent.id, result.id)
+        assertEquals(_sampleEvent.title, result.title)
+        assertEquals(_sampleEvent.description, result.description)
 
-        verify(eventRepository).findById(id)
+        verify(_eventRepository).findById(id)
     }
 
     @Test
     fun `should return paginated list of filtered events`() {
         val filter = EventFilterDto(title = "Event")
-        val events: List<Event> = listOf(sampleEvent, sampleEvent.copy(), sampleEvent.copy())
+        val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
 
         whenever(
-            eventRepository.filter(
+            _eventRepository.filter(
                 eq(filter.title),
                 isNull(),
                 isNull(),
@@ -141,16 +147,16 @@ class EventServiceTest {
                 isNull(),
                 isNull(),
                 isNull(),
-                eq(pageable)
+                eq(_pageable)
             )
         ).thenReturn(PageImpl(events))
 
-        val result: Page<Event> = eventService.filter(filter, pageable)
+        val result: Page<Event> = _eventService.filter(filter, _pageable)
 
         assertEquals(events.size, result.totalElements.toInt())
         assertEquals(events.map { it.title }, result.content.map { it.title })
 
-        verify(eventRepository).filter(
+        verify(_eventRepository).filter(
             eq(filter.title),
             isNull(),
             isNull(),
@@ -158,39 +164,39 @@ class EventServiceTest {
             isNull(),
             isNull(),
             isNull(),
-            eq(pageable)
+            eq(_pageable)
         )
     }
 
     @Test
     fun `should return updated event`() {
-        val id: UUID = sampleEvent.id
-        val updatedEvent: Event = sampleEvent.copy(title = "Updated Event")
+        val id: UUID = _sampleEvent.id
+        val updatedEvent: Event = _sampleEvent.copy(title = "Updated Event")
 
-        whenever(eventRepository.findById(id)).thenReturn(Optional.of(sampleEvent))
-        whenever(calendarRepository.findById(sampleEventDto.calendarId)).thenReturn(Optional.of(sampleCalendar))
-        whenever(categoryRepository.findById(sampleEventDto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
-        doReturn(updatedEvent).whenever(eventRepository).save(any())
+        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
+        whenever(_calendarRepository.findById(_sampleEventDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
+        whenever(_categoryRepository.findById(_sampleEventDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
+        doReturn(updatedEvent).whenever(_eventRepository).save(any())
 
-        val result: Event = eventService.update(id, sampleEventDto)
+        val result: Event = _eventService.update(id, _sampleEventDto)
 
         assertNotNull(result)
         assertEquals(updatedEvent.id, result.id)
         assertEquals("Updated Event", result.title)
         assertEquals(updatedEvent.description, result.description)
 
-        verify(eventRepository).save(any())
+        verify(_eventRepository).save(any())
     }
 
     @Test
     fun `should delete event by id`() {
-        val id: UUID = sampleEvent.id
-        whenever(eventRepository.findById(id)).thenReturn(Optional.of(sampleEvent))
-        doNothing().whenever(eventRepository).delete(sampleEvent)
+        val id: UUID = _sampleEvent.id
+        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
+        doNothing().whenever(_eventRepository).delete(_sampleEvent)
 
-        eventService.delete(id)
+        _eventService.delete(id)
 
-        verify(eventRepository).delete(sampleEvent)
+        verify(_eventRepository).delete(_sampleEvent)
     }
 
 }

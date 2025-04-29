@@ -2,6 +2,12 @@ package com.tomaszwnuk.opencalendar.category
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
+import com.tomaszwnuk.opencalendar.domain.category.Category
+import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
+import com.tomaszwnuk.opencalendar.domain.category.CategoryDto
+import com.tomaszwnuk.opencalendar.domain.category.CategoryFilterDto
+import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
+import com.tomaszwnuk.opencalendar.domain.category.CategoryService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -25,123 +31,123 @@ import java.util.*
 class CategoryServiceTest {
 
     @Mock
-    private lateinit var categoryRepository: CategoryRepository
+    private lateinit var _categoryRepository: CategoryRepository
 
     @InjectMocks
-    private lateinit var categoryService: CategoryService
+    private lateinit var _categoryService: CategoryService
 
-    private lateinit var sampleCategory: Category
+    private lateinit var _sampleCategory: Category
 
-    private lateinit var sampleCategoryDto: CategoryDto
+    private lateinit var _sampleCategoryDto: CategoryDto
 
-    private lateinit var pageable: Pageable
+    private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setup() {
-        sampleCategory = Category(
+        _sampleCategory = Category(
             id = UUID.randomUUID(),
             title = "Personal",
             color = CategoryColorHelper.toHex(Color.GREEN)
         )
-        sampleCategoryDto = sampleCategory.toDto()
-        pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+        _sampleCategoryDto = _sampleCategory.toDto()
+        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
     }
 
     @Test
     fun `should return created category`() {
-        whenever(categoryRepository.existsByTitle(sampleCategoryDto.title)).thenReturn(false)
-        doReturn(sampleCategory).whenever(categoryRepository).save(any())
+        whenever(_categoryRepository.existsByTitle(_sampleCategoryDto.title)).thenReturn(false)
+        doReturn(_sampleCategory).whenever(_categoryRepository).save(any())
 
-        val result: Category = categoryService.create(sampleCategoryDto)
+        val result: Category = _categoryService.create(_sampleCategoryDto)
 
         assertNotNull(result)
-        assertEquals(sampleCategory.id, result.id)
-        assertEquals(sampleCategory.title, result.title)
-        assertEquals(sampleCategory.color, result.color)
+        assertEquals(_sampleCategory.id, result.id)
+        assertEquals(_sampleCategory.title, result.title)
+        assertEquals(_sampleCategory.color, result.color)
 
-        verify(categoryRepository).save(any())
+        verify(_categoryRepository).save(any())
     }
 
     @Test
     fun `should return paginated list of all categories`() {
         val categories: List<Category> = listOf(
-            sampleCategory,
-            sampleCategory.copy(id = UUID.randomUUID()),
-            sampleCategory.copy(id = UUID.randomUUID())
+            _sampleCategory,
+            _sampleCategory.copy(id = UUID.randomUUID()),
+            _sampleCategory.copy(id = UUID.randomUUID())
         )
-        whenever(categoryRepository.findAll(pageable)).thenReturn(PageImpl(categories))
+        whenever(_categoryRepository.findAll(_pageable)).thenReturn(PageImpl(categories))
 
-        val result: Page<Category> = categoryService.getAll(pageable)
+        val result: Page<Category> = _categoryService.getAll(_pageable)
 
         assertEquals(categories.size, result.totalElements.toInt())
         assertEquals(categories.map { it.id }, result.content.map { it.id })
         assertEquals(categories.map { it.title }, result.content.map { it.title })
 
-        verify(categoryRepository).findAll(pageable)
+        verify(_categoryRepository).findAll(_pageable)
     }
 
     @Test
     fun `should return category by id`() {
-        val id: UUID = sampleCategory.id
-        whenever(categoryRepository.findById(id)).thenReturn(Optional.of(sampleCategory))
+        val id: UUID = _sampleCategory.id
+        whenever(_categoryRepository.findById(id)).thenReturn(Optional.of(_sampleCategory))
 
-        val result: Category = categoryService.getById(id)
+        val result: Category = _categoryService.getById(id)
 
         assertNotNull(result)
-        assertEquals(sampleCategory.id, result.id)
-        assertEquals(sampleCategory.title, result.title)
-        assertEquals(sampleCategory.color, result.color)
+        assertEquals(_sampleCategory.id, result.id)
+        assertEquals(_sampleCategory.title, result.title)
+        assertEquals(_sampleCategory.color, result.color)
 
-        verify(categoryRepository).findById(id)
+        verify(_categoryRepository).findById(id)
     }
 
     @Test
     fun `should return paginated list of filtered categories`() {
         val filter = CategoryFilterDto(title = "Personal")
         val categories: List<Category> = listOf(
-            sampleCategory,
-            sampleCategory.copy(id = UUID.randomUUID()),
-            sampleCategory.copy(id = UUID.randomUUID())
+            _sampleCategory,
+            _sampleCategory.copy(id = UUID.randomUUID()),
+            _sampleCategory.copy(id = UUID.randomUUID())
         )
-        whenever(categoryRepository.filter(eq(filter.title), isNull(), eq(pageable)))
+        whenever(_categoryRepository.filter(eq(filter.title), isNull(), eq(_pageable)))
             .thenReturn(PageImpl(categories))
 
-        val result: Page<Category> = categoryService.filter(filter, pageable)
+        val result: Page<Category> = _categoryService.filter(filter, _pageable)
 
         assertEquals(categories.size, result.totalElements.toInt())
         assertEquals(categories.map { it.title }, result.content.map { it.title })
 
-        verify(categoryRepository).filter(eq(filter.title), isNull(), eq(pageable))
+        verify(_categoryRepository).filter(eq(filter.title), isNull(), eq(_pageable))
     }
 
     @Test
     fun `should return updated category`() {
-        val id: UUID = sampleCategory.id
-        val updatedCategory: Category = sampleCategory.copy(title = "Work")
+        val id: UUID = _sampleCategory.id
+        val updatedCategory: Category = _sampleCategory.copy(title = "Work")
 
-        whenever(categoryRepository.findById(id)).thenReturn(Optional.of(sampleCategory))
-        whenever(categoryRepository.existsByTitle(updatedCategory.title)).thenReturn(false)
-        doReturn(updatedCategory).whenever(categoryRepository).save(any())
+        whenever(_categoryRepository.findById(id)).thenReturn(Optional.of(_sampleCategory))
+        whenever(_categoryRepository.existsByTitle(updatedCategory.title)).thenReturn(false)
+        doReturn(updatedCategory).whenever(_categoryRepository).save(any())
 
-        val result: Category = categoryService.update(id, updatedCategory.toDto())
+        val result: Category = _categoryService.update(id, updatedCategory.toDto())
 
         assertNotNull(result)
         assertEquals(updatedCategory.id, result.id)
         assertEquals("Work", result.title)
         assertEquals(updatedCategory.color, result.color)
 
-        verify(categoryRepository).save(any())
+        verify(_categoryRepository).save(any())
     }
 
     @Test
     fun `should delete category by id`() {
-        val id: UUID = sampleCategory.id
-        whenever(categoryRepository.findById(id)).thenReturn(Optional.of(sampleCategory))
-        doNothing().whenever(categoryRepository).delete(sampleCategory)
+        val id: UUID = _sampleCategory.id
+        whenever(_categoryRepository.findById(id)).thenReturn(Optional.of(_sampleCategory))
+        doNothing().whenever(_categoryRepository).delete(_sampleCategory)
 
-        categoryService.delete(id)
+        _categoryService.delete(id)
 
-        verify(categoryRepository).delete(sampleCategory)
+        verify(_categoryRepository).delete(_sampleCategory)
     }
 
 }
