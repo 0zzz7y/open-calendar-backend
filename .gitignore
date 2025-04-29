@@ -39,4 +39,5 @@ out/
 ### Kotlin ###
 .kotlin
 
-database/*
+database/development.sqlite
+database/production.sqlite
