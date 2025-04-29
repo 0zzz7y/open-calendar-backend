@@ -33,7 +33,12 @@ class TestDataLoader(
     private var _timer: Long = System.currentTimeMillis()
 
     override fun run(vararg arguments: String?) {
+        if (_calendarRepository.count() > 0) {
+            info(this, "Test data already loaded. Skipping...")
+            return
+        }
         _timer = System.currentTimeMillis()
+
         val calendars: Map<String, Calendar> = createCalendars()
         val categories: Map<String, Category> = createCategories()
 
