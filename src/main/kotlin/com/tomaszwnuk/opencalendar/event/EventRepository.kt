@@ -18,7 +18,7 @@ interface EventRepository : JpaRepository<Event, UUID> {
     @Query(
         """
     SELECT e FROM Event e
-    WHERE (:name IS NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')))
+    WHERE (:title IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%')))
       AND (:description IS NULL OR LOWER(e.description) LIKE LOWER(CONCAT('%', :description, '%')))
       AND (:dateFrom IS NULL OR e.startDate >= :dateFrom)
       AND (:dateTo IS NULL OR e.endDate <= :dateTo)
@@ -28,7 +28,7 @@ interface EventRepository : JpaRepository<Event, UUID> {
     """
     )
     fun filter(
-        @Param("name") name: String?,
+        @Param("title") title: String?,
         @Param("description") description: String?,
         @Param("dateFrom") dateFrom: LocalDateTime?,
         @Param("dateTo") dateTo: LocalDateTime?,

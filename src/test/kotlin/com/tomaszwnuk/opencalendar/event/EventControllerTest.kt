@@ -4,7 +4,7 @@ import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.category.CategoryColors
+import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.domain.RecurringPattern
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -46,17 +46,17 @@ class EventControllerTest {
     fun setup() {
         val sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Work",
+            title = "Work",
             emoji = "\uD83C\uDFE2"
         )
         val sampleCategory = Category(
             id = UUID.randomUUID(),
-            name = "Meetings",
-            color = CategoryColors.toHex(Color.BLUE)
+            title = "Meetings",
+            color = CategoryColorHelper.toHex(Color.BLUE)
         )
         _sampleEvent = Event(
             id = UUID.randomUUID(),
-            name = "Daily Standup",
+            title = "Daily Standup",
             description = "Team sync",
             startDate = LocalDateTime.now(),
             endDate = LocalDateTime.now().plusHours(1),
@@ -92,12 +92,12 @@ class EventControllerTest {
 
     @Test
     fun `should return filtered list of events with status code 200 OK`() {
-        val filter = EventFilterDto(name = "Standup")
+        val filter = EventFilterDto(title = "Standup")
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent, _sampleEvent)
 
         whenever(_eventService.filter(eq(filter), eq(_pageable))).thenReturn(PageImpl(events))
         val response: ResponseEntity<Page<EventDto>> = _eventController.filter(
-            eq(filter.name),
+            eq(filter.title),
             null,
             null,
             null,
@@ -126,7 +126,7 @@ class EventControllerTest {
 
     @Test
     fun `should return updated event with status code 200 OK`() {
-        val updated: Event = _sampleEvent.copy(name = "Updated Event")
+        val updated: Event = _sampleEvent.copy(title = "Updated Event")
 
         whenever(_eventService.update(_sampleEvent.id, _sampleDto)).thenReturn(updated)
         val response: ResponseEntity<EventDto> = _eventController.update(_sampleEvent.id, _sampleDto)

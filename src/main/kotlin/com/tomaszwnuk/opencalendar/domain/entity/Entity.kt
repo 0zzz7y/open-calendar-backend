@@ -1,7 +1,7 @@
 package com.tomaszwnuk.opencalendar.domain.entity
 
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_DATE
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_ID
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DATE
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import jakarta.persistence.Column
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.Id

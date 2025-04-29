@@ -1,7 +1,7 @@
 package com.tomaszwnuk.opencalendar.calendar
 
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.EMOJI_MAXIMUM_LENGTH
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.NAME_MAXIMUM_LENGTH
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.EMOJI_MAXIMUM_LENGTH
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.TITLE_MAXIMUM_LENGTH
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import java.util.*
@@ -10,12 +10,12 @@ data class CalendarDto(
 
     val id: UUID? = null,
 
-    @field:NotBlank(message = "Name cannot be blank.")
+    @field:NotBlank(message = "Title cannot be blank.")
     @field:Size(
-        max = NAME_MAXIMUM_LENGTH,
-        message = "Description cannot be longer than $NAME_MAXIMUM_LENGTH characters."
+        max = TITLE_MAXIMUM_LENGTH,
+        message = "Title cannot be longer than $TITLE_MAXIMUM_LENGTH characters."
     )
-    val name: String,
+    val title: String,
 
     @field:Size(
         max = EMOJI_MAXIMUM_LENGTH,

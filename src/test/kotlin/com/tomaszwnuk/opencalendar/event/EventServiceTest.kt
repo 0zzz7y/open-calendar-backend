@@ -5,7 +5,7 @@ import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.category.CategoryColors
+import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.category.CategoryRepository
 import com.tomaszwnuk.opencalendar.domain.RecurringPattern
 import org.junit.jupiter.api.BeforeEach
@@ -56,17 +56,17 @@ class EventServiceTest {
     fun setup() {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Work",
+            title = "Work",
             emoji = "💼"
         )
         _sampleCategory = Category(
             id = UUID.randomUUID(),
-            name = "Meeting",
-            color = CategoryColors.toHex(Color.GREEN),
+            title = "Meeting",
+            color = CategoryColorHelper.toHex(Color.GREEN),
         )
         _sampleEvent = Event(
             id = UUID.randomUUID(),
-            name = "Daily Standup",
+            title = "Daily Standup",
             description = "Team sync",
             startDate = LocalDateTime.now(),
             endDate = LocalDateTime.now().plusHours(1),
@@ -107,18 +107,18 @@ class EventServiceTest {
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
         val result: Event = _eventService.getById(id)
 
-        assertEquals(_sampleEvent.name, result.name)
+        assertEquals(_sampleEvent.title, result.title)
         verify(_eventRepository).findById(id)
     }
 
     @Test
     fun `should return filtered events`() {
-        val filter = EventFilterDto(name = "Event")
+        val filter = EventFilterDto(title = "Event")
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent, _sampleEvent)
 
         whenever(
             _eventRepository.filter(
-                eq(filter.name),
+                eq(filter.title),
                 isNull(),
                 isNull(),
                 isNull(),
@@ -132,7 +132,7 @@ class EventServiceTest {
 
         assertEquals(events.size, result.totalElements.toInt())
         verify(_eventRepository).filter(
-            eq(filter.name),
+            eq(filter.title),
             isNull(),
             isNull(),
             isNull(),
@@ -146,7 +146,7 @@ class EventServiceTest {
     @Test
     fun `should return updated event`() {
         val id: UUID = _sampleEvent.id
-        val updated: Event = _sampleEvent.copy(name = "Updated Event")
+        val updated: Event = _sampleEvent.copy(title = "Updated Event")
 
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
         whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
@@ -154,7 +154,7 @@ class EventServiceTest {
         doReturn(updated).whenever(_eventRepository).save(any())
         val result: Event = _eventService.update(id, _sampleDto)
 
-        assertEquals(updated.name, result.name)
+        assertEquals(updated.title, result.title)
         verify(_eventRepository).save(any())
     }
 

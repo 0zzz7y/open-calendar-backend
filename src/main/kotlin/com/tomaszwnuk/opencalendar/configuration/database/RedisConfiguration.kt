@@ -1,4 +1,4 @@
-package com.tomaszwnuk.opencalendar.configuration
+package com.tomaszwnuk.opencalendar.configuration.database
 
 import com.tomaszwnuk.opencalendar.utility.info
 import org.springframework.cache.CacheManager

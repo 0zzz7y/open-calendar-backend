@@ -2,10 +2,10 @@ package com.tomaszwnuk.opencalendar.note
 
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.domain.entry.Entry
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_ID
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_NAME
+import com.tomaszwnuk.opencalendar.domain.record.Record
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_TITLE
 import jakarta.persistence.*
 import java.util.*
 
@@ -17,8 +17,8 @@ data class Note(
     @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
     override val id: UUID = UUID.randomUUID(),
 
-    @Column(columnDefinition = COLUMN_DEFINITION_NAME, nullable = true)
-    override val name: String? = null,
+    @Column(columnDefinition = COLUMN_DEFINITION_TITLE, nullable = true)
+    override val title: String? = null,
 
     @Column(columnDefinition = COLUMN_DEFINITION_DESCRIPTION, nullable = false)
     override val description: String,
@@ -31,9 +31,9 @@ data class Note(
     @JoinColumn(name = "category_id", nullable = true)
     override val category: Category? = null
 
-) : Entry(
+) : Record(
     id = id,
-    name = name,
+    title = title,
     description = description,
     calendar = calendar,
     category = category
@@ -42,7 +42,7 @@ data class Note(
     override fun toDto(): NoteDto {
         return NoteDto(
             id = id,
-            name = name,
+            title = title,
             description = description,
             calendarId = calendar.id,
             categoryId = category?.id

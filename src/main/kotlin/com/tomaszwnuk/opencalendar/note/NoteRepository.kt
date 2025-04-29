@@ -16,14 +16,14 @@ interface NoteRepository : JpaRepository<Note, UUID> {
     @Query(
         """
     SELECT n FROM Note n
-    WHERE (:name IS NULL OR LOWER(n.name) LIKE LOWER(CONCAT('%', :name, '%')))
+    WHERE (:title IS NULL OR LOWER(n.title) LIKE LOWER(CONCAT('%', :title, '%')))
       AND (:description IS NULL OR LOWER(n.description) LIKE LOWER(CONCAT('%', :description, '%')))
       AND (:calendarId IS NULL OR n.calendar.id = :calendarId)
       AND (:categoryId IS NULL OR n.category.id = :categoryId)
     """
     )
     fun filter(
-        @Param("name") name: String?,
+        @Param("title") title: String?,
         @Param("description") description: String?,
         @Param("calendarId") calendarId: UUID?,
         @Param("categoryId") categoryId: UUID?,

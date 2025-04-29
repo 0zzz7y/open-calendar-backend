@@ -25,6 +25,8 @@ WORKDIR /app
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 
+COPY database ./database
+
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=production"]

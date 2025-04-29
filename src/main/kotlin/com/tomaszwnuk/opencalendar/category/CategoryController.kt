@@ -108,7 +108,7 @@ class CategoryController(
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<CategoryDto>> {
         val filter = CategoryFilterDto(
-            name = name,
+            title = name,
             color = color
         )
         val categories: Page<CategoryDto> = _categoryService.filter(filter, pageable).map { it.toDto() }

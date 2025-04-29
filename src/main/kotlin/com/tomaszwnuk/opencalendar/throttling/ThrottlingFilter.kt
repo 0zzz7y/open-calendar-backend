@@ -1,6 +1,6 @@
 package com.tomaszwnuk.opencalendar.throttling
 
-import com.tomaszwnuk.opencalendar.validation.CommunicationConstraints.MAXIMUM_REQUESTS_PER_MINUTE
+import com.tomaszwnuk.opencalendar.communication.CommunicationConstraints.MAXIMUM_REQUESTS_PER_MINUTE
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill

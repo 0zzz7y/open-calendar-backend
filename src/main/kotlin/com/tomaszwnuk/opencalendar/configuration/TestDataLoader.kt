@@ -11,6 +11,7 @@ import com.tomaszwnuk.opencalendar.note.Note
 import com.tomaszwnuk.opencalendar.note.NoteRepository
 import com.tomaszwnuk.opencalendar.task.Task
 import com.tomaszwnuk.opencalendar.task.TaskRepository
+import com.tomaszwnuk.opencalendar.task.TaskStatus
 import com.tomaszwnuk.opencalendar.utility.info
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
@@ -46,7 +47,7 @@ class TestDataLoader(
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
         val first: Calendar =
-            _calendarRepository.save(Calendar(id = UUID.randomUUID(), name = "#1", emoji = "\uD83D\uDCA5"))
+            _calendarRepository.save(Calendar(id = UUID.randomUUID(), title = "#1", emoji = "\uD83D\uDCA5"))
         val calendars: Map<String, Calendar> = mapOf(
             "first" to first,
         )
@@ -58,11 +59,11 @@ class TestDataLoader(
     private fun createCategories(): Map<String, Category> {
         _timer = System.currentTimeMillis()
         val personal: Category =
-            _categoryRepository.save(Category(name = "Personal", color = "#EFEF39"))
+            _categoryRepository.save(Category(title = "Personal", color = "#EFEF39"))
         val work: Category =
-            _categoryRepository.save(Category(name = "Work", color = "#48DD52"))
+            _categoryRepository.save(Category(title = "Work", color = "#48DD52"))
         val university: Category =
-            _categoryRepository.save(Category(name = "University", color = "#E8475D"))
+            _categoryRepository.save(Category(title = "University", color = "#E8475D"))
         val categories: Map<String, Category> = mapOf(
             "personal" to personal,
             "work" to work,
@@ -78,7 +79,7 @@ class TestDataLoader(
         val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
 
         val workingAtTheOffice = Event(
-            name = "Working at the Office",
+            title = "Working at the Office",
             description = "Drinking coffee and checking emails.",
             startDate = now.withHour(8).withMinute(0),
             endDate = now.withHour(12).withMinute(0),
@@ -87,7 +88,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.DAILY
         )
         val dailyMeeting = Event(
-            name = "Daily Meeting",
+            title = "Daily Meeting",
             description = "Daily organizational team meeting.",
             startDate = now.withHour(10).withMinute(0),
             endDate = now.withHour(10).withMinute(30),
@@ -97,7 +98,7 @@ class TestDataLoader(
         )
 
         val universityClasses01 = Event(
-            name = "University classes",
+            title = "University classes",
             description = "University classes - 01.",
             startDate = now.plusDays(1).withHour(16).withMinute(0),
             endDate = now.plusDays(1).withHour(18).withMinute(0),
@@ -106,7 +107,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val universityClasses02 = Event(
-            name = "University classes",
+            title = "University classes",
             description = "University classes - 02.",
             startDate = now.plusDays(2).withHour(13).withMinute(0),
             endDate = now.plusDays(2).withHour(18).withMinute(0),
@@ -115,7 +116,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val universityClasses03 = Event(
-            name = "University classes",
+            title = "University classes",
             description = "University classes - 03.",
             startDate = now.plusDays(3).withHour(12).withMinute(0),
             endDate = now.plusDays(3).withHour(15).withMinute(0),
@@ -124,7 +125,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val universityClasses04 = Event(
-            name = "University classes",
+            title = "University classes",
             description = "University classes - 04.",
             startDate = now.plusDays(4).withHour(12).withMinute(0),
             endDate = now.plusDays(4).withHour(14).withMinute(0),
@@ -134,7 +135,7 @@ class TestDataLoader(
         )
 
         val gymBicepsAndBackWorkout = Event(
-            name = "Gym",
+            title = "Gym",
             description = "Biceps and back workout at the gym.",
             startDate = now.plusDays(1).withHour(18).withMinute(0),
             endDate = now.plusDays(1).withHour(20).withMinute(0),
@@ -143,7 +144,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val gymTricepsAndChestWorkout = Event(
-            name = "Gym",
+            title = "Gym",
             description = "Triceps and chest workout at the gym.",
             startDate = now.plusDays(2).withHour(18).withMinute(0),
             endDate = now.plusDays(2).withHour(20).withMinute(0),
@@ -152,7 +153,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val gymCoreWorkout = Event(
-            name = "Gym",
+            title = "Gym",
             description = "Core workout at the gym.",
             startDate = now.plusDays(4).withHour(18).withMinute(0),
             endDate = now.plusDays(4).withHour(20).withMinute(0),
@@ -161,7 +162,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val gymLegWorkout = Event(
-            name = "Gym",
+            title = "Gym",
             description = "Leg workout at the gym.",
             startDate = now.plusDays(5).withHour(18).withMinute(0),
             endDate = now.plusDays(5).withHour(20).withMinute(0),
@@ -171,7 +172,7 @@ class TestDataLoader(
         )
 
         val birthdayParty = Event(
-            name = "Birthday Party",
+            title = "Birthday Party",
             description = "Friend's birthday celebration.",
             startDate = now.plusDays(10).withHour(16).withMinute(0),
             endDate = now.plusDays(10).withHour(23).withMinute(59),
@@ -199,34 +200,27 @@ class TestDataLoader(
 
     private fun createTasks(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
-        val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
 
         val walkTheDog = Task(
-            name = "Walk the Dog",
+            title = "Walk the Dog",
             description = "After my morning coffee.",
-            startDate = now.withHour(6).withMinute(0),
-            endDate = now.withHour(7).withMinute(0),
+            status = TaskStatus.TODO,
             calendar = calendars["first"]!!,
             category = categories["personal"],
-            recurringPattern = RecurringPattern.DAILY
         )
         val doShopping = Task(
-            name = "Do Shopping",
+            title = "Do Shopping",
             description = "There is nothing in the fridge.",
-            startDate = now.plusDays(1).withHour(17).withMinute(0),
-            endDate = now.plusDays(1).withHour(18).withMinute(0),
+            status = TaskStatus.TODO,
             calendar = calendars["first"]!!,
             category = categories["personal"],
-            recurringPattern = RecurringPattern.WEEKLY
         )
         val studyForExam = Task(
-            name = "Study for Exam",
+            title = "Study for Exam",
             description = "Study for final term exam.",
-            startDate = now.plusDays(1).withHour(12).withMinute(0),
-            endDate = now.plusDays(1).withHour(20).withMinute(0),
+            status = TaskStatus.IN_PROGRESS,
             calendar = calendars["first"]!!,
             category = categories["university"],
-            recurringPattern = RecurringPattern.NONE
         )
 
         info(this, "Tasks created in ${System.currentTimeMillis() - _timer} ms")
@@ -237,7 +231,7 @@ class TestDataLoader(
         _timer = System.currentTimeMillis()
 
         val shoppingList = Note(
-            name = "Shopping List",
+            title = "Shopping List",
             description = "Milk, Eggs, Bread",
             calendar = calendars["first"]!!,
             category = categories["personal"]

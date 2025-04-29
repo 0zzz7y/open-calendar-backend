@@ -1,8 +1,8 @@
 package com.tomaszwnuk.opencalendar.calendar
 
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_ID
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_NAME
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_EMOJI
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_TITLE
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_EMOJI
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -17,8 +17,8 @@ data class Calendar(
     @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
     override val id: UUID = UUID.randomUUID(),
 
-    @Column(columnDefinition = COLUMN_DEFINITION_NAME, unique = true, nullable = false)
-    val name: String,
+    @Column(columnDefinition = COLUMN_DEFINITION_TITLE, unique = true, nullable = false)
+    val title: String,
 
     @Column(columnDefinition = COLUMN_DEFINITION_EMOJI, unique = false, nullable = false)
     val emoji: String
@@ -28,7 +28,7 @@ data class Calendar(
     fun toDto(): CalendarDto {
         return CalendarDto(
             id = id,
-            name = name,
+            title = title,
             emoji = emoji
         )
     }

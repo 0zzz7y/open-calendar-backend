@@ -1,4 +1,4 @@
-package com.tomaszwnuk.opencalendar.validation
+package com.tomaszwnuk.opencalendar.communication
 
 @Suppress("unused")
 object CommunicationConstraints {

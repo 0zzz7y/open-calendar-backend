@@ -9,17 +9,17 @@ import java.util.*
 
 interface CategoryRepository : JpaRepository<Category, UUID> {
 
-    fun existsByName(name: String): Boolean
+    fun existsByTitle(title: String): Boolean
 
     @Query(
         """
     SELECT c from Category c
-    WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT("%", :name, "%")))
+    WHERE (:title IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT("%", :title, "%")))
       AND (:color IS NULL OR c.color = :color)
     """
     )
     fun filter(
-        @Param("name") name: String?,
+        @Param("title") title: String?,
         @Param("color") color: String?,
         pageable: Pageable
     ): Page<Category>

@@ -1,22 +1,22 @@
-package com.tomaszwnuk.opencalendar.domain.entry
+package com.tomaszwnuk.opencalendar.domain.record
 
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.category.Category
 import com.tomaszwnuk.opencalendar.domain.entity.Entity
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
-import com.tomaszwnuk.opencalendar.validation.FieldConstraints.COLUMN_DEFINITION_ID
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import jakarta.persistence.*
 import java.util.*
 
 @MappedSuperclass
-abstract class Entry(
+abstract class Record(
 
     @Id
     @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
     override val id: UUID = UUID.randomUUID(),
 
     @Column(columnDefinition = COLUMN_DEFINITION_DESCRIPTION, nullable = true)
-    val name: String? = null,
+    val title: String? = null,
 
     @Column(columnDefinition = COLUMN_DEFINITION_DESCRIPTION, nullable = true)
     val description: String? = null,
@@ -31,10 +31,10 @@ abstract class Entry(
 
 ) : Entity(id = id) {
 
-    fun toDto(): EntryDto {
-        return EntryDto(
+    fun toDto(): RecordDto {
+        return RecordDto(
             id = id,
-            name = name,
+            title = title,
             description = description,
             calendarId = calendar.id,
             categoryId = category?.id

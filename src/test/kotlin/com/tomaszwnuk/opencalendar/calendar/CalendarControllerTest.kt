@@ -64,7 +64,7 @@ class CalendarControllerTest {
     fun setup() {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Personal",
+            title = "Personal",
             emoji = "\\uD83C\\uDFE0"
         )
         _sampleDto = _sampleCalendar.toDto()
@@ -77,7 +77,7 @@ class CalendarControllerTest {
         val response: ResponseEntity<CalendarDto> = _calendarController.create(_sampleDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleCalendar.name, response.body?.name)
+        assertEquals(_sampleCalendar.title, response.body?.title)
         assertEquals(_sampleCalendar.emoji, response.body?.emoji)
         verify(_calendarService).create(_sampleDto)
     }
@@ -122,7 +122,7 @@ class CalendarControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(id, response.body?.id)
-        assertEquals(_sampleCalendar.name, response.body?.name)
+        assertEquals(_sampleCalendar.title, response.body?.title)
         verify(_calendarService).getById(id)
     }
 
@@ -132,7 +132,7 @@ class CalendarControllerTest {
         val now = LocalDateTime.now()
         val event = Event(
             id = UUID.randomUUID(),
-            name = "Event",
+            title = "Event",
             description = "Description",
             startDate = now,
             endDate = now.plusHours(1),
@@ -147,21 +147,17 @@ class CalendarControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(events.size, response.body?.totalElements?.toInt())
-        assertEquals(events[0].name, response.body?.content?.get(0)?.name)
+        assertEquals(events[0].title, response.body?.content?.get(0)?.title)
         verify(_eventService).getAllByCalendarId(id, _pageable)
     }
 
     @Test
     fun `should return paginated list of tasks by calendar id with status code 200 OK`() {
         val id: UUID = _sampleCalendar.id
-        val now = LocalDateTime.now()
         val task = Task(
             id = UUID.randomUUID(),
-            name = "Task",
+            title = "Task",
             description = "Description",
-            startDate = now,
-            endDate = now.plusHours(1),
-            recurringPattern = RecurringPattern.NONE,
             status = TaskStatus.TODO,
             calendar = _sampleCalendar,
             category = null,
@@ -173,7 +169,7 @@ class CalendarControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(tasks.size, response.body?.totalElements?.toInt())
-        assertEquals(tasks[0].name, response.body?.content?.get(0)?.name)
+        assertEquals(tasks[0].title, response.body?.content?.get(0)?.title)
         verify(_taskService).getAllByCalendarId(id, _pageable)
     }
 
@@ -182,7 +178,7 @@ class CalendarControllerTest {
         val id: UUID = _sampleCalendar.id
         val note = Note(
             id = UUID.randomUUID(),
-            name = "Note",
+            title = "Note",
             description = "Description",
             calendar = _sampleCalendar,
             category = null
@@ -194,7 +190,7 @@ class CalendarControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(notes.size, response.body?.totalElements?.toInt())
-        assertEquals(notes[0].name, response.body?.content?.get(0)?.name)
+        assertEquals(notes[0].title, response.body?.content?.get(0)?.title)
         verify(_noteService).getAllByCalendarId(id, _pageable)
     }
 
@@ -204,7 +200,7 @@ class CalendarControllerTest {
         val now = LocalDateTime.now()
         val event = Event(
             id = UUID.randomUUID(),
-            name = "Event",
+            title = "Event",
             description = "Description",
             startDate = now,
             endDate = now.plusHours(1),
@@ -214,18 +210,15 @@ class CalendarControllerTest {
         )
         val task = Task(
             id = UUID.randomUUID(),
-            name = "Task",
+            title = "Task",
             description = "Description",
-            startDate = now,
-            endDate = now.plusHours(1),
-            recurringPattern = RecurringPattern.NONE,
             status = TaskStatus.TODO,
             calendar = _sampleCalendar,
             category = null,
         )
         val note = Note(
             id = UUID.randomUUID(),
-            name = "Note",
+            title = "Note",
             description = "Description",
             calendar = _sampleCalendar,
             category = null
@@ -246,13 +239,13 @@ class CalendarControllerTest {
 
     @Test
     fun `should return updated calendar with status code 200 OK`() {
-        val updated: Calendar = _sampleCalendar.copy(name = "Updated")
+        val updated: Calendar = _sampleCalendar.copy(title = "Updated")
         whenever(_calendarService.update(_sampleCalendar.id, _sampleDto)).thenReturn(updated)
 
         val response: ResponseEntity<CalendarDto> = _calendarController.update(_sampleCalendar.id, _sampleDto)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(updated.name, response.body?.name)
+        assertEquals(updated.title, response.body?.title)
         verify(_calendarService).update(_sampleCalendar.id, _sampleDto)
     }
 

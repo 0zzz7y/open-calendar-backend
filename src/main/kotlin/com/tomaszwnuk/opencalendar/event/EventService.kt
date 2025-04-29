@@ -32,7 +32,7 @@ class EventService(
         val calendar: Calendar = _calendarRepository.findOrThrow(id = dto.calendarId)
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
         val event = Event(
-            name = dto.name,
+            title = dto.title,
             description = dto.description,
             startDate = dto.startDate,
             endDate = dto.endDate,
@@ -90,7 +90,7 @@ class EventService(
         info(this, "Filtering events with $filter")
         _timer = System.currentTimeMillis()
         val filtered: Page<Event> = _eventRepository.filter(
-            name = filter.name,
+            title = filter.title,
             description = filter.description,
             dateFrom = filter.dateFrom,
             dateTo = filter.dateTo,
@@ -117,7 +117,7 @@ class EventService(
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
 
         val updated = existing.copy(
-            name = dto.name,
+            title = dto.title,
             description = dto.description,
             startDate = dto.startDate,
             endDate = dto.endDate,

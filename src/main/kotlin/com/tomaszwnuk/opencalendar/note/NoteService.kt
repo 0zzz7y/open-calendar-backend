@@ -32,7 +32,7 @@ class NoteService(
         val calendar: Calendar = _calendarRepository.findOrThrow(id = dto.calendarId)
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
         val note = Note(
-            name = dto.name,
+            title = dto.title,
             description = dto.description,
             calendar = calendar,
             category = category
@@ -87,7 +87,7 @@ class NoteService(
         info(this, "Filtering notes with $filter")
         _timer = System.currentTimeMillis()
         val filtered: Page<Note> = _noteRepository.filter(
-            name = filter.name,
+            title = filter.title,
             description = filter.description,
             calendarId = filter.calendarId,
             categoryId = filter.categoryId,
@@ -109,7 +109,7 @@ class NoteService(
         val calendar: Calendar = _calendarRepository.findOrThrow(id = dto.calendarId)
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
         val changed: Note = existing.copy(
-            name = dto.name,
+            title = dto.title,
             description = dto.description,
             calendar = calendar,
             category = category

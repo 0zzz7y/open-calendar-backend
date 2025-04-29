@@ -9,18 +9,18 @@ import java.util.*
 
 interface CalendarRepository : JpaRepository<Calendar, UUID> {
 
-    fun existsByName(name: String): Boolean
+    fun existsByTitle(title: String): Boolean
 
     @Query(
         """
     SELECT c FROM Calendar c
-    WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT("%", :name, "%")))
+    WHERE (:title IS NULL OR LOWER(c.title) LIKE LOWER(CONCAT("%", :title, "%")))
       AND (:emoji IS NULL OR c.emoji = :emoji)
     """,
         nativeQuery = false
     )
     fun filter(
-        @Param("name") name: String?,
+        @Param("title") title: String?,
         @Param("emoji") emoji: String?,
         pageable: Pageable
     ): Page<Calendar>

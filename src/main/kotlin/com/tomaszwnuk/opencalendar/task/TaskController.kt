@@ -1,16 +1,13 @@
 package com.tomaszwnuk.opencalendar.task
 
-import com.tomaszwnuk.opencalendar.domain.RecurringPattern
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
-import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
 import java.util.*
 
 @Suppress("unused")
@@ -46,20 +43,14 @@ class TaskController(private val _taskService: TaskService) {
     fun filter(
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) description: String?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateFrom: String?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateTo: String?,
-        @RequestParam(required = false) recurringPattern: String?,
         @RequestParam(required = false) status: String?,
         @RequestParam(required = false) calendarId: UUID?,
         @RequestParam(required = false) categoryId: UUID?,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val filter = TaskFilterDto(
-            name = name,
+            title = name,
             description = description,
-            dateFrom = dateFrom?.let { LocalDateTime.parse(it) },
-            dateTo = dateTo?.let { LocalDateTime.parse(it) },
-            recurringPattern = recurringPattern?.let { RecurringPattern.valueOf(it) },
             status = status?.let { TaskStatus.valueOf(it) },
             calendarId = calendarId,
             categoryId = categoryId

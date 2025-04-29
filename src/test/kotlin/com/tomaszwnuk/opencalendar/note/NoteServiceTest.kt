@@ -5,7 +5,7 @@ import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.category.CategoryColors
+import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.category.CategoryRepository
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -54,17 +54,17 @@ class NoteServiceTest {
     fun setup() {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Personal",
+            title = "Personal",
             emoji = "\\uD83C\\uDFE0"
         )
         _sampleCategory = Category(
             id = UUID.randomUUID(),
-            name = "Shopping",
-            color = CategoryColors.toHex(Color.YELLOW)
+            title = "Shopping",
+            color = CategoryColorHelper.toHex(Color.YELLOW)
         )
         _sampleNote = Note(
             id = UUID.randomUUID(),
-            name = "Groceries",
+            title = "Groceries",
             description = "Buy milk, eggs, and bread",
             calendar = _sampleCalendar,
             category = _sampleCategory
@@ -102,18 +102,18 @@ class NoteServiceTest {
         whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
         val result: Note = _noteService.getById(id)
 
-        assertEquals(_sampleNote.name, result.name)
+        assertEquals(_sampleNote.title, result.title)
         verify(_noteRepository).findById(id)
     }
 
     @Test
     fun `should return filtered notes`() {
-        val filter = NoteFilterDto(name = "Groceries")
+        val filter = NoteFilterDto(title = "Groceries")
         val notes: List<Note> = listOf(_sampleNote, _sampleNote, _sampleNote)
 
         whenever(
             _noteRepository.filter(
-                eq(filter.name),
+                eq(filter.title),
                 isNull(),
                 isNull(),
                 isNull(),
@@ -124,7 +124,7 @@ class NoteServiceTest {
 
         assertEquals(notes.size, result.totalElements.toInt())
         verify(_noteRepository).filter(
-            eq(filter.name),
+            eq(filter.title),
             isNull(),
             isNull(),
             isNull(),
@@ -135,7 +135,7 @@ class NoteServiceTest {
     @Test
     fun `should return updated note`() {
         val id: UUID = _sampleNote.id
-        val updated: Note = _sampleNote.copy(name = "Updated note")
+        val updated: Note = _sampleNote.copy(title = "Updated note")
 
         whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
         whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
@@ -143,7 +143,7 @@ class NoteServiceTest {
         doReturn(updated).whenever(_noteRepository).save(any())
         val result: Note = _noteService.update(id, _sampleDto)
 
-        assertEquals(updated.name, result.name)
+        assertEquals(updated.title, result.title)
         verify(_noteRepository).save(any())
     }
 

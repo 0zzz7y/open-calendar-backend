@@ -25,11 +25,11 @@ class CalendarService(
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
         _calendarRepository.assertNameDoesNotExist(
-            name = dto.name,
-            existsByName = { _calendarRepository.existsByName(it) }
+            name = dto.title,
+            existsByName = { _calendarRepository.existsByTitle(it) }
         )
         val calendar = Calendar(
-            name = dto.name,
+            title = dto.title,
             emoji = dto.emoji
         )
 
@@ -63,7 +63,7 @@ class CalendarService(
         info(this, "Filtering calendars with $filter")
         _timer = System.currentTimeMillis()
         val calendars: Page<Calendar> = _calendarRepository.filter(
-            name = filter.name,
+            title = filter.title,
             emoji = filter.emoji,
             pageable = pageable
         )
@@ -81,16 +81,16 @@ class CalendarService(
         _timer = System.currentTimeMillis()
         val existing: Calendar = getById(id)
 
-        val isNameChanged: Boolean = !(dto.name.equals(existing.name, ignoreCase = true))
+        val isNameChanged: Boolean = !(dto.title.equals(existing.title, ignoreCase = true))
         if (isNameChanged) {
             _calendarRepository.assertNameDoesNotExist(
-                name = dto.name,
-                existsByName = { _calendarRepository.existsByName(it) }
+                name = dto.title,
+                existsByName = { _calendarRepository.existsByTitle(it) }
             )
         }
 
         val changed: Calendar = existing.copy(
-            name = dto.name,
+            title = dto.title,
             emoji = dto.emoji
         )
 

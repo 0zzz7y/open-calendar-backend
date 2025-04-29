@@ -4,8 +4,7 @@ import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.category.CategoryColors
-import com.tomaszwnuk.opencalendar.domain.RecurringPattern
+import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,7 +22,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.awt.Color
-import java.time.LocalDateTime
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
@@ -46,21 +44,18 @@ class TaskControllerTest {
     fun setup() {
         val sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Personal",
+            title = "Personal",
             emoji = "\\uD83C\\uDFE0"
         )
         val sampleCategory = Category(
             id = UUID.randomUUID(),
-            name = "Training",
-            color = CategoryColors.toHex(Color.GREEN)
+            title = "Training",
+            color = CategoryColorHelper.toHex(Color.GREEN)
         )
         _sampleTask = Task(
             id = UUID.randomUUID(),
-            name = "Gym Workout",
+            title = "Gym Workout",
             description = null,
-            startDate = LocalDateTime.now(),
-            endDate = LocalDateTime.now().plusHours(1),
-            recurringPattern = RecurringPattern.DAILY,
             status = TaskStatus.TODO,
             calendar = sampleCalendar,
             category = sampleCategory
@@ -105,15 +100,12 @@ class TaskControllerTest {
 
     @Test
     fun `should return filtered list of tasks with status code 200 OK`() {
-        val filter = TaskFilterDto(name = "Gym Workout")
+        val filter = TaskFilterDto(title = "Gym Workout")
         val tasks: List<Task> = listOf(_sampleTask, _sampleTask, _sampleTask)
 
         whenever(_taskService.filter(eq(filter), eq(_pageable))).thenReturn(PageImpl(tasks))
         val response: ResponseEntity<Page<TaskDto>> = _taskController.filter(
-            eq(filter.name),
-            null,
-            null,
-            null,
+            eq(filter.title),
             null,
             null,
             null,
@@ -128,7 +120,7 @@ class TaskControllerTest {
 
     @Test
     fun `should return updated task with status code 200 OK`() {
-        val updated: Task = _sampleTask.copy(name = "Updated Task")
+        val updated: Task = _sampleTask.copy(title = "Updated Task")
 
         whenever(_taskService.update(_sampleTask.id, _sampleDto)).thenReturn(updated)
         val response: ResponseEntity<TaskDto> = _taskController.update(_sampleTask.id, _sampleDto)

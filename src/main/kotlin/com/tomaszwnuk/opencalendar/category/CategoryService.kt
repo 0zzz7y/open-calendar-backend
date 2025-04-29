@@ -25,11 +25,11 @@ class CategoryService(
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
         _categoryRepository.assertNameDoesNotExist(
-            name = dto.name,
-            existsByName = { _categoryRepository.existsByName(it) }
+            name = dto.title,
+            existsByName = { _categoryRepository.existsByTitle(it) }
         )
         val category = Category(
-            name = dto.name,
+            title = dto.title,
             color = dto.color
         )
 
@@ -63,7 +63,7 @@ class CategoryService(
         info(this, "Filtering categories with $filter")
         _timer = System.currentTimeMillis()
         val categories: Page<Category> = _categoryRepository.filter(
-            name = filter.name,
+            title = filter.title,
             color = filter.color,
             pageable = pageable
         )
@@ -81,16 +81,16 @@ class CategoryService(
         _timer = System.currentTimeMillis()
         val existing: Category = getById(id)
 
-        val isNameChanged: Boolean = !(dto.name.equals(existing.name, ignoreCase = true))
+        val isNameChanged: Boolean = !(dto.title.equals(existing.title, ignoreCase = true))
         if (isNameChanged) {
             _categoryRepository.assertNameDoesNotExist(
-                name = dto.name,
-                existsByName = { _categoryRepository.existsByName(it) }
+                name = dto.title,
+                existsByName = { _categoryRepository.existsByTitle(it) }
             )
         }
 
         val changed: Category = existing.copy(
-            name = dto.name,
+            title = dto.title,
             color = dto.color
         )
 

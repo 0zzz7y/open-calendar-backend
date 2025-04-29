@@ -1,13 +1,13 @@
-package com.tomaszwnuk.opencalendar.domain.entry
+package com.tomaszwnuk.opencalendar.domain.record
 
 import com.tomaszwnuk.opencalendar.domain.entity.EntityDto
 import java.util.*
 
-open class EntryDto(
+open class RecordDto(
 
     id: UUID? = null,
 
-    open val name: String? = null,
+    open val title: String? = null,
 
     open val description: String? = null,
 

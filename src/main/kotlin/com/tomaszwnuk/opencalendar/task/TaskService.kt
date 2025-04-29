@@ -32,11 +32,8 @@ class TaskService(
         val calendar: Calendar = dto.calendarId.let { _calendarRepository.findOrThrow(id = it) }
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
         val task = Task(
-            name = dto.name,
+            title = dto.title,
             description = dto.description,
-            startDate = dto.startDate,
-            endDate = dto.endDate,
-            recurringPattern = dto.recurringPattern,
             status = dto.status,
             calendar = calendar,
             category = category
@@ -91,11 +88,8 @@ class TaskService(
         info(this, "Filtering tasks with $filter")
         _timer = System.currentTimeMillis()
         val filteredTasks: Page<Task> = _taskRepository.filter(
-            name = filter.name,
+            title = filter.title,
             description = filter.description,
-            dateFrom = filter.dateFrom,
-            dateTo = filter.dateTo,
-            recurringPattern = filter.recurringPattern,
             status = filter.status,
             calendarId = filter.calendarId,
             categoryId = filter.categoryId,
@@ -117,11 +111,8 @@ class TaskService(
         val calendar: Calendar = dto.calendarId.let { _calendarRepository.findOrThrow(id = it) }
         val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
         val changed: Task = existing.copy(
-            name = dto.name,
+            title = dto.title,
             description = dto.description,
-            startDate = dto.startDate,
-            endDate = dto.endDate,
-            recurringPattern = dto.recurringPattern,
             status = dto.status,
             calendar = calendar,
             category = category

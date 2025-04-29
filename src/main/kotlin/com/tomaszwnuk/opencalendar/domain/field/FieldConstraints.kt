@@ -1,8 +1,8 @@
-package com.tomaszwnuk.opencalendar.validation
+package com.tomaszwnuk.opencalendar.domain.field
 
 object FieldConstraints {
 
-    const val NAME_MAXIMUM_LENGTH: Int = 255
+    const val TITLE_MAXIMUM_LENGTH: Int = 255
 
     const val DESCRIPTION_MAXIMUM_LENGTH: Int = 4096
 
@@ -12,7 +12,7 @@ object FieldConstraints {
 
     const val COLUMN_DEFINITION_ID: String = "CHAR(36)"
 
-    const val COLUMN_DEFINITION_NAME: String = "VARCHAR(255)"
+    const val COLUMN_DEFINITION_TITLE: String = "VARCHAR(255)"
 
     const val COLUMN_DEFINITION_DESCRIPTION: String = "VARCHAR(4096)"
 

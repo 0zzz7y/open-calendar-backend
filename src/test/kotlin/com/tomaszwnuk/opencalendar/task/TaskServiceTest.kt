@@ -5,9 +5,8 @@ import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.category.CategoryColors
+import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.category.CategoryRepository
-import com.tomaszwnuk.opencalendar.domain.RecurringPattern
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -23,7 +22,6 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import java.awt.Color
-import java.time.LocalDateTime
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
@@ -56,21 +54,18 @@ class TaskServiceTest {
     fun setup() {
         _sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Personal",
+            title = "Personal",
             emoji = "\\uD83C\\uDFE0"
         )
         _sampleCategory = Category(
             id = UUID.randomUUID(),
-            name = "Training",
-            color = CategoryColors.toHex(Color.GREEN)
+            title = "Training",
+            color = CategoryColorHelper.toHex(Color.GREEN)
         )
         _sampleTask = Task(
             id = UUID.randomUUID(),
-            name = "Daily Standup",
+            title = "Daily Standup",
             description = null,
-            startDate = LocalDateTime.now(),
-            endDate = LocalDateTime.now().plusHours(1),
-            recurringPattern = RecurringPattern.WEEKLY,
             status = TaskStatus.TODO,
             calendar = _sampleCalendar,
             category = _sampleCategory
@@ -108,21 +103,18 @@ class TaskServiceTest {
         whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
         val result: Task = _taskService.getById(id)
 
-        assertEquals(_sampleTask.name, result.name)
+        assertEquals(_sampleTask.title, result.title)
         verify(_taskRepository).findById(id)
     }
 
     @Test
     fun `should return filtered tasks`() {
-        val filter = TaskFilterDto(name = "Task")
+        val filter = TaskFilterDto(title = "Task")
         val tasks: List<Task> = listOf(_sampleTask, _sampleTask, _sampleTask)
 
         whenever(
             _taskRepository.filter(
-                eq(filter.name),
-                isNull(),
-                isNull(),
-                isNull(),
+                eq(filter.title),
                 isNull(),
                 isNull(),
                 isNull(),
@@ -134,10 +126,7 @@ class TaskServiceTest {
 
         assertEquals(tasks.size, result.totalElements.toInt())
         verify(_taskRepository).filter(
-            eq(filter.name),
-            isNull(),
-            isNull(),
-            isNull(),
+            eq(filter.title),
             isNull(),
             isNull(),
             isNull(),
@@ -149,7 +138,7 @@ class TaskServiceTest {
     @Test
     fun `should return updated task`() {
         val id: UUID = _sampleTask.id
-        val updated: Task = _sampleTask.copy(name = "Updated Task")
+        val updated: Task = _sampleTask.copy(title = "Updated Task")
 
         whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
         whenever(_calendarRepository.findById(_sampleDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
@@ -157,7 +146,7 @@ class TaskServiceTest {
         doReturn(updated).whenever(_taskRepository).save(any())
         val result: Task = _taskService.update(id, _sampleDto)
 
-        assertEquals(updated.name, result.name)
+        assertEquals(updated.title, result.title)
         verify(_taskRepository).save(any())
     }
 

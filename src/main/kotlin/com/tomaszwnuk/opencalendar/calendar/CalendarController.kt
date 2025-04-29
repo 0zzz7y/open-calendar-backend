@@ -108,7 +108,7 @@ class CalendarController(
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<CalendarDto>> {
         val filter = CalendarFilterDto(
-            name = name,
+            title = name,
             emoji = emoji
         )
         val calendars: Page<CalendarDto> = _calendarService.filter(filter, pageable).map { it.toDto() }

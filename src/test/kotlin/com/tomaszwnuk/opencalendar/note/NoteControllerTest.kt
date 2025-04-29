@@ -4,7 +4,7 @@ import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.calendar.Calendar
 import com.tomaszwnuk.opencalendar.category.Category
-import com.tomaszwnuk.opencalendar.category.CategoryColors
+import com.tomaszwnuk.opencalendar.category.CategoryColorHelper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,17 +43,17 @@ class NoteControllerTest {
     @BeforeEach
     fun setup() {
         val sampleCalendar = Calendar(
-            name = "Personal",
+            title = "Personal",
             emoji = "\\uD83C\\uDFE0"
         )
         val sampleCategory = Category(
             id = UUID.randomUUID(),
-            name = "Shopping",
-            color = CategoryColors.toHex(Color.YELLOW)
+            title = "Shopping",
+            color = CategoryColorHelper.toHex(Color.YELLOW)
         )
         _sampleNote = Note(
             id = UUID.randomUUID(),
-            name = "Groceries",
+            title = "Groceries",
             description = "Buy milk, eggs, and bread",
             calendar = sampleCalendar,
             category = sampleCategory
@@ -98,12 +98,12 @@ class NoteControllerTest {
 
     @Test
     fun `should return filtered list of notes with status code 200 OK`() {
-        val filter = NoteFilterDto(name = "Groceries")
+        val filter = NoteFilterDto(title = "Groceries")
         val notes: List<Note> = listOf(_sampleNote, _sampleNote, _sampleNote)
 
         whenever(_noteService.filter(eq(filter), eq(_pageable))).thenReturn(PageImpl(notes))
         val response: ResponseEntity<Page<NoteDto>> = _noteController.filter(
-            eq(filter.name),
+            eq(filter.title),
             null,
             null,
             null,
@@ -117,7 +117,7 @@ class NoteControllerTest {
 
     @Test
     fun `should return updated task with status code 200 OK`() {
-        val updated: Note = _sampleNote.copy(name = "Updated Note")
+        val updated: Note = _sampleNote.copy(title = "Updated Note")
 
         whenever(_noteService.update(_sampleNote.id, _sampleDto)).thenReturn(updated)
         val response: ResponseEntity<NoteDto> = _noteController.update(_sampleNote.id, _sampleDto)

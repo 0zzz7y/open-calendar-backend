@@ -62,8 +62,8 @@ class CategoryControllerTest {
     fun setup() {
         _sampleCategory = Category(
             id = UUID.randomUUID(),
-            name = "Personal",
-            color = CategoryColors.toHex(Color.GREEN)
+            title = "Personal",
+            color = CategoryColorHelper.toHex(Color.GREEN)
         )
         _sampleDto = _sampleCategory.toDto()
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
@@ -106,12 +106,12 @@ class CategoryControllerTest {
 
     @Test
     fun `should return paginated list of filtered categories with status code 200 OK`() {
-        val filter = CategoryFilterDto(name = "Personal")
+        val filter = CategoryFilterDto(title = "Personal")
         val categories: List<Category> = listOf(_sampleCategory, _sampleCategory, _sampleCategory)
 
         whenever(_categoryService.filter(filter, _pageable)).thenReturn(PageImpl(categories))
         val response: ResponseEntity<Page<CategoryDto>> = _categoryController.filter(
-            eq(filter.name),
+            eq(filter.title),
             null,
             eq(_pageable)
         )
@@ -124,10 +124,10 @@ class CategoryControllerTest {
     @Test
     fun `should return events by category id with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
-        val calendar = Calendar(name = "Calendar", emoji = "📅")
+        val calendar = Calendar(title = "Calendar", emoji = "📅")
         val event = Event(
             id = UUID.randomUUID(),
-            name = "Event",
+            title = "Event",
             description = "Description",
             startDate = LocalDateTime.now(),
             endDate = LocalDateTime.now().plusHours(1),
@@ -142,25 +142,21 @@ class CategoryControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(events.size, response.body?.totalElements?.toInt())
-        assertEquals(events[0].name, response.body?.content?.first()?.name)
+        assertEquals(events[0].title, response.body?.content?.first()?.title)
     }
 
     @Test
     fun `should return tasks by category id with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
-        val now: LocalDateTime = LocalDateTime.now()
         val calendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Calendar",
+            title = "Calendar",
             emoji = "📅"
         )
         val task = Task(
             id = UUID.randomUUID(),
-            name = "Task",
+            title = "Task",
             description = "Description",
-            startDate = now,
-            endDate = now.plusHours(1),
-            recurringPattern = RecurringPattern.NONE,
             status = TaskStatus.TODO,
             calendar = calendar,
             category = _sampleCategory
@@ -172,7 +168,7 @@ class CategoryControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(tasks.size, response.body?.totalElements?.toInt())
-        assertEquals(tasks[0].name, response.body?.content?.first()?.name)
+        assertEquals(tasks[0].title, response.body?.content?.first()?.title)
     }
 
     @Test
@@ -180,12 +176,12 @@ class CategoryControllerTest {
         val id: UUID = _sampleCategory.id
         val sampleCalendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Calendar",
+            title = "Calendar",
             emoji = "📅"
         )
         val note = Note(
             id = UUID.randomUUID(),
-            name = "Note",
+            title = "Note",
             description = "Description",
             calendar = sampleCalendar,
             category = _sampleCategory
@@ -197,7 +193,7 @@ class CategoryControllerTest {
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(notes.size, response.body?.totalElements?.toInt())
-        assertEquals(notes[0].name, response.body?.content?.first()?.name)
+        assertEquals(notes[0].title, response.body?.content?.first()?.title)
     }
 
     @Test
@@ -206,12 +202,12 @@ class CategoryControllerTest {
         val now: LocalDateTime = LocalDateTime.now()
         val calendar = Calendar(
             id = UUID.randomUUID(),
-            name = "Calendar",
+            title = "Calendar",
             emoji = "\uD83D\uDCC5"
         )
         val event = Event(
             id = UUID.randomUUID(),
-            name = "Event",
+            title = "Event",
             description = "Description",
             startDate = now,
             endDate = now.plusHours(1),
@@ -221,18 +217,15 @@ class CategoryControllerTest {
         )
         val task = Task(
             id = UUID.randomUUID(),
-            name = "Task",
+            title = "Task",
             description = "Description",
-            startDate = now,
-            endDate = now.plusHours(1),
-            recurringPattern = RecurringPattern.NONE,
             status = TaskStatus.TODO,
             calendar = calendar,
             category = _sampleCategory
         )
         val note = Note(
             id = UUID.randomUUID(),
-            name = "Note",
+            title = "Note",
             description = "Description",
             calendar = calendar,
             category = _sampleCategory
@@ -252,7 +245,7 @@ class CategoryControllerTest {
 
     @Test
     fun `should return updated category with status code 200 OK`() {
-        val updated = _sampleCategory.copy(name = "Work")
+        val updated = _sampleCategory.copy(title = "Work")
         whenever(_categoryService.update(_sampleCategory.id, _sampleDto)).thenReturn(updated)
 
         val response = _categoryController.update(_sampleCategory.id, _sampleDto)

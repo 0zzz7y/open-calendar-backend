@@ -56,7 +56,7 @@ class EventController(
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val filter = EventFilterDto(
-            name = name,
+            title = name,
             description = description,
             dateFrom = dateFrom?.let { LocalDateTime.parse(it) },
             dateTo = dateTo?.let { LocalDateTime.parse(it) },
