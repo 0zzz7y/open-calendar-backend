@@ -1,6 +1,7 @@
 package com.tomaszwnuk.opencalendar.domain.event
 
 import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
+import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -34,8 +35,8 @@ class EventController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
-        val events: Page<EventDto> = _eventService.getAll(pageable).map { it.toDto() }
-        return ResponseEntity.ok(events)
+        val events: List<EventDto> = _eventService.getAll().map { it.toDto() }
+        return ResponseEntity.ok(events.toPage(pageable))
     }
 
     @GetMapping("/{id}")
@@ -64,8 +65,8 @@ class EventController(
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val eventPages: Page<EventDto> = _eventService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(eventPages)
+        val events: List<EventDto> = _eventService.filter(filter).map { it.toDto() }
+        return ResponseEntity.ok(events.toPage(pageable))
     }
 
     @PutMapping("/{id}")

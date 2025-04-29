@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.*
 import org.mockito.quality.Strictness
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -104,11 +103,11 @@ class EventServiceTest {
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
         whenever(_eventRepository.findAll(_pageable)).thenReturn(PageImpl(events))
 
-        val result: Page<Event> = _eventService.getAll(_pageable)
+        val result: List<Event> = _eventService.getAll()
 
-        assertEquals(events.size, result.totalElements.toInt())
-        assertEquals(events.map { it.id }, result.content.map { it.id })
-        assertEquals(events.map { it.title }, result.content.map { it.title })
+        assertEquals(events.size, result.size)
+        assertEquals(events.map { it.id }, result.map { it.id })
+        assertEquals(events.map { it.title }, result.map { it.title })
 
         verify(_eventRepository).findAll(_pageable)
     }
@@ -141,15 +140,14 @@ class EventServiceTest {
                 isNull(),
                 isNull(),
                 isNull(),
-                isNull(),
-                eq(_pageable)
+                isNull()
             )
-        ).thenReturn(PageImpl(events))
+        ).thenReturn(events)
 
-        val result: Page<Event> = _eventService.filter(filter, _pageable)
+        val result: List<Event> = _eventService.filter(filter)
 
-        assertEquals(events.size, result.totalElements.toInt())
-        assertEquals(events.map { it.title }, result.content.map { it.title })
+        assertEquals(events.size, result.size)
+        assertEquals(events.map { it.title }, result.map { it.title })
 
         verify(_eventRepository).filter(
             eq(filter.title),
@@ -158,8 +156,7 @@ class EventServiceTest {
             isNull(),
             isNull(),
             isNull(),
-            isNull(),
-            eq(_pageable)
+            isNull()
         )
     }
 

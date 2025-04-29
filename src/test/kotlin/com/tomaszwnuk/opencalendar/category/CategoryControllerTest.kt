@@ -30,7 +30,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -90,7 +89,7 @@ class CategoryControllerTest {
     @Test
     fun `should return paginated list of all categories with status code 200 OK`() {
         val categories: List<Category> = listOf(_sampleCategory, _sampleCategory.copy(), _sampleCategory.copy())
-        whenever(_categoryService.getAll(_pageable)).thenReturn(PageImpl(categories))
+        whenever(_categoryService.getAll()).thenReturn(categories)
 
         val response: ResponseEntity<Page<CategoryDto>> = _categoryController.getAll(_pageable)
 
@@ -99,7 +98,7 @@ class CategoryControllerTest {
         assertEquals(categories.map { it.id }, response.body?.content?.map { it.id })
         assertEquals(categories.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_categoryService).getAll(_pageable)
+        verify(_categoryService).getAll()
     }
 
     @Test
@@ -119,14 +118,14 @@ class CategoryControllerTest {
     fun `should return paginated list of filtered categories with status code 200 OK`() {
         val filter = CategoryFilterDto(title = "Personal")
         val categories: List<Category> = listOf(_sampleCategory, _sampleCategory.copy(), _sampleCategory.copy())
-        whenever(_categoryService.filter(filter, _pageable)).thenReturn(PageImpl(categories))
+        whenever(_categoryService.filter(filter)).thenReturn(categories)
 
         val response: ResponseEntity<Page<CategoryDto>> = _categoryController.filter(filter.title, null, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(categories.size.toLong(), response.body?.totalElements)
 
-        verify(_categoryService).filter(eq(filter), eq(_pageable))
+        verify(_categoryService).filter(eq(filter))
     }
 
     @Test
@@ -145,7 +144,7 @@ class CategoryControllerTest {
         )
         val events: List<Event> = listOf(event)
 
-        whenever(_eventService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(events))
+        whenever(_eventService.getAllByCategoryId(id)).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _categoryController.getEvents(id, _pageable)
 
@@ -153,7 +152,7 @@ class CategoryControllerTest {
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).getAllByCategoryId(id, _pageable)
+        verify(_eventService).getAllByCategoryId(id)
     }
 
     @Test
@@ -170,7 +169,7 @@ class CategoryControllerTest {
         )
         val tasks: List<Task> = listOf(task)
 
-        whenever(_taskService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(tasks))
+        whenever(_taskService.getAllByCategoryId(id)).thenReturn(tasks)
 
         val response: ResponseEntity<Page<TaskDto>> = _categoryController.getTasks(id, _pageable)
 
@@ -178,7 +177,7 @@ class CategoryControllerTest {
         assertEquals(tasks.size.toLong(), response.body?.totalElements)
         assertEquals(tasks.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_taskService).getAllByCategoryId(id, _pageable)
+        verify(_taskService).getAllByCategoryId(id)
     }
 
     @Test
@@ -194,7 +193,7 @@ class CategoryControllerTest {
         )
         val notes: List<Note> = listOf(note)
 
-        whenever(_noteService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(notes))
+        whenever(_noteService.getAllByCategoryId(id)).thenReturn(notes)
 
         val response: ResponseEntity<Page<NoteDto>> = _categoryController.getNotes(id, _pageable)
 
@@ -202,7 +201,7 @@ class CategoryControllerTest {
         assertEquals(notes.size.toLong(), response.body?.totalElements)
         assertEquals(notes.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_noteService).getAllByCategoryId(id, _pageable)
+        verify(_noteService).getAllByCategoryId(id)
     }
 
     @Test
@@ -237,9 +236,9 @@ class CategoryControllerTest {
             category = _sampleCategory
         )
 
-        whenever(_eventService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(event)))
-        whenever(_taskService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(task)))
-        whenever(_noteService.getAllByCategoryId(id, _pageable)).thenReturn(PageImpl(listOf(note)))
+        whenever(_eventService.getAllByCategoryId(id)).thenReturn(listOf(event))
+        whenever(_taskService.getAllByCategoryId(id)).thenReturn(listOf(task))
+        whenever(_noteService.getAllByCategoryId(id)).thenReturn(listOf(note))
 
         val response: ResponseEntity<List<Map<String, Any>>> = _categoryController.getAllItems(id, _pageable)
 
@@ -249,9 +248,9 @@ class CategoryControllerTest {
         val types: List<String> = response.body?.mapNotNull { it["type"] as? String } ?: emptyList()
         assertTrue(types.containsAll(listOf("event", "task", "note")))
 
-        verify(_eventService).getAllByCategoryId(id, _pageable)
-        verify(_taskService).getAllByCategoryId(id, _pageable)
-        verify(_noteService).getAllByCategoryId(id, _pageable)
+        verify(_eventService).getAllByCategoryId(id)
+        verify(_taskService).getAllByCategoryId(id)
+        verify(_noteService).getAllByCategoryId(id)
     }
 
     @Test

@@ -30,7 +30,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -98,7 +97,7 @@ class CalendarControllerTest {
     @Test
     fun `should return paginated list of all calendars with status code 200 OK`() {
         val calendars: List<Calendar> = listOf(_sampleCalendar, _sampleCalendar.copy(), _sampleCalendar.copy())
-        whenever(_calendarService.getAll(_pageable)).thenReturn(PageImpl(calendars))
+        whenever(_calendarService.getAll()).thenReturn(calendars)
 
         val response: ResponseEntity<Page<CalendarDto>> = _calendarController.getAll(_pageable)
 
@@ -107,7 +106,7 @@ class CalendarControllerTest {
         assertEquals(calendars.map { it.id }, response.body?.content?.map { it.id })
         assertEquals(calendars.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_calendarService).getAll(_pageable)
+        verify(_calendarService).getAll()
     }
 
     @Test
@@ -141,7 +140,7 @@ class CalendarControllerTest {
         )
         val events: List<Event> = listOf(event, event, event)
 
-        whenever(_eventService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(events))
+        whenever(_eventService.getAllByCalendarId(id)).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _calendarController.getEvents(id, _pageable)
 
@@ -149,7 +148,7 @@ class CalendarControllerTest {
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).getAllByCalendarId(id, _pageable)
+        verify(_eventService).getAllByCalendarId(id)
     }
 
     @Test
@@ -165,7 +164,7 @@ class CalendarControllerTest {
         )
         val tasks: List<Task> = listOf(task, task, task)
 
-        whenever(_taskService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(tasks))
+        whenever(_taskService.getAllByCalendarId(id)).thenReturn(tasks)
 
         val response: ResponseEntity<Page<TaskDto>> = _calendarController.getTasks(id, _pageable)
 
@@ -173,7 +172,7 @@ class CalendarControllerTest {
         assertEquals(tasks.size.toLong(), response.body?.totalElements)
         assertEquals(tasks.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_taskService).getAllByCalendarId(id, _pageable)
+        verify(_taskService).getAllByCalendarId(id)
     }
 
     @Test
@@ -188,7 +187,7 @@ class CalendarControllerTest {
         )
         val notes: List<Note> = listOf(note, note.copy())
 
-        whenever(_noteService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(notes))
+        whenever(_noteService.getAllByCalendarId(id)).thenReturn(notes)
 
         val response: ResponseEntity<Page<NoteDto>> = _calendarController.getNotes(id, _pageable)
 
@@ -196,7 +195,7 @@ class CalendarControllerTest {
         assertEquals(notes.size.toLong(), response.body?.totalElements)
         assertEquals(notes.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_noteService).getAllByCalendarId(id, _pageable)
+        verify(_noteService).getAllByCalendarId(id)
     }
 
     @Test
@@ -230,9 +229,9 @@ class CalendarControllerTest {
             category = null
         )
 
-        whenever(_eventService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(event)))
-        whenever(_taskService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(task)))
-        whenever(_noteService.getAllByCalendarId(id, _pageable)).thenReturn(PageImpl(listOf(note)))
+        whenever(_eventService.getAllByCalendarId(id)).thenReturn(listOf(event))
+        whenever(_taskService.getAllByCalendarId(id)).thenReturn(listOf(task))
+        whenever(_noteService.getAllByCalendarId(id)).thenReturn(listOf(note))
 
         val response: ResponseEntity<List<Map<String, Any>>> = _calendarController.getAllItems(id, _pageable)
 

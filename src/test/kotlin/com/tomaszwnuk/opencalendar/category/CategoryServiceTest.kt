@@ -14,8 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.*
 import org.mockito.quality.Strictness
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import java.awt.Color
@@ -70,13 +68,13 @@ class CategoryServiceTest {
             _sampleCategory.copy(id = UUID.randomUUID()),
             _sampleCategory.copy(id = UUID.randomUUID())
         )
-        whenever(_categoryRepository.findAll(_pageable)).thenReturn(PageImpl(categories))
+        whenever(_categoryRepository.findAll()).thenReturn(categories)
 
-        val result: Page<Category> = _categoryService.getAll(_pageable)
+        val result: List<Category> = _categoryService.getAll()
 
-        assertEquals(categories.size, result.totalElements.toInt())
-        assertEquals(categories.map { it.id }, result.content.map { it.id })
-        assertEquals(categories.map { it.title }, result.content.map { it.title })
+        assertEquals(categories.size, result.size)
+        assertEquals(categories.map { it.id }, result.map { it.id })
+        assertEquals(categories.map { it.title }, result.map { it.title })
 
         verify(_categoryRepository).findAll(_pageable)
     }
@@ -104,15 +102,15 @@ class CategoryServiceTest {
             _sampleCategory.copy(id = UUID.randomUUID()),
             _sampleCategory.copy(id = UUID.randomUUID())
         )
-        whenever(_categoryRepository.filter(eq(filter.title), isNull(), eq(_pageable)))
-            .thenReturn(PageImpl(categories))
+        whenever(_categoryRepository.filter(eq(filter.title), isNull()))
+            .thenReturn(categories)
 
-        val result: Page<Category> = _categoryService.filter(filter, _pageable)
+        val result: List<Category> = _categoryService.filter(filter)
 
-        assertEquals(categories.size, result.totalElements.toInt())
-        assertEquals(categories.map { it.title }, result.content.map { it.title })
+        assertEquals(categories.size, result.size)
+        assertEquals(categories.map { it.title }, result.map { it.title })
 
-        verify(_categoryRepository).filter(eq(filter.title), isNull(), eq(_pageable))
+        verify(_categoryRepository).filter(eq(filter.title), isNull())
     }
 
     @Test

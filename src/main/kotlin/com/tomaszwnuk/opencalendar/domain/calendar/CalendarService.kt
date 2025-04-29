@@ -6,8 +6,6 @@ import com.tomaszwnuk.opencalendar.utility.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -42,11 +40,10 @@ class CalendarService(
     }
 
     @Cacheable(cacheNames = ["allCalendars"])
-    fun getAll(pageable: Pageable): Page<Calendar> {
+    fun getAll(): List<Calendar> {
         info(this, "Fetching all calendars")
         _timer = System.currentTimeMillis()
-        val calendars: Page<Calendar> = _calendarRepository.findAll(pageable)
-
+        val calendars: List<Calendar> = _calendarRepository.findAll()
         info(this, "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
         return calendars
     }
@@ -55,19 +52,19 @@ class CalendarService(
     fun getById(id: UUID): Calendar {
         info(this, "Fetching calendar with id $id")
         _timer = System.currentTimeMillis()
+
         val calendar: Calendar = _calendarRepository.findOrThrow(id)
 
         info(this, "Found $calendar in ${System.currentTimeMillis() - _timer} ms")
         return calendar
     }
 
-    fun filter(filter: CalendarFilterDto, pageable: Pageable): Page<Calendar> {
+    fun filter(filter: CalendarFilterDto): List<Calendar> {
         info(this, "Filtering calendars with $filter")
         _timer = System.currentTimeMillis()
-        val calendars: Page<Calendar> = _calendarRepository.filter(
+        val calendars: List<Calendar> = _calendarRepository.filter(
             title = filter.title,
-            emoji = filter.emoji,
-            pageable = pageable
+            emoji = filter.emoji
         )
 
         info(this, "Found $calendars in ${System.currentTimeMillis() - _timer} ms")

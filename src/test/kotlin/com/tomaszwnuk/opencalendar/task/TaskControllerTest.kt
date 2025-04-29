@@ -21,7 +21,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -87,7 +86,7 @@ class TaskControllerTest {
     @Test
     fun `should return paginated list of all tasks with status code 200 OK`() {
         val tasks: List<Task> = listOf(_sampleTask, _sampleTask.copy(), _sampleTask.copy())
-        whenever(_taskService.getAll(_pageable)).thenReturn(PageImpl(tasks))
+        whenever(_taskService.getAll()).thenReturn(tasks)
 
         val response: ResponseEntity<Page<TaskDto>> = _taskController.getAll(_pageable)
 
@@ -96,7 +95,7 @@ class TaskControllerTest {
         assertEquals(tasks.map { it.id }, response.body?.content?.map { it.id })
         assertEquals(tasks.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_taskService).getAll(_pageable)
+        verify(_taskService).getAll()
     }
 
     @Test
@@ -120,7 +119,7 @@ class TaskControllerTest {
         val filter = TaskFilterDto(title = "Gym Workout")
         val tasks: List<Task> = listOf(_sampleTask, _sampleTask.copy(), _sampleTask.copy())
 
-        whenever(_taskService.filter(eq(filter), eq(_pageable))).thenReturn(PageImpl(tasks))
+        whenever(_taskService.filter(eq(filter))).thenReturn(tasks)
 
         val response: ResponseEntity<Page<TaskDto>> = _taskController.filter(
             filter.title,
@@ -135,7 +134,7 @@ class TaskControllerTest {
         assertEquals(tasks.size.toLong(), response.body?.totalElements)
         assertEquals(tasks.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_taskService).filter(eq(filter), eq(_pageable))
+        verify(_taskService).filter(eq(filter))
     }
 
     @Test

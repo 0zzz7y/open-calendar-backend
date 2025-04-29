@@ -1,5 +1,6 @@
 package com.tomaszwnuk.opencalendar.domain.note
 
+import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -31,8 +32,8 @@ class NoteController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
-        val notes: Page<NoteDto> = _noteService.getAll(pageable).map { it.toDto() }
-        return ResponseEntity.ok(notes)
+        val notes: List<NoteDto> = _noteService.getAll().map { it.toDto() }
+        return ResponseEntity.ok(notes.toPage(pageable))
     }
 
     @GetMapping("/{id}")
@@ -55,8 +56,8 @@ class NoteController(
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val notes: Page<NoteDto> = _noteService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(notes)
+        val notes: List<NoteDto> = _noteService.filter(filter).map { it.toDto() }
+        return ResponseEntity.ok(notes.toPage(pageable))
     }
 
     @PutMapping("/{id}")

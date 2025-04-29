@@ -6,7 +6,8 @@ import com.tomaszwnuk.opencalendar.domain.note.NoteDto
 import com.tomaszwnuk.opencalendar.domain.note.NoteService
 import com.tomaszwnuk.opencalendar.domain.task.TaskDto
 import com.tomaszwnuk.opencalendar.domain.task.TaskService
-import com.tomaszwnuk.opencalendar.utility.mapper.ItemTypeMapper.toMapWithType
+import com.tomaszwnuk.opencalendar.domain.mapper.ItemTypeMapper.toMapWithType
+import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -41,8 +42,8 @@ class CalendarController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<CalendarDto>> {
-        val calendars: Page<CalendarDto> = _calendarService.getAll(pageable).map { it.toDto() }
-        return ResponseEntity.ok(calendars)
+        val calendars: List<CalendarDto> = _calendarService.getAll().map { it.toDto() }
+        return ResponseEntity.ok(calendars.toPage(pageable))
     }
 
     @GetMapping("/{id}")
@@ -56,8 +57,8 @@ class CalendarController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
-        val events: Page<EventDto> = _eventService.getAllByCalendarId(id, pageable).map { it.toDto() }
-        return ResponseEntity.ok(events)
+        val events: List<EventDto> = _eventService.getAllByCalendarId(id).map { it.toDto() }
+        return ResponseEntity.ok(events.toPage(pageable))
     }
 
     @GetMapping("/{id}/tasks")
@@ -65,8 +66,8 @@ class CalendarController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
-        val tasks: Page<TaskDto> = _taskService.getAllByCalendarId(id, pageable).map { it.toDto() }
-        return ResponseEntity.ok(tasks)
+        val tasks: List<TaskDto> = _taskService.getAllByCalendarId(id).map { it.toDto() }
+        return ResponseEntity.ok(tasks.toPage(pageable))
     }
 
     @GetMapping("/{id}/notes")
@@ -74,8 +75,8 @@ class CalendarController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
-        val notes: Page<NoteDto> = _noteService.getAllByCalendarId(id, pageable).map { it.toDto() }
-        return ResponseEntity.ok(notes)
+        val notes: List<NoteDto> = _noteService.getAllByCalendarId(id).map { it.toDto() }
+        return ResponseEntity.ok(notes.toPage(pageable))
     }
 
     @GetMapping("/{id}/items")
@@ -87,15 +88,15 @@ class CalendarController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<List<Map<String, Any>>> {
-        val events = _eventService.getAllByCalendarId(id, pageable).map {
+        val events: Page<Map<String, Any>> = _eventService.getAllByCalendarId(id).map {
             it.toDto().toMapWithType("event")
-        }
-        val tasks = _taskService.getAllByCalendarId(id, pageable).map {
+        }.toPage(pageable)
+        val tasks: Page<Map<String, Any>> = _taskService.getAllByCalendarId(id).map {
             it.toDto().toMapWithType("task")
-        }
-        val notes = _noteService.getAllByCalendarId(id, pageable).map {
+        }.toPage(pageable)
+        val notes: Page<Map<String, Any>> = _noteService.getAllByCalendarId(id).map {
             it.toDto().toMapWithType("note")
-        }
+        }.toPage(pageable)
 
         val items = events + tasks + notes
         return ResponseEntity.ok(items)
@@ -111,8 +112,8 @@ class CalendarController(
             title = title,
             emoji = emoji
         )
-        val calendars: Page<CalendarDto> = _calendarService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(calendars)
+        val calendars: List<CalendarDto> = _calendarService.filter(filter).map { it.toDto() }
+        return ResponseEntity.ok(calendars.toPage(pageable))
     }
 
     @PutMapping("/{id}")

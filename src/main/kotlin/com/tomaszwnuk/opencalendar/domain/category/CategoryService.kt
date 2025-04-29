@@ -6,8 +6,6 @@ import com.tomaszwnuk.opencalendar.utility.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -42,10 +40,10 @@ class CategoryService(
     }
 
     @Cacheable(cacheNames = ["allCategories"])
-    fun getAll(pageable: Pageable): Page<Category> {
+    fun getAll(): List<Category> {
         info(this, "Fetching all categories")
         _timer = System.currentTimeMillis()
-        val categories: Page<Category> = _categoryRepository.findAll(pageable)
+        val categories: List<Category> = _categoryRepository.findAll()
 
         info(this, "Found $categories in ${System.currentTimeMillis() - _timer} ms")
         return categories
@@ -61,13 +59,12 @@ class CategoryService(
         return category
     }
 
-    fun filter(filter: CategoryFilterDto, pageable: Pageable): Page<Category> {
+    fun filter(filter: CategoryFilterDto): List<Category> {
         info(this, "Filtering categories with $filter")
         _timer = System.currentTimeMillis()
-        val categories: Page<Category> = _categoryRepository.filter(
+        val categories: List<Category> = _categoryRepository.filter(
             title = filter.title,
-            color = filter.color,
-            pageable = pageable
+            color = filter.color
         )
 
         info(this, "Found $categories in ${System.currentTimeMillis() - _timer} ms")

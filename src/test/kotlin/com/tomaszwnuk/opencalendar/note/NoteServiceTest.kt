@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.*
 import org.mockito.quality.Strictness
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -96,11 +95,11 @@ class NoteServiceTest {
         val notes: List<Note> = listOf(_sampleNote, _sampleNote.copy(), _sampleNote.copy())
         whenever(_noteRepository.findAll(_pageable)).thenReturn(PageImpl(notes))
 
-        val result: Page<Note> = _noteService.getAll(_pageable)
+        val result: List<Note> = _noteService.getAll()
 
-        assertEquals(notes.size, result.totalElements.toInt())
-        assertEquals(notes.map { it.id }, result.content.map { it.id })
-        assertEquals(notes.map { it.title }, result.content.map { it.title })
+        assertEquals(notes.size, result.size)
+        assertEquals(notes.map { it.id }, result.map { it.id })
+        assertEquals(notes.map { it.title }, result.map { it.title })
 
         verify(_noteRepository).findAll(_pageable)
     }
@@ -130,22 +129,20 @@ class NoteServiceTest {
                 eq(filter.title),
                 isNull(),
                 isNull(),
-                isNull(),
-                eq(_pageable)
+                isNull()
             )
-        ).thenReturn(PageImpl(notes))
+        ).thenReturn(notes)
 
-        val result: Page<Note> = _noteService.filter(filter, _pageable)
+        val result: List<Note> = _noteService.filter(filter)
 
-        assertEquals(notes.size, result.totalElements.toInt())
-        assertEquals(notes.map { it.title }, result.content.map { it.title })
+        assertEquals(notes.size, result.size)
+        assertEquals(notes.map { it.title }, result.map { it.title })
 
         verify(_noteRepository).filter(
             eq(filter.title),
             isNull(),
             isNull(),
-            isNull(),
-            eq(_pageable)
+            isNull()
         )
     }
 

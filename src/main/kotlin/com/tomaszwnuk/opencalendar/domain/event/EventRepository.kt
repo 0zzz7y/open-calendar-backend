@@ -1,8 +1,6 @@
 package com.tomaszwnuk.opencalendar.domain.event
 
 import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -11,9 +9,9 @@ import java.util.*
 
 interface EventRepository : JpaRepository<Event, UUID> {
 
-    fun findAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Event>
+    fun findAllByCalendarId(calendarId: UUID): List<Event>
 
-    fun findAllByCategoryId(categoryId: UUID, pageable: Pageable): Page<Event>
+    fun findAllByCategoryId(categoryId: UUID): List<Event>
 
     @Query(
         """
@@ -34,8 +32,7 @@ interface EventRepository : JpaRepository<Event, UUID> {
         @Param("dateTo") dateTo: LocalDateTime?,
         @Param("recurringPattern") recurringPattern: RecurringPattern?,
         @Param("calendarId") calendarId: UUID?,
-        @Param("categoryId") categoryId: UUID?,
-        pageable: Pageable
-    ): Page<Event>
+        @Param("categoryId") categoryId: UUID?
+    ): List<Event>
 
 }

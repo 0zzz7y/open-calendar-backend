@@ -19,8 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.*
 import org.mockito.quality.Strictness
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import java.awt.Color
@@ -95,13 +93,13 @@ class TaskServiceTest {
     @Test
     fun `should return paginated list of all tasks`() {
         val tasks: List<Task> = listOf(_sampleTask, _sampleTask.copy(), _sampleTask.copy())
-        whenever(_taskRepository.findAll(_pageable)).thenReturn(PageImpl(tasks))
+        whenever(_taskRepository.findAll()).thenReturn(tasks)
 
-        val result: Page<Task> = _taskService.getAll(_pageable)
+        val result: List<Task> = _taskService.getAll()
 
-        assertEquals(tasks.size, result.totalElements.toInt())
-        assertEquals(tasks.map { it.id }, result.content.map { it.id })
-        assertEquals(tasks.map { it.title }, result.content.map { it.title })
+        assertEquals(tasks.size, result.size)
+        assertEquals(tasks.map { it.id }, result.map { it.id })
+        assertEquals(tasks.map { it.title }, result.map { it.title })
 
         verify(_taskRepository).findAll(_pageable)
     }
@@ -132,23 +130,21 @@ class TaskServiceTest {
                 isNull(),
                 isNull(),
                 isNull(),
-                isNull(),
-                eq(_pageable)
+                isNull()
             )
-        ).thenReturn(PageImpl(tasks))
+        ).thenReturn(tasks)
 
-        val result: Page<Task> = _taskService.filter(filter, _pageable)
+        val result: List<Task> = _taskService.filter(filter)
 
-        assertEquals(tasks.size, result.totalElements.toInt())
-        assertEquals(tasks.map { it.title }, result.content.map { it.title })
+        assertEquals(tasks.size, result.size)
+        assertEquals(tasks.map { it.title }, result.map { it.title })
 
         verify(_taskRepository).filter(
             eq(filter.title),
             isNull(),
             isNull(),
             isNull(),
-            isNull(),
-            eq(_pageable)
+            isNull()
         )
     }
 

@@ -13,7 +13,6 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.*
 import org.mockito.quality.Strictness
-import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
@@ -76,11 +75,11 @@ class CalendarServiceTest {
         )
         whenever(_calendarRepository.findAll(_pageable)).thenReturn(PageImpl(calendars))
 
-        val result: Page<Calendar> = _calendarService.getAll(_pageable)
+        val result: List<Calendar> = _calendarService.getAll()
 
-        assertEquals(calendars.size, result.totalElements.toInt())
-        assertEquals(calendars.map { it.id }, result.content.map { it.id })
-        assertEquals(calendars.map { it.title }, result.content.map { it.title })
+        assertEquals(calendars.size, result.size)
+        assertEquals(calendars.map { it.id }, result.map { it.id })
+        assertEquals(calendars.map { it.title }, result.map { it.title })
 
         verify(_calendarRepository).findAll(_pageable)
     }
@@ -108,15 +107,15 @@ class CalendarServiceTest {
             _sampleCalendar.copy(id = UUID.randomUUID()),
             _sampleCalendar.copy(id = UUID.randomUUID())
         )
-        whenever(_calendarRepository.filter(eq(filter.title), eq(filter.emoji), eq(_pageable)))
-            .thenReturn(PageImpl(calendars))
+        whenever(_calendarRepository.filter(eq(filter.title), eq(filter.emoji)))
+            .thenReturn(calendars)
 
-        val result: Page<Calendar> = _calendarService.filter(filter, _pageable)
+        val result: List<Calendar> = _calendarService.filter(filter)
 
-        assertEquals(calendars.size, result.totalElements.toInt())
-        assertEquals(calendars.map { it.title }, result.content.map { it.title })
+        assertEquals(calendars.size, result.size)
+        assertEquals(calendars.map { it.title }, result.map { it.title })
 
-        verify(_calendarRepository).filter(eq(filter.title), eq(filter.emoji), eq(_pageable))
+        verify(_calendarRepository).filter(eq(filter.title), eq(filter.emoji))
     }
 
     @Test

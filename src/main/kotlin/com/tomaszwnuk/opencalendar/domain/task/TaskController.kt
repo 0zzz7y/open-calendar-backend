@@ -1,5 +1,6 @@
 package com.tomaszwnuk.opencalendar.domain.task
 
+import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -29,8 +30,8 @@ class TaskController(private val _taskService: TaskService) {
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
-        val tasks: Page<TaskDto> = _taskService.getAll(pageable).map { it.toDto() }
-        return ResponseEntity.ok(tasks)
+        val tasks: List<TaskDto> = _taskService.getAll().map { it.toDto() }
+        return ResponseEntity.ok(tasks.toPage(pageable))
     }
 
     @GetMapping("/{id}")
@@ -55,8 +56,8 @@ class TaskController(private val _taskService: TaskService) {
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val tasks: Page<TaskDto> = _taskService.filter(filter, pageable).map { it.toDto() }
-        return ResponseEntity.ok(tasks)
+        val tasks: List<TaskDto> = _taskService.filter(filter).map { it.toDto() }
+        return ResponseEntity.ok(tasks.toPage(pageable))
     }
 
     @PutMapping("/{id}")

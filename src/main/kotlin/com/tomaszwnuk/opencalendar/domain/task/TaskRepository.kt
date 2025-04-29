@@ -1,7 +1,5 @@
 package com.tomaszwnuk.opencalendar.domain.task
 
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
@@ -9,9 +7,9 @@ import java.util.*
 
 interface TaskRepository : JpaRepository<Task, UUID> {
 
-    fun findAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Task>
+    fun findAllByCalendarId(calendarId: UUID): List<Task>
 
-    fun findAllByCategoryId(categoryId: UUID, pageable: Pageable): Page<Task>
+    fun findAllByCategoryId(categoryId: UUID): List<Task>
 
     @Query(
         """
@@ -28,8 +26,7 @@ interface TaskRepository : JpaRepository<Task, UUID> {
         @Param("description") description: String?,
         @Param("status") status: TaskStatus?,
         @Param("calendarId") calendarId: UUID?,
-        @Param("categoryId") categoryId: UUID?,
-        pageable: Pageable
-    ): Page<Task>
+        @Param("categoryId") categoryId: UUID?
+    ): List<Task>
 
 }

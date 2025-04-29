@@ -9,8 +9,6 @@ import com.tomaszwnuk.opencalendar.utility.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -57,45 +55,44 @@ class TaskService(
         return task
     }
 
-    fun getAll(pageable: Pageable): Page<Task> {
+    fun getAll(): List<Task> {
         info(this, "Fetching all tasks")
         _timer = System.currentTimeMillis()
-        val tasks: Page<Task> = _taskRepository.findAll(pageable)
+        val tasks: List<Task> = _taskRepository.findAll()
 
         info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks
     }
 
     @Cacheable(cacheNames = ["calendarTasks"], key = "#calendarId")
-    fun getAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Task> {
+    fun getAllByCalendarId(calendarId: UUID): List<Task> {
         info(this, "Fetching all tasks for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
-        val tasks: Page<Task> = _taskRepository.findAllByCalendarId(calendarId, pageable)
+        val tasks: List<Task> = _taskRepository.findAllByCalendarId(calendarId)
 
         info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks
     }
 
     @Cacheable(cacheNames = ["categoryTasks"], key = "#categoryId")
-    fun getAllByCategoryId(categoryId: UUID, pageable: Pageable): Page<Task> {
+    fun getAllByCategoryId(categoryId: UUID): List<Task> {
         info(this, "Fetching all tasks for calendar with id $categoryId")
         _timer = System.currentTimeMillis()
-        val tasks: Page<Task> = _taskRepository.findAllByCategoryId(categoryId, pageable)
+        val tasks: List<Task> = _taskRepository.findAllByCategoryId(categoryId)
 
         info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks
     }
 
-    fun filter(filter: TaskFilterDto, pageable: Pageable): Page<Task> {
+    fun filter(filter: TaskFilterDto): List<Task> {
         info(this, "Filtering tasks with $filter")
         _timer = System.currentTimeMillis()
-        val filteredTasks: Page<Task> = _taskRepository.filter(
+        val filteredTasks: List<Task> = _taskRepository.filter(
             title = filter.title,
             description = filter.description,
             status = filter.status,
             calendarId = filter.calendarId,
-            categoryId = filter.categoryId,
-            pageable = pageable
+            categoryId = filter.categoryId
         )
 
         info(this, "Found $filteredTasks in ${System.currentTimeMillis() - _timer} ms")
@@ -152,9 +149,8 @@ class TaskService(
     fun deleteAllByCalendarId(calendarId: UUID) {
         info(this, "Deleting all tasks for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
-        val tasks: Page<Task> = _taskRepository.findAllByCalendarId(
-            calendarId = calendarId,
-            pageable = Pageable.unpaged()
+        val tasks: List<Task> = _taskRepository.findAllByCalendarId(
+            calendarId = calendarId
         )
 
         _taskRepository.deleteAll(tasks)
@@ -170,12 +166,9 @@ class TaskService(
     fun deleteAllCategoryByCategoryId(categoryId: UUID) {
         info(this, "Updating all tasks for category with id $categoryId.")
         _timer = System.currentTimeMillis()
-        val tasks: Page<Task> = _taskRepository.findAllByCategoryId(
-            categoryId = categoryId,
-            pageable = Pageable.unpaged()
-        )
+        val tasks: List<Task> = _taskRepository.findAllByCategoryId(categoryId = categoryId)
 
-        tasks.content.forEach { task ->
+        tasks.forEach { task ->
             val withoutCategory = task.copy(category = null)
             _taskRepository.save(withoutCategory)
         }

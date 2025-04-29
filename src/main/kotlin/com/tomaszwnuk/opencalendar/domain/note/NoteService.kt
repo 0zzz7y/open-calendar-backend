@@ -9,8 +9,6 @@ import com.tomaszwnuk.opencalendar.utility.validation.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -57,43 +55,42 @@ class NoteService(
     }
 
     @Cacheable(cacheNames = ["calendarNotes"], key = "#calendarId")
-    fun getAllByCalendarId(calendarId: UUID, pageable: Pageable): Page<Note> {
+    fun getAllByCalendarId(calendarId: UUID): List<Note> {
         info(this, "Fetching all notes for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
-        val notes: Page<Note> = _noteRepository.findAllByCalendarId(calendarId, pageable)
+        val notes: List<Note> = _noteRepository.findAllByCalendarId(calendarId)
 
         info(this, "Found $notes in ${System.currentTimeMillis() - _timer} ms")
         return notes
     }
 
     @Cacheable(cacheNames = ["categoryNotes"], key = "#categoryId")
-    fun getAllByCategoryId(categoryId: UUID, pageable: Pageable): Page<Note> {
+    fun getAllByCategoryId(categoryId: UUID): List<Note> {
         info(this, "Fetching all notes for calendar with id $categoryId")
         _timer = System.currentTimeMillis()
-        val notes: Page<Note> = _noteRepository.findAllByCategoryId(categoryId, pageable)
+        val notes: List<Note> = _noteRepository.findAllByCategoryId(categoryId)
 
         info(this, "Found $notes in ${System.currentTimeMillis() - _timer} ms")
         return notes
     }
 
-    fun getAll(pageable: Pageable): Page<Note> {
+    fun getAll(): List<Note> {
         info(this, "Fetching all notes")
         _timer = System.currentTimeMillis()
-        val notes: Page<Note> = _noteRepository.findAll(pageable)
+        val notes: List<Note> = _noteRepository.findAll()
 
         info(this, "Found $notes in ${System.currentTimeMillis() - _timer} ms")
         return notes
     }
 
-    fun filter(filter: NoteFilterDto, pageable: Pageable): Page<Note> {
+    fun filter(filter: NoteFilterDto): List<Note> {
         info(this, "Filtering notes with $filter")
         _timer = System.currentTimeMillis()
-        val filtered: Page<Note> = _noteRepository.filter(
+        val filtered: List<Note> = _noteRepository.filter(
             title = filter.title,
             description = filter.description,
             calendarId = filter.calendarId,
-            categoryId = filter.categoryId,
-            pageable = pageable
+            categoryId = filter.categoryId
         )
 
         info(this, "Found $filtered in ${System.currentTimeMillis() - _timer} ms")
@@ -149,9 +146,8 @@ class NoteService(
     fun deleteAllByCalendarId(calendarId: UUID) {
         info(this, "Deleting all notes for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
-        val notes: Page<Note> = _noteRepository.findAllByCalendarId(
-            calendarId = calendarId,
-            pageable = Pageable.unpaged()
+        val notes: List<Note> = _noteRepository.findAllByCalendarId(
+            calendarId = calendarId
         )
 
         _noteRepository.deleteAll(notes)
@@ -167,12 +163,9 @@ class NoteService(
     fun deleteAllCategoryByCategoryId(categoryId: UUID) {
         info(this, "Updating all notes for category with id $categoryId.")
         _timer = System.currentTimeMillis()
-        val notes: Page<Note> = _noteRepository.findAllByCategoryId(
-            categoryId = categoryId,
-            pageable = Pageable.unpaged()
-        )
+        val notes: List<Note> = _noteRepository.findAllByCategoryId(categoryId = categoryId)
 
-        notes.content.forEach { note ->
+        notes.forEach { note ->
             val withoutCategory = note.copy(category = null)
             _noteRepository.save(withoutCategory)
         }

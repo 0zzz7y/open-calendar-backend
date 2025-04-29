@@ -22,7 +22,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -91,7 +90,7 @@ class EventControllerTest {
     @Test
     fun `should return paginated list of all events with status code 200 OK`() {
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
-        whenever(_eventService.getAll(_pageable)).thenReturn(PageImpl(events))
+        whenever(_eventService.getAll()).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _eventController.getAll(_pageable)
 
@@ -100,14 +99,14 @@ class EventControllerTest {
         assertEquals(events.map { it.id }, response.body?.content?.map { it.id })
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).getAll(_pageable)
+        verify(_eventService).getAll()
     }
 
     @Test
     fun `should return paginated list of filtered events with status code 200 OK`() {
         val filter = EventFilterDto(title = "Standup")
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
-        whenever(_eventService.filter(eq(filter), eq(_pageable))).thenReturn(PageImpl(events))
+        whenever(_eventService.filter(eq(filter))).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _eventController.filter(
             filter.title,
@@ -124,7 +123,7 @@ class EventControllerTest {
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).filter(eq(filter), eq(_pageable))
+        verify(_eventService).filter(eq(filter))
     }
 
     @Test

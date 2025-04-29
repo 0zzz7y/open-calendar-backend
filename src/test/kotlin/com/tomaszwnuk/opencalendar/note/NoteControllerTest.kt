@@ -21,7 +21,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.quality.Strictness
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -85,7 +84,7 @@ class NoteControllerTest {
     @Test
     fun `should return paginated list of all notes with status code 200 OK`() {
         val notes: List<Note> = listOf(_sampleNote, _sampleNote.copy(), _sampleNote.copy())
-        whenever(_noteService.getAll(_pageable)).thenReturn(PageImpl(notes))
+        whenever(_noteService.getAll()).thenReturn(notes)
 
         val response: ResponseEntity<Page<NoteDto>> = _noteController.getAll(_pageable)
 
@@ -94,7 +93,7 @@ class NoteControllerTest {
         assertEquals(notes.map { it.id }, response.body?.content?.map { it.id })
         assertEquals(notes.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_noteService).getAll(_pageable)
+        verify(_noteService).getAll()
     }
 
     @Test
@@ -118,7 +117,7 @@ class NoteControllerTest {
         val filter = NoteFilterDto(title = "Groceries")
         val notes: List<Note> = listOf(_sampleNote, _sampleNote.copy(), _sampleNote.copy())
 
-        whenever(_noteService.filter(eq(filter), eq(_pageable))).thenReturn(PageImpl(notes))
+        whenever(_noteService.filter(eq(filter))).thenReturn(notes)
 
         val response: ResponseEntity<Page<NoteDto>> = _noteController.filter(
             filter.title,
@@ -132,7 +131,7 @@ class NoteControllerTest {
         assertEquals(notes.size.toLong(), response.body?.totalElements)
         assertEquals(notes.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_noteService).filter(eq(filter), eq(_pageable))
+        verify(_noteController).filter(filter.title, null, null, null, _pageable)
     }
 
     @Test
