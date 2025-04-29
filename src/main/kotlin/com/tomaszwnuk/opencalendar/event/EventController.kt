@@ -46,7 +46,7 @@ class EventController(
 
     @GetMapping("/filter")
     fun filter(
-        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) title: String?,
         @RequestParam(required = false) description: String?,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateFrom: String?,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateTo: String?,
@@ -56,7 +56,7 @@ class EventController(
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val filter = EventFilterDto(
-            title = name,
+            title = title,
             description = description,
             dateFrom = dateFrom?.let { LocalDateTime.parse(it) },
             dateTo = dateTo?.let { LocalDateTime.parse(it) },

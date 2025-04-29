@@ -37,7 +37,7 @@ class CategoryController(
     fun getAll(
         @PageableDefault(
             size = 10,
-            sort = ["name"],
+            sort = ["title"],
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<CategoryDto>> {
@@ -103,12 +103,12 @@ class CategoryController(
 
     @GetMapping("/filter")
     fun filter(
-        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) title: String?,
         @RequestParam(required = false) color: String?,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<CategoryDto>> {
         val filter = CategoryFilterDto(
-            title = name,
+            title = title,
             color = color
         )
         val categories: Page<CategoryDto> = _categoryService.filter(filter, pageable).map { it.toDto() }

@@ -41,7 +41,7 @@ class TaskController(private val _taskService: TaskService) {
 
     @GetMapping("/filter")
     fun filter(
-        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) title: String?,
         @RequestParam(required = false) description: String?,
         @RequestParam(required = false) status: String?,
         @RequestParam(required = false) calendarId: UUID?,
@@ -49,7 +49,7 @@ class TaskController(private val _taskService: TaskService) {
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val filter = TaskFilterDto(
-            title = name,
+            title = title,
             description = description,
             status = status?.let { TaskStatus.valueOf(it) },
             calendarId = calendarId,
