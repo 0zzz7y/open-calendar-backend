@@ -1,7 +1,5 @@
 package com.tomaszwnuk.opencalendar.domain.event
 
-import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
-import com.tomaszwnuk.opencalendar.domain.other.Schedulable
 import com.tomaszwnuk.opencalendar.common.date.LocalDateTimeConverter
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.category.Category
@@ -9,10 +7,12 @@ import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITI
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_TITLE
+import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
+import com.tomaszwnuk.opencalendar.domain.other.Schedulable
 import com.tomaszwnuk.opencalendar.domain.record.Record
 import jakarta.persistence.*
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "event")

@@ -2,11 +2,8 @@ package com.tomaszwnuk.opencalendar.calendar
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
-import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
-import com.tomaszwnuk.opencalendar.domain.calendar.CalendarService
+import com.tomaszwnuk.opencalendar.domain.calendar.*
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
-import com.tomaszwnuk.opencalendar.domain.calendar.CalendarDto
-import com.tomaszwnuk.opencalendar.domain.calendar.CalendarFilterDto
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

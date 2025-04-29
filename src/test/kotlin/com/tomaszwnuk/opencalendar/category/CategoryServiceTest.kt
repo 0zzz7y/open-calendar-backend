@@ -2,12 +2,7 @@ package com.tomaszwnuk.opencalendar.category
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
-import com.tomaszwnuk.opencalendar.domain.category.Category
-import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
-import com.tomaszwnuk.opencalendar.domain.category.CategoryDto
-import com.tomaszwnuk.opencalendar.domain.category.CategoryFilterDto
-import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
-import com.tomaszwnuk.opencalendar.domain.category.CategoryService
+import com.tomaszwnuk.opencalendar.domain.category.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach

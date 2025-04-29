@@ -7,7 +7,7 @@ import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITI
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_TITLE
 import com.tomaszwnuk.opencalendar.domain.record.Record
 import jakarta.persistence.*
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "task")

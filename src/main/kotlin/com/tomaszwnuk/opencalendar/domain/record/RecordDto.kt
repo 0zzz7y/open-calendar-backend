@@ -1,6 +1,7 @@
 package com.tomaszwnuk.opencalendar.domain.record
 
 import com.tomaszwnuk.opencalendar.domain.entity.EntityDto
+import java.io.Serializable
 import java.util.*
 
 open class RecordDto(
@@ -15,4 +16,4 @@ open class RecordDto(
 
     open val categoryId: UUID? = null
 
-) : EntityDto(id = id)
+) : EntityDto(id = id), Serializable

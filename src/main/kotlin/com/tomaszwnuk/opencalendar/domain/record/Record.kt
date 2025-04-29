@@ -6,7 +6,7 @@ import com.tomaszwnuk.opencalendar.domain.entity.Entity
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import jakarta.persistence.*
-import java.util.UUID
+import java.util.*
 
 @MappedSuperclass
 abstract class Record(

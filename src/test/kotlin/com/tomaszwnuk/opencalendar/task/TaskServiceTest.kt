@@ -7,12 +7,7 @@ import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.domain.category.Category
 import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
-import com.tomaszwnuk.opencalendar.domain.task.Task
-import com.tomaszwnuk.opencalendar.domain.task.TaskDto
-import com.tomaszwnuk.opencalendar.domain.task.TaskFilterDto
-import com.tomaszwnuk.opencalendar.domain.task.TaskRepository
-import com.tomaszwnuk.opencalendar.domain.task.TaskService
-import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
+import com.tomaszwnuk.opencalendar.domain.task.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -29,8 +24,7 @@ import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import java.awt.Color
-import java.util.Optional
-import java.util.UUID
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)

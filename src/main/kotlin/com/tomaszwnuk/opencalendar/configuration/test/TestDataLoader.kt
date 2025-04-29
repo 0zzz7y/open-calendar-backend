@@ -17,7 +17,7 @@ import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Suppress("unused")
 @Profile("production", "development", "test")
@@ -51,6 +51,7 @@ class TestDataLoader(
 
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
+
         val first: Calendar =
             _calendarRepository.save(Calendar(id = UUID.randomUUID(), title = "#1", emoji = "\uD83D\uDCA5"))
         val calendars: Map<String, Calendar> = mapOf(
@@ -63,6 +64,7 @@ class TestDataLoader(
 
     private fun createCategories(): Map<String, Category> {
         _timer = System.currentTimeMillis()
+
         val personal: Category =
             _categoryRepository.save(Category(title = "Personal", color = "#EFEF39"))
         val work: Category =
@@ -81,6 +83,7 @@ class TestDataLoader(
 
     private fun createEvents(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
+
         val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
 
         val workingAtTheOffice = Event(

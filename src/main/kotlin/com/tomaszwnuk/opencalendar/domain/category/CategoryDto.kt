@@ -5,6 +5,7 @@ import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLOR_HEX_LENGT
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.TITLE_MAXIMUM_LENGTH
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import java.io.Serializable
 import java.util.*
 
 data class CategoryDto(
@@ -21,4 +22,4 @@ data class CategoryDto(
     @field:Size(min = COLOR_HEX_LENGTH, max = COLOR_HEX_LENGTH, message = "Color must be a valid hex color code.")
     val color: String = CategoryColorHelper.DEFAULT_COLOR
 
-) : EntityDto(id = id)
+) : EntityDto(id = id), Serializable

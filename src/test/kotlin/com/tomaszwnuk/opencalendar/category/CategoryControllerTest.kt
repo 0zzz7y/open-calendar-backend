@@ -3,12 +3,7 @@ package com.tomaszwnuk.opencalendar.category
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
-import com.tomaszwnuk.opencalendar.domain.category.Category
-import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
-import com.tomaszwnuk.opencalendar.domain.category.CategoryController
-import com.tomaszwnuk.opencalendar.domain.category.CategoryDto
-import com.tomaszwnuk.opencalendar.domain.category.CategoryFilterDto
-import com.tomaszwnuk.opencalendar.domain.category.CategoryService
+import com.tomaszwnuk.opencalendar.domain.category.*
 import com.tomaszwnuk.opencalendar.domain.event.Event
 import com.tomaszwnuk.opencalendar.domain.event.EventDto
 import com.tomaszwnuk.opencalendar.domain.event.EventService
@@ -42,7 +37,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.awt.Color
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @ExtendWith(MockitoExtension::class)
 @MockitoSettings(strictness = Strictness.LENIENT)

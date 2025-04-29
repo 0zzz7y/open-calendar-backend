@@ -6,6 +6,7 @@ import com.tomaszwnuk.opencalendar.domain.record.RecordDto
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
+import java.io.Serializable
 import java.util.*
 
 data class NoteDto(
@@ -30,4 +31,4 @@ data class NoteDto(
 
     override val categoryId: UUID? = null
 
-) : RecordDto(id, title, description, categoryId)
+) : RecordDto(id, title, description, categoryId), Serializable

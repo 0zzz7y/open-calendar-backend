@@ -4,6 +4,7 @@ import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.EMOJI_MAXIMUM_L
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.TITLE_MAXIMUM_LENGTH
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import java.io.Serializable
 import java.util.*
 
 data class CalendarDto(
@@ -23,4 +24,4 @@ data class CalendarDto(
     )
     val emoji: String
 
-)
+) : Serializable
