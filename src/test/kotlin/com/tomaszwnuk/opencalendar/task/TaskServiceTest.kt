@@ -80,7 +80,7 @@ class TaskServiceTest {
         whenever(_categoryRepository.findById(_sampleTaskDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(_sampleTask).whenever(_taskRepository).save(any())
 
-        val result: Task = _taskService.create(_sampleTaskDto)
+        val result: TaskDto = _taskService.create(_sampleTaskDto)
 
         assertNotNull(result)
         assertEquals(_sampleTask.id, result.id)
@@ -95,7 +95,7 @@ class TaskServiceTest {
         val tasks: List<Task> = listOf(_sampleTask, _sampleTask.copy(), _sampleTask.copy())
         whenever(_taskRepository.findAll()).thenReturn(tasks)
 
-        val result: List<Task> = _taskService.getAll()
+        val result: List<TaskDto> = _taskService.getAll()
 
         assertEquals(tasks.size, result.size)
         assertEquals(tasks.map { it.id }, result.map { it.id })
@@ -109,7 +109,7 @@ class TaskServiceTest {
         val id: UUID = _sampleTask.id
         whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
 
-        val result: Task = _taskService.getById(id)
+        val result: TaskDto = _taskService.getById(id)
 
         assertNotNull(result)
         assertEquals(_sampleTask.id, result.id)
@@ -134,7 +134,7 @@ class TaskServiceTest {
             )
         ).thenReturn(tasks)
 
-        val result: List<Task> = _taskService.filter(filter)
+        val result: List<TaskDto> = _taskService.filter(filter)
 
         assertEquals(tasks.size, result.size)
         assertEquals(tasks.map { it.title }, result.map { it.title })
@@ -157,7 +157,7 @@ class TaskServiceTest {
         whenever(_categoryRepository.findById(_sampleTaskDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(updatedTask).whenever(_taskRepository).save(any())
 
-        val result: Task = _taskService.update(_sampleTask.id, _sampleTaskDto)
+        val result: TaskDto = _taskService.update(_sampleTask.id, _sampleTaskDto)
 
         assertNotNull(result)
         assertEquals(updatedTask.id, result.id)

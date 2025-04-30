@@ -57,7 +57,7 @@ class CalendarController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
-        val events: List<EventDto> = _eventService.getAllByCalendarId(id).map { it.toDto() }
+        val events: List<EventDto> = _eventService.getAllDtosByCalendarId(id)
         return ResponseEntity.ok(events.toPage(pageable))
     }
 
@@ -66,7 +66,7 @@ class CalendarController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
-        val tasks: List<TaskDto> = _taskService.getAllByCalendarId(id).map { it.toDto() }
+        val tasks: List<TaskDto> = _taskService.getAllByCalendarId(id)
         return ResponseEntity.ok(tasks.toPage(pageable))
     }
 
@@ -75,7 +75,7 @@ class CalendarController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
-        val notes: List<NoteDto> = _noteService.getAllByCalendarId(id).map { it.toDto() }
+        val notes: List<NoteDto> = _noteService.getAllByCalendarId(id)
         return ResponseEntity.ok(notes.toPage(pageable))
     }
 
@@ -88,14 +88,14 @@ class CalendarController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<List<Map<String, Any>>> {
-        val events: Page<Map<String, Any>> = _eventService.getAllByCalendarId(id).map {
-            it.toDto().toMapWithType("event")
+        val events: Page<Map<String, Any>> = _eventService.getAllDtosByCalendarId(id).map {
+            it.toMapWithType("event")
         }.toPage(pageable)
         val tasks: Page<Map<String, Any>> = _taskService.getAllByCalendarId(id).map {
-            it.toDto().toMapWithType("task")
+            it.toMapWithType("task")
         }.toPage(pageable)
         val notes: Page<Map<String, Any>> = _noteService.getAllByCalendarId(id).map {
-            it.toDto().toMapWithType("note")
+            it.toMapWithType("note")
         }.toPage(pageable)
 
         val items = events + tasks + notes
@@ -126,7 +126,7 @@ class CalendarController(
     fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
         _eventService.deleteAllByCalendarId(id)
         _taskService.deleteAllByCalendarId(id)
-        _noteService.deleteAllByCalendarId(id)
+        _noteService.deleteByCalendarId(id)
         _calendarService.delete(id)
         return ResponseEntity.noContent().build()
     }

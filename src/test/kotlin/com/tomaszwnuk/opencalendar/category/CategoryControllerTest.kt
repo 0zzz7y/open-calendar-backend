@@ -141,10 +141,10 @@ class CategoryControllerTest {
             recurringPattern = RecurringPattern.NONE,
             calendar = calendar,
             category = _sampleCategory
-        )
-        val events: List<Event> = listOf(event)
+        ).toDto()
+        val events: List<EventDto> = listOf(event)
 
-        whenever(_eventService.getAllByCategoryId(id)).thenReturn(events)
+        whenever(_eventService.getAllDtosByCategoryId(id)).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _categoryController.getEvents(id, _pageable)
 
@@ -152,7 +152,7 @@ class CategoryControllerTest {
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).getAllByCategoryId(id)
+        verify(_eventService).getAllDtosByCategoryId(id)
     }
 
     @Test
@@ -166,8 +166,8 @@ class CategoryControllerTest {
             status = TaskStatus.TODO,
             calendar = calendar,
             category = _sampleCategory
-        )
-        val tasks: List<Task> = listOf(task)
+        ).toDto()
+        val tasks: List<TaskDto> = listOf(task)
 
         whenever(_taskService.getAllByCategoryId(id)).thenReturn(tasks)
 
@@ -190,8 +190,8 @@ class CategoryControllerTest {
             description = "Note description",
             calendar = calendar,
             category = _sampleCategory
-        )
-        val notes: List<Note> = listOf(note)
+        ).toDto()
+        val notes: List<NoteDto> = listOf(note)
 
         whenever(_noteService.getAllByCategoryId(id)).thenReturn(notes)
 
@@ -219,7 +219,7 @@ class CategoryControllerTest {
             recurringPattern = RecurringPattern.NONE,
             calendar = calendar,
             category = _sampleCategory
-        )
+        ).toDto()
         val task = Task(
             id = UUID.randomUUID(),
             title = "Sample Task",
@@ -227,16 +227,16 @@ class CategoryControllerTest {
             status = TaskStatus.TODO,
             calendar = calendar,
             category = _sampleCategory
-        )
+        ).toDto()
         val note = Note(
             id = UUID.randomUUID(),
             title = "Sample Note",
             description = "Note description",
             calendar = calendar,
             category = _sampleCategory
-        )
+        ).toDto()
 
-        whenever(_eventService.getAllByCategoryId(id)).thenReturn(listOf(event))
+        whenever(_eventService.getAllDtosByCategoryId(id)).thenReturn(listOf(event))
         whenever(_taskService.getAllByCategoryId(id)).thenReturn(listOf(task))
         whenever(_noteService.getAllByCategoryId(id)).thenReturn(listOf(note))
 
@@ -248,7 +248,7 @@ class CategoryControllerTest {
         val types: List<String> = response.body?.mapNotNull { it["type"] as? String } ?: emptyList()
         assertTrue(types.containsAll(listOf("event", "task", "note")))
 
-        verify(_eventService).getAllByCategoryId(id)
+        verify(_eventService).getAllDtosByCategoryId(id)
         verify(_taskService).getAllByCategoryId(id)
         verify(_noteService).getAllByCategoryId(id)
     }

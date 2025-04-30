@@ -18,7 +18,7 @@ class TaskController(private val _taskService: TaskService) {
 
     @PostMapping
     fun create(@Valid @RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
-        val created: TaskDto = _taskService.create(dto).toDto()
+        val created: TaskDto = _taskService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
@@ -30,13 +30,13 @@ class TaskController(private val _taskService: TaskService) {
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
-        val tasks: List<TaskDto> = _taskService.getAll().map { it.toDto() }
+        val tasks: List<TaskDto> = _taskService.getAll()
         return ResponseEntity.ok(tasks.toPage(pageable))
     }
 
     @GetMapping("/{id}")
     fun getById(@PathVariable id: UUID): ResponseEntity<TaskDto> {
-        val task: TaskDto = _taskService.getById(id).toDto()
+        val task: TaskDto = _taskService.getById(id)
         return ResponseEntity.ok(task)
     }
 
@@ -56,13 +56,13 @@ class TaskController(private val _taskService: TaskService) {
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val tasks: List<TaskDto> = _taskService.filter(filter).map { it.toDto() }
+        val tasks: List<TaskDto> = _taskService.filter(filter)
         return ResponseEntity.ok(tasks.toPage(pageable))
     }
 
     @PutMapping("/{id}")
     fun update(@PathVariable id: UUID, @Valid @RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
-        val updated: TaskDto = _taskService.update(id, dto).toDto()
+        val updated: TaskDto = _taskService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
 

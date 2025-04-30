@@ -23,7 +23,7 @@ class EventController(
 
     @PostMapping
     fun create(@Valid @RequestBody dto: EventDto): ResponseEntity<EventDto> {
-        val created: EventDto = _eventService.create(dto).toDto()
+        val created: EventDto = _eventService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
@@ -35,13 +35,13 @@ class EventController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
-        val events: List<EventDto> = _eventService.getAll().map { it.toDto() }
+        val events: List<EventDto> = _eventService.getAllDtos()
         return ResponseEntity.ok(events.toPage(pageable))
     }
 
     @GetMapping("/{id}")
     fun getById(@PathVariable id: UUID): ResponseEntity<EventDto> {
-        val event: EventDto = _eventService.getById(id).toDto()
+        val event: EventDto = _eventService.getById(id)
         return ResponseEntity.ok(event)
     }
 
@@ -65,13 +65,13 @@ class EventController(
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val events: List<EventDto> = _eventService.filter(filter).map { it.toDto() }
+        val events: List<EventDto> = _eventService.filterDtos(filter)
         return ResponseEntity.ok(events.toPage(pageable))
     }
 
     @PutMapping("/{id}")
     fun update(@PathVariable id: UUID, @Valid @RequestBody dto: EventDto): ResponseEntity<EventDto> {
-        val updated: EventDto = _eventService.update(id, dto).toDto()
+        val updated: EventDto = _eventService.updateDto(id, dto)
         return ResponseEntity.ok(updated)
     }
 

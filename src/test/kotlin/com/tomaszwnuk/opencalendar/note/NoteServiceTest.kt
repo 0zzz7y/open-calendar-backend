@@ -80,7 +80,7 @@ class NoteServiceTest {
         whenever(_categoryRepository.findById(_sampleNoteDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(_sampleNote).whenever(_noteRepository).save(any())
 
-        val result: Note = _noteService.create(_sampleNoteDto)
+        val result: NoteDto = _noteService.create(_sampleNoteDto)
 
         assertNotNull(result)
         assertEquals(_sampleNote.id, result.id)
@@ -95,7 +95,7 @@ class NoteServiceTest {
         val notes: List<Note> = listOf(_sampleNote, _sampleNote.copy(), _sampleNote.copy())
         whenever(_noteRepository.findAll(_pageable)).thenReturn(PageImpl(notes))
 
-        val result: List<Note> = _noteService.getAll()
+        val result: List<NoteDto> = _noteService.getAll()
 
         assertEquals(notes.size, result.size)
         assertEquals(notes.map { it.id }, result.map { it.id })
@@ -109,7 +109,7 @@ class NoteServiceTest {
         val id: UUID = _sampleNote.id
         whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
 
-        val result: Note = _noteService.getById(id)
+        val result: NoteDto = _noteService.getById(id)
 
         assertNotNull(result)
         assertEquals(_sampleNote.id, result.id)
@@ -133,7 +133,7 @@ class NoteServiceTest {
             )
         ).thenReturn(notes)
 
-        val result: List<Note> = _noteService.filter(filter)
+        val result: List<NoteDto> = _noteService.filter(filter)
 
         assertEquals(notes.size, result.size)
         assertEquals(notes.map { it.title }, result.map { it.title })
@@ -156,7 +156,7 @@ class NoteServiceTest {
         whenever(_categoryRepository.findById(_sampleNoteDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(updatedNote).whenever(_noteRepository).save(any())
 
-        val result: Note = _noteService.update(id, _sampleNoteDto)
+        val result: NoteDto = _noteService.update(id, _sampleNoteDto)
 
         assertNotNull(result)
         assertEquals(updatedNote.id, result.id)

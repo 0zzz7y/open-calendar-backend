@@ -20,7 +20,7 @@ class NoteController(
 
     @PostMapping
     fun create(@Valid @RequestBody dto: NoteDto): ResponseEntity<NoteDto> {
-        val created: NoteDto = _noteService.create(dto).toDto()
+        val created: NoteDto = _noteService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
@@ -32,13 +32,13 @@ class NoteController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
-        val notes: List<NoteDto> = _noteService.getAll().map { it.toDto() }
+        val notes: List<NoteDto> = _noteService.getAll()
         return ResponseEntity.ok(notes.toPage(pageable))
     }
 
     @GetMapping("/{id}")
     fun getById(@PathVariable id: UUID): ResponseEntity<NoteDto> {
-        val note: NoteDto = _noteService.getById(id).toDto()
+        val note: NoteDto = _noteService.getById(id)
         return ResponseEntity.ok(note)
     }
 
@@ -56,13 +56,13 @@ class NoteController(
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val notes: List<NoteDto> = _noteService.filter(filter).map { it.toDto() }
+        val notes: List<NoteDto> = _noteService.filter(filter)
         return ResponseEntity.ok(notes.toPage(pageable))
     }
 
     @PutMapping("/{id}")
     fun update(@PathVariable id: UUID, @Valid @RequestBody dto: NoteDto): ResponseEntity<NoteDto> {
-        val updated: NoteDto = _noteService.update(id, dto).toDto()
+        val updated: NoteDto = _noteService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
 

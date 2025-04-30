@@ -68,7 +68,7 @@ class NoteControllerTest {
 
     @Test
     fun `should return created note with status code 201 Created`() {
-        whenever(_noteService.create(_sampleNoteDto)).thenReturn(_sampleNote)
+        whenever(_noteService.create(_sampleNoteDto)).thenReturn(_sampleNote.toDto())
 
         val response: ResponseEntity<NoteDto> = _noteController.create(_sampleNoteDto)
 
@@ -83,7 +83,7 @@ class NoteControllerTest {
 
     @Test
     fun `should return paginated list of all notes with status code 200 OK`() {
-        val notes: List<Note> = listOf(_sampleNote, _sampleNote.copy(), _sampleNote.copy())
+        val notes: List<NoteDto> = listOf(_sampleNoteDto, _sampleNoteDto.copy(), _sampleNoteDto.copy())
         whenever(_noteService.getAll()).thenReturn(notes)
 
         val response: ResponseEntity<Page<NoteDto>> = _noteController.getAll(_pageable)
@@ -99,7 +99,7 @@ class NoteControllerTest {
     @Test
     fun `should return note by id with status code 200 OK`() {
         val id: UUID = _sampleNote.id
-        whenever(_noteService.getById(id)).thenReturn(_sampleNote)
+        whenever(_noteService.getById(id)).thenReturn(_sampleNote.toDto())
 
         val response: ResponseEntity<NoteDto> = _noteController.getById(id)
 
@@ -115,7 +115,7 @@ class NoteControllerTest {
     @Test
     fun `should return paginated list of filtered notes with status code 200 OK`() {
         val filter = NoteFilterDto(title = "Groceries")
-        val notes: List<Note> = listOf(_sampleNote, _sampleNote.copy(), _sampleNote.copy())
+        val notes: List<NoteDto> = listOf(_sampleNoteDto, _sampleNoteDto.copy(), _sampleNoteDto.copy())
 
         whenever(_noteService.filter(eq(filter))).thenReturn(notes)
 
@@ -137,7 +137,7 @@ class NoteControllerTest {
     @Test
     fun `should return updated note with status code 200 OK`() {
         val updatedNote: Note = _sampleNote.copy(title = "Updated Note")
-        whenever(_noteService.update(_sampleNote.id, _sampleNoteDto)).thenReturn(updatedNote)
+        whenever(_noteService.update(_sampleNote.id, _sampleNoteDto)).thenReturn(updatedNote.toDto())
 
         val response: ResponseEntity<NoteDto> = _noteController.update(_sampleNote.id, _sampleNoteDto)
 

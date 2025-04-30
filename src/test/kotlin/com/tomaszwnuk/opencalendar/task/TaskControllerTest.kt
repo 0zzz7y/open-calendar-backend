@@ -70,7 +70,7 @@ class TaskControllerTest {
 
     @Test
     fun `should return created task with status code 201 Created`() {
-        whenever(_taskService.create(_sampleTaskDto)).thenReturn(_sampleTask)
+        whenever(_taskService.create(_sampleTaskDto)).thenReturn(_sampleTask.toDto())
 
         val response: ResponseEntity<TaskDto> = _taskController.create(_sampleTaskDto)
 
@@ -85,7 +85,7 @@ class TaskControllerTest {
 
     @Test
     fun `should return paginated list of all tasks with status code 200 OK`() {
-        val tasks: List<Task> = listOf(_sampleTask, _sampleTask.copy(), _sampleTask.copy())
+        val tasks: List<TaskDto> = listOf(_sampleTaskDto, _sampleTaskDto.copy(), _sampleTaskDto.copy())
         whenever(_taskService.getAll()).thenReturn(tasks)
 
         val response: ResponseEntity<Page<TaskDto>> = _taskController.getAll(_pageable)
@@ -101,7 +101,7 @@ class TaskControllerTest {
     @Test
     fun `should return task by id with status code 200 OK`() {
         val id: UUID = _sampleTask.id
-        whenever(_taskService.getById(id)).thenReturn(_sampleTask)
+        whenever(_taskService.getById(id)).thenReturn(_sampleTask.toDto())
 
         val response: ResponseEntity<TaskDto> = _taskController.getById(id)
 
@@ -117,7 +117,7 @@ class TaskControllerTest {
     @Test
     fun `should return paginated list of filtered tasks with status code 200 OK`() {
         val filter = TaskFilterDto(title = "Gym Workout")
-        val tasks: List<Task> = listOf(_sampleTask, _sampleTask.copy(), _sampleTask.copy())
+        val tasks: List<TaskDto> = listOf(_sampleTaskDto, _sampleTaskDto.copy(), _sampleTaskDto.copy())
 
         whenever(_taskService.filter(eq(filter))).thenReturn(tasks)
 
@@ -140,7 +140,7 @@ class TaskControllerTest {
     @Test
     fun `should return updated task with status code 200 OK`() {
         val updatedTask: Task = _sampleTask.copy(title = "Updated Task")
-        whenever(_taskService.update(_sampleTask.id, _sampleTaskDto)).thenReturn(updatedTask)
+        whenever(_taskService.update(_sampleTask.id, _sampleTaskDto)).thenReturn(updatedTask.toDto())
 
         val response: ResponseEntity<TaskDto> = _taskController.update(_sampleTask.id, _sampleTaskDto)
 

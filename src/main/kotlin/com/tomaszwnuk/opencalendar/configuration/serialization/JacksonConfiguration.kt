@@ -1,6 +1,7 @@
 package com.tomaszwnuk.opencalendar.configuration.serialization
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -33,15 +34,16 @@ class JacksonConfiguration {
                 PropertyAccessor.ALL,
                 JsonAutoDetect.Visibility.ANY
             )
-            .also {
-                it.activateDefaultTyping(
-                    LaissezFaireSubTypeValidator.instance,
-                    ObjectMapper.DefaultTyping.NON_FINAL
-                )
-                it.setVisibility(
-                    PropertyAccessor.ALL,
-                    JsonAutoDetect.Visibility.ANY)
-            }
+            .activateDefaultTyping(
+                LaissezFaireSubTypeValidator.instance,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY
+            )
+            .setVisibility(
+                PropertyAccessor.ALL,
+                JsonAutoDetect.Visibility.ANY
+            )
+
     }
 
 }

@@ -74,7 +74,7 @@ class EventControllerTest {
 
     @Test
     fun `should return created event with status code 201 Created`() {
-        whenever(_eventService.create(_sampleEventDto)).thenReturn(_sampleEvent)
+        whenever(_eventService.create(_sampleEventDto)).thenReturn(_sampleEvent.toDto())
 
         val response: ResponseEntity<EventDto> = _eventController.create(_sampleEventDto)
 
@@ -89,8 +89,8 @@ class EventControllerTest {
 
     @Test
     fun `should return paginated list of all events with status code 200 OK`() {
-        val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
-        whenever(_eventService.getAll()).thenReturn(events)
+        val events: List<EventDto> = listOf(_sampleEventDto, _sampleEventDto.copy(), _sampleEventDto.copy())
+        whenever(_eventService.getAllDtos()).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _eventController.getAll(_pageable)
 
@@ -99,14 +99,14 @@ class EventControllerTest {
         assertEquals(events.map { it.id }, response.body?.content?.map { it.id })
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).getAll()
+        verify(_eventService).getAllDtos()
     }
 
     @Test
     fun `should return paginated list of filtered events with status code 200 OK`() {
         val filter = EventFilterDto(title = "Standup")
-        val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
-        whenever(_eventService.filter(eq(filter))).thenReturn(events)
+        val events: List<EventDto> = listOf(_sampleEventDto, _sampleEventDto.copy(), _sampleEventDto.copy())
+        whenever(_eventService.filterDtos(eq(filter))).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _eventController.filter(
             filter.title,
@@ -123,13 +123,13 @@ class EventControllerTest {
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).filter(eq(filter))
+        verify(_eventService).filterDtos(eq(filter))
     }
 
     @Test
     fun `should return event by id with status code 200 OK`() {
         val id: UUID = _sampleEvent.id
-        whenever(_eventService.getById(id)).thenReturn(_sampleEvent)
+        whenever(_eventService.getById(id)).thenReturn(_sampleEvent.toDto())
 
         val response: ResponseEntity<EventDto> = _eventController.getById(id)
 
@@ -145,7 +145,7 @@ class EventControllerTest {
     @Test
     fun `should return updated event with status code 200 OK`() {
         val updatedEvent: Event = _sampleEvent.copy(title = "Updated Event")
-        whenever(_eventService.update(_sampleEvent.id, _sampleEventDto)).thenReturn(updatedEvent)
+        whenever(_eventService.updateDto(_sampleEvent.id, _sampleEventDto)).thenReturn(updatedEvent.toDto())
 
         val response: ResponseEntity<EventDto> = _eventController.update(_sampleEvent.id, _sampleEventDto)
 
@@ -155,7 +155,7 @@ class EventControllerTest {
         assertEquals("Updated Event", response.body?.title)
         assertEquals(updatedEvent.description, response.body?.description)
 
-        verify(_eventService).update(_sampleEvent.id, _sampleEventDto)
+        verify(_eventService).updateDto(_sampleEvent.id, _sampleEventDto)
     }
 
     @Test

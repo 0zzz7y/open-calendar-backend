@@ -137,10 +137,10 @@ class CalendarControllerTest {
             recurringPattern = RecurringPattern.NONE,
             calendar = _sampleCalendar,
             category = null
-        )
-        val events: List<Event> = listOf(event, event, event)
+        ).toDto()
+        val events: List<EventDto> = listOf(event, event, event)
 
-        whenever(_eventService.getAllByCalendarId(id)).thenReturn(events)
+        whenever(_eventService.getAllDtosByCalendarId(id)).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _calendarController.getEvents(id, _pageable)
 
@@ -148,7 +148,7 @@ class CalendarControllerTest {
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).getAllByCalendarId(id)
+        verify(_eventService).getAllDtosByCalendarId(id)
     }
 
     @Test
@@ -161,8 +161,8 @@ class CalendarControllerTest {
             status = TaskStatus.TODO,
             calendar = _sampleCalendar,
             category = null
-        )
-        val tasks: List<Task> = listOf(task, task, task)
+        ).toDto()
+        val tasks: List<TaskDto> = listOf(task, task, task)
 
         whenever(_taskService.getAllByCalendarId(id)).thenReturn(tasks)
 
@@ -184,8 +184,8 @@ class CalendarControllerTest {
             description = "Note description",
             calendar = _sampleCalendar,
             category = null
-        )
-        val notes: List<Note> = listOf(note, note.copy())
+        ).toDto()
+        val notes: List<NoteDto> = listOf(note, note.copy())
 
         whenever(_noteService.getAllByCalendarId(id)).thenReturn(notes)
 
@@ -212,7 +212,7 @@ class CalendarControllerTest {
             recurringPattern = RecurringPattern.NONE,
             calendar = _sampleCalendar,
             category = null
-        )
+        ).toDto()
         val task = Task(
             id = UUID.randomUUID(),
             title = "Sample Task",
@@ -220,16 +220,16 @@ class CalendarControllerTest {
             status = TaskStatus.TODO,
             calendar = _sampleCalendar,
             category = null
-        )
+        ).toDto()
         val note = Note(
             id = UUID.randomUUID(),
             title = "Sample Note",
             description = "Note description",
             calendar = _sampleCalendar,
             category = null
-        )
+        ).toDto()
 
-        whenever(_eventService.getAllByCalendarId(id)).thenReturn(listOf(event))
+        whenever(_eventService.getAllDtosByCalendarId(id)).thenReturn(listOf(event))
         whenever(_taskService.getAllByCalendarId(id)).thenReturn(listOf(task))
         whenever(_noteService.getAllByCalendarId(id)).thenReturn(listOf(note))
 

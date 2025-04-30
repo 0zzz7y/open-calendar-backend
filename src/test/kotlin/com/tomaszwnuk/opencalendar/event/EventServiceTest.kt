@@ -85,7 +85,7 @@ class EventServiceTest {
         whenever(_categoryRepository.findById(_sampleEventDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(_sampleEvent).whenever(_eventRepository).save(any())
 
-        val result: Event = _eventService.create(_sampleEventDto)
+        val result: EventDto = _eventService.create(_sampleEventDto)
 
         assertNotNull(result)
         assertEquals(_sampleEvent.id, result.id)
@@ -103,7 +103,7 @@ class EventServiceTest {
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
         whenever(_eventRepository.findAll(_pageable)).thenReturn(PageImpl(events))
 
-        val result: List<Event> = _eventService.getAll()
+        val result: List<EventDto> = _eventService.getAllDtos()
 
         assertEquals(events.size, result.size)
         assertEquals(events.map { it.id }, result.map { it.id })
@@ -117,7 +117,7 @@ class EventServiceTest {
         val id: UUID = _sampleEvent.id
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
 
-        val result: Event = _eventService.getById(id)
+        val result: EventDto = _eventService.getById(id)
 
         assertNotNull(result)
         assertEquals(_sampleEvent.id, result.id)
@@ -144,7 +144,7 @@ class EventServiceTest {
             )
         ).thenReturn(events)
 
-        val result: List<Event> = _eventService.filter(filter)
+        val result: List<EventDto> = _eventService.filterDtos(filter)
 
         assertEquals(events.size, result.size)
         assertEquals(events.map { it.title }, result.map { it.title })
@@ -170,7 +170,7 @@ class EventServiceTest {
         whenever(_categoryRepository.findById(_sampleEventDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(updatedEvent).whenever(_eventRepository).save(any())
 
-        val result: Event = _eventService.update(id, _sampleEventDto)
+        val result: EventDto = _eventService.updateDto(id, _sampleEventDto)
 
         assertNotNull(result)
         assertEquals(updatedEvent.id, result.id)
