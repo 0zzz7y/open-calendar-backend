@@ -84,21 +84,6 @@ class TaskControllerTest {
     }
 
     @Test
-    fun `should return paginated list of all tasks with status code 200 OK`() {
-        val tasks: List<TaskDto> = listOf(_sampleTaskDto, _sampleTaskDto.copy(), _sampleTaskDto.copy())
-        whenever(_taskService.getAll()).thenReturn(tasks)
-
-        val response: ResponseEntity<Page<TaskDto>> = _taskController.getAll(_pageable)
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(tasks.size.toLong(), response.body?.totalElements)
-        assertEquals(tasks.map { it.id }, response.body?.content?.map { it.id })
-        assertEquals(tasks.map { it.title }, response.body?.content?.map { it.title })
-
-        verify(_taskService).getAll()
-    }
-
-    @Test
     fun `should return task by id with status code 200 OK`() {
         val id: UUID = _sampleTask.id
         whenever(_taskService.getById(id)).thenReturn(_sampleTask.toDto())

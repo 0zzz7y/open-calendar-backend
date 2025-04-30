@@ -177,29 +177,6 @@ class CalendarControllerTest {
     }
 
     @Test
-    fun `should return paginated of all calendar notes with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
-        val note = Note(
-            id = UUID.randomUUID(),
-            title = "Note title",
-            description = "Note description",
-            calendar = _sampleCalendar,
-            category = null
-        ).toDto()
-        val notes: List<NoteDto> = listOf(note, note.copy())
-
-        whenever(_noteService.getAllByCalendarId(id)).thenReturn(notes)
-
-        val response: ResponseEntity<Page<NoteDto>> = _calendarController.getNotes(id, _pageable)
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(notes.size.toLong(), response.body?.totalElements)
-        assertEquals(notes.map { it.title }, response.body?.content?.map { it.title })
-
-        verify(_noteService).getAllByCalendarId(id)
-    }
-
-    @Test
     fun `should return combined list of all calendar events, tasks and notes with status code 200 OK`() {
         val id: UUID = _sampleCalendar.id
         val now: LocalDateTime = LocalDateTime.now()

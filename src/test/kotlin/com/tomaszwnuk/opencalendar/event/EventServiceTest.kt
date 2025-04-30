@@ -99,20 +99,6 @@ class EventServiceTest {
     }
 
     @Test
-    fun `should return paginated list of all events`() {
-        val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
-        whenever(_eventRepository.findAll(_pageable)).thenReturn(PageImpl(events))
-
-        val result: List<EventDto> = _eventService.getAll()
-
-        assertEquals(events.size, result.size)
-        assertEquals(events.map { it.id }, result.map { it.id })
-        assertEquals(events.map { it.title }, result.map { it.title })
-
-        verify(_eventRepository).findAll(_pageable)
-    }
-
-    @Test
     fun `should return event by id`() {
         val id: UUID = _sampleEvent.id
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))

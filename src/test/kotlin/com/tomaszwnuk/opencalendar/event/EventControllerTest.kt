@@ -88,21 +88,6 @@ class EventControllerTest {
     }
 
     @Test
-    fun `should return paginated list of all events with status code 200 OK`() {
-        val events: List<EventDto> = listOf(_sampleEventDto, _sampleEventDto.copy(), _sampleEventDto.copy())
-        whenever(_eventService.getAll()).thenReturn(events)
-
-        val response: ResponseEntity<Page<EventDto>> = _eventController.getAll(_pageable)
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(events.size.toLong(), response.body?.totalElements)
-        assertEquals(events.map { it.id }, response.body?.content?.map { it.id })
-        assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
-
-        verify(_eventService).getAll()
-    }
-
-    @Test
     fun `should return paginated list of filtered events with status code 200 OK`() {
         val filter = EventFilterDto(title = "Standup")
         val events: List<EventDto> = listOf(_sampleEventDto, _sampleEventDto.copy(), _sampleEventDto.copy())

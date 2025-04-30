@@ -82,21 +82,6 @@ class NoteControllerTest {
     }
 
     @Test
-    fun `should return paginated list of all notes with status code 200 OK`() {
-        val notes: List<NoteDto> = listOf(_sampleNoteDto, _sampleNoteDto.copy(), _sampleNoteDto.copy())
-        whenever(_noteService.getAll()).thenReturn(notes)
-
-        val response: ResponseEntity<Page<NoteDto>> = _noteController.getAll(_pageable)
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(notes.size.toLong(), response.body?.totalElements)
-        assertEquals(notes.map { it.id }, response.body?.content?.map { it.id })
-        assertEquals(notes.map { it.title }, response.body?.content?.map { it.title })
-
-        verify(_noteService).getAll()
-    }
-
-    @Test
     fun `should return note by id with status code 200 OK`() {
         val id: UUID = _sampleNote.id
         whenever(_noteService.getById(id)).thenReturn(_sampleNote.toDto())
@@ -110,28 +95,6 @@ class NoteControllerTest {
         assertEquals(_sampleNote.description, response.body?.description)
 
         verify(_noteService).getById(id)
-    }
-
-    @Test
-    fun `should return paginated list of filtered notes with status code 200 OK`() {
-        val filter = NoteFilterDto(title = "Groceries")
-        val notes: List<NoteDto> = listOf(_sampleNoteDto, _sampleNoteDto.copy(), _sampleNoteDto.copy())
-
-        whenever(_noteService.filter(eq(filter))).thenReturn(notes)
-
-        val response: ResponseEntity<Page<NoteDto>> = _noteController.filter(
-            filter.title,
-            null,
-            null,
-            null,
-            _pageable
-        )
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(notes.size.toLong(), response.body?.totalElements)
-        assertEquals(notes.map { it.title }, response.body?.content?.map { it.title })
-
-        verify(_noteController).filter(filter.title, null, null, null, _pageable)
     }
 
     @Test

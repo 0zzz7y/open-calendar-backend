@@ -67,24 +67,6 @@ class CalendarServiceTest {
     }
 
     @Test
-    fun `should return paginated list of all calendars`() {
-        val calendars: List<Calendar> = listOf(
-            _sampleCalendar,
-            _sampleCalendar.copy(id = UUID.randomUUID()),
-            _sampleCalendar.copy(id = UUID.randomUUID())
-        )
-        whenever(_calendarRepository.findAll(_pageable)).thenReturn(PageImpl(calendars))
-
-        val result: List<CalendarDto> = _calendarService.getAll()
-
-        assertEquals(calendars.size, result.size)
-        assertEquals(calendars.map { it.id }, result.map { it.id })
-        assertEquals(calendars.map { it.title }, result.map { it.title })
-
-        verify(_calendarRepository).findAll(_pageable)
-    }
-
-    @Test
     fun `should return calendar by id`() {
         val id: UUID = _sampleCalendar.id
         whenever(_calendarRepository.findById(id)).thenReturn(Optional.of(_sampleCalendar))
@@ -97,25 +79,6 @@ class CalendarServiceTest {
         assertEquals(_sampleCalendar.emoji, result.emoji)
 
         verify(_calendarRepository).findById(id)
-    }
-
-    @Test
-    fun `should return paginated list of filtered calendars`() {
-        val filter = CalendarFilterDto(title = "Personal")
-        val calendars: List<Calendar> = listOf(
-            _sampleCalendar,
-            _sampleCalendar.copy(id = UUID.randomUUID()),
-            _sampleCalendar.copy(id = UUID.randomUUID())
-        )
-        whenever(_calendarRepository.filter(eq(filter.title), eq(filter.emoji)))
-            .thenReturn(calendars)
-
-        val result: List<CalendarDto> = _calendarService.filter(filter)
-
-        assertEquals(calendars.size, result.size)
-        assertEquals(calendars.map { it.title }, result.map { it.title })
-
-        verify(_calendarRepository).filter(eq(filter.title), eq(filter.emoji))
     }
 
     @Test

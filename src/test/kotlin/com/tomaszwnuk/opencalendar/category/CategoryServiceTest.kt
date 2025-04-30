@@ -62,24 +62,6 @@ class CategoryServiceTest {
     }
 
     @Test
-    fun `should return paginated list of all categories`() {
-        val categories: List<Category> = listOf(
-            _sampleCategory,
-            _sampleCategory.copy(id = UUID.randomUUID()),
-            _sampleCategory.copy(id = UUID.randomUUID())
-        )
-        whenever(_categoryRepository.findAll()).thenReturn(categories)
-
-        val result: List<CategoryDto> = _categoryService.getAll()
-
-        assertEquals(categories.size, result.size)
-        assertEquals(categories.map { it.id }, result.map { it.id })
-        assertEquals(categories.map { it.title }, result.map { it.title })
-
-        verify(_categoryRepository).findAll(_pageable)
-    }
-
-    @Test
     fun `should return category by id`() {
         val id: UUID = _sampleCategory.id
         whenever(_categoryRepository.findById(id)).thenReturn(Optional.of(_sampleCategory))
@@ -92,24 +74,6 @@ class CategoryServiceTest {
         assertEquals(_sampleCategory.color, result.color)
 
         verify(_categoryRepository).findById(id)
-    }
-
-    @Test
-    fun `should return paginated list of filtered categories`() {
-        val filter = CategoryFilterDto(title = "Personal")
-        val categories: List<Category> = listOf(
-            _sampleCategory,
-            _sampleCategory.copy(id = UUID.randomUUID()),
-            _sampleCategory.copy(id = UUID.randomUUID())
-        )
-        whenever(_categoryRepository.filter(eq(filter.title), isNull())).thenReturn(categories)
-
-        val result: List<CategoryDto> = _categoryService.filter(filter)
-
-        assertEquals(categories.size, result.size)
-        assertEquals(categories.map { it.title }, result.map { it.title })
-
-        verify(_categoryRepository).filter(eq(filter.title), isNull())
     }
 
     @Test

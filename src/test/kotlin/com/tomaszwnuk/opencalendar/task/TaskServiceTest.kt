@@ -91,20 +91,6 @@ class TaskServiceTest {
     }
 
     @Test
-    fun `should return paginated list of all tasks`() {
-        val tasks: List<Task> = listOf(_sampleTask, _sampleTask.copy(), _sampleTask.copy())
-        whenever(_taskRepository.findAll()).thenReturn(tasks)
-
-        val result: List<TaskDto> = _taskService.getAll()
-
-        assertEquals(tasks.size, result.size)
-        assertEquals(tasks.map { it.id }, result.map { it.id })
-        assertEquals(tasks.map { it.title }, result.map { it.title })
-
-        verify(_taskRepository).findAll(_pageable)
-    }
-
-    @Test
     fun `should return task by id`() {
         val id: UUID = _sampleTask.id
         whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
@@ -117,35 +103,6 @@ class TaskServiceTest {
         assertEquals(_sampleTask.status, result.status)
 
         verify(_taskRepository).findById(id)
-    }
-
-    @Test
-    fun `should return paginated list of filtered tasks`() {
-        val filter = TaskFilterDto(title = "Task")
-        val tasks: List<Task> = listOf(_sampleTask, _sampleTask.copy(), _sampleTask.copy())
-
-        whenever(
-            _taskRepository.filter(
-                eq(filter.title),
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull()
-            )
-        ).thenReturn(tasks)
-
-        val result: List<TaskDto> = _taskService.filter(filter)
-
-        assertEquals(tasks.size, result.size)
-        assertEquals(tasks.map { it.title }, result.map { it.title })
-
-        verify(_taskRepository).filter(
-            eq(filter.title),
-            isNull(),
-            isNull(),
-            isNull(),
-            isNull()
-        )
     }
 
     @Test

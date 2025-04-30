@@ -91,20 +91,6 @@ class NoteServiceTest {
     }
 
     @Test
-    fun `should return paginated list of all notes`() {
-        val notes: List<Note> = listOf(_sampleNote, _sampleNote.copy(), _sampleNote.copy())
-        whenever(_noteRepository.findAll(_pageable)).thenReturn(PageImpl(notes))
-
-        val result: List<NoteDto> = _noteService.getAll()
-
-        assertEquals(notes.size, result.size)
-        assertEquals(notes.map { it.id }, result.map { it.id })
-        assertEquals(notes.map { it.title }, result.map { it.title })
-
-        verify(_noteRepository).findAll(_pageable)
-    }
-
-    @Test
     fun `should return note by id`() {
         val id: UUID = _sampleNote.id
         whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))

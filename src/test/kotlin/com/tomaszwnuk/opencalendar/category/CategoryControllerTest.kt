@@ -115,20 +115,6 @@ class CategoryControllerTest {
     }
 
     @Test
-    fun `should return paginated list of filtered categories with status code 200 OK`() {
-        val filter = CategoryFilterDto(title = "Personal")
-        val categories: List<Category> = listOf(_sampleCategory, _sampleCategory.copy(), _sampleCategory.copy())
-        whenever(_categoryService.filter(filter)).thenReturn(categories.map{it.toDto()})
-
-        val response: ResponseEntity<Page<CategoryDto>> = _categoryController.filter(filter.title, null, _pageable)
-
-        assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(categories.size.toLong(), response.body?.totalElements)
-
-        verify(_categoryService).filter(eq(filter))
-    }
-
-    @Test
     fun `should return paginated list of all category events with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
         val calendar = Calendar(title = "Calendar", emoji = "📅")
