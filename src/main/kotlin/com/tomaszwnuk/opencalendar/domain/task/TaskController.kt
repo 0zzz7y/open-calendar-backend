@@ -61,7 +61,10 @@ class TaskController(private val _taskService: TaskService) {
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody(required = true) dto: TaskDto): ResponseEntity<TaskDto> {
+    fun update(
+        @PathVariable(name = "id", required = true) id: UUID,
+        @Valid @RequestBody(required = true) dto: TaskDto
+    ): ResponseEntity<TaskDto> {
         val updated: TaskDto = _taskService.update(id, dto)
         return ResponseEntity.ok(updated)
     }

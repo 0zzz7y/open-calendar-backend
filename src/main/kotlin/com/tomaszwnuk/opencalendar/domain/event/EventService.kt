@@ -174,8 +174,8 @@ class EventService(
         _timer = System.currentTimeMillis()
 
         val events: List<Event> = _eventRepository.findAllByCalendarId(calendarId)
-
         _eventRepository.deleteAll(events)
+
         info(this, "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
 

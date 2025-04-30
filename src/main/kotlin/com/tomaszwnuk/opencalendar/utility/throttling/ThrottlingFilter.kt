@@ -20,10 +20,10 @@ class ThrottlingFilter : Filter {
     private val _buckets: MutableMap<String, Bucket> = ConcurrentHashMap()
 
     override fun doFilter(request: ServletRequest?, response: ServletResponse?, chain: FilterChain?) {
-        val httpRequest = request as HttpServletRequest
-        val httpResponse = response as HttpServletResponse
-        val clientIp = getClientIp(httpRequest)
-        val bucket = _buckets.computeIfAbsent(clientIp) { createBucket() }
+        val httpRequest: HttpServletRequest = request as HttpServletRequest
+        val httpResponse: HttpServletResponse = response as HttpServletResponse
+        val clientIp: String = getClientIp(httpRequest)
+        val bucket: Bucket = _buckets.computeIfAbsent(clientIp) { createBucket() }
 
         if (bucket.tryConsume(1)) {
             chain?.doFilter(request, response)
@@ -34,7 +34,7 @@ class ThrottlingFilter : Filter {
     }
 
     private fun createBucket(): Bucket {
-        val limit = Bandwidth.classic(
+        val limit: Bandwidth = Bandwidth.classic(
             MAXIMUM_REQUESTS_PER_MINUTE,
             Refill.greedy(MAXIMUM_REQUESTS_PER_MINUTE, Duration.ofMinutes(1))
         )

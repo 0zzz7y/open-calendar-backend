@@ -24,6 +24,7 @@ class CalendarService(
     fun create(dto: CalendarDto): CalendarDto {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
+
         _calendarRepository.assertNameDoesNotExist(
             name = dto.title,
             existsByName = { _calendarRepository.existsByTitle(it) }

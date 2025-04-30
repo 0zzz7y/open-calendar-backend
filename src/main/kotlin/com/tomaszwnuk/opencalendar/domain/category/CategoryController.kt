@@ -117,7 +117,10 @@ class CategoryController(
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody(required = true) dto: CategoryDto): ResponseEntity<CategoryDto> {
+    fun update(
+        @PathVariable(name = "id", required = true) id: UUID,
+        @Valid @RequestBody(required = true) dto: CategoryDto
+    ): ResponseEntity<CategoryDto> {
         val updated: CategoryDto = _categoryService.update(id, dto)
         return ResponseEntity.ok(updated)
     }

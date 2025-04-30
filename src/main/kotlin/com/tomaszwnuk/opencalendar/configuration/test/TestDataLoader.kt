@@ -52,8 +52,13 @@ class TestDataLoader(
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
 
-        val first: Calendar =
-            _calendarRepository.save(Calendar(id = UUID.randomUUID(), title = "#1", emoji = "\uD83D\uDCA5"))
+        val first: Calendar = _calendarRepository.save(
+            Calendar(
+                id = UUID.randomUUID(),
+                title = "#1",
+                emoji = "\uD83D\uDCA5"
+            )
+        )
         val calendars: Map<String, Calendar> = mapOf("first" to first)
 
         info(this, "Calendars created in ${System.currentTimeMillis() - _timer} ms")
@@ -63,12 +68,24 @@ class TestDataLoader(
     private fun createCategories(): Map<String, Category> {
         _timer = System.currentTimeMillis()
 
-        val personal: Category =
-            _categoryRepository.save(Category(title = "Personal", color = "#EFEF39"))
-        val work: Category =
-            _categoryRepository.save(Category(title = "Work", color = "#48DD52"))
-        val university: Category =
-            _categoryRepository.save(Category(title = "University", color = "#E8475D"))
+        val personal: Category = _categoryRepository.save(
+            Category(
+                title = "Personal",
+                color = "#EFEF39"
+            )
+        )
+        val work: Category = _categoryRepository.save(
+            Category(
+                title = "Work",
+                color = "#48DD52"
+            )
+        )
+        val university: Category = _categoryRepository.save(
+            Category(
+                title = "University",
+                color = "#E8475D"
+            )
+        )
         val categories: Map<String, Category> = mapOf(
             "personal" to personal,
             "work" to work,
@@ -94,7 +111,7 @@ class TestDataLoader(
         )
         val work02 = Event(
             title = "Daily Meeting",
-            description = "Daily organizational team meeting.",
+            description = "Team meeting.",
             startDate = now.withHour(10).withMinute(0),
             endDate = now.withHour(10).withMinute(30),
             calendar = calendars["first"]!!,

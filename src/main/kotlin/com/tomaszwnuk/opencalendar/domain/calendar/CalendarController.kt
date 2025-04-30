@@ -117,7 +117,10 @@ class CalendarController(
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody dto: CalendarDto): ResponseEntity<CalendarDto> {
+    fun update(
+        @PathVariable(name = "id", required = true) id: UUID,
+        @Valid @RequestBody dto: CalendarDto
+    ): ResponseEntity<CalendarDto> {
         val updated: CalendarDto = _calendarService.update(id, dto)
         return ResponseEntity.ok(updated)
     }

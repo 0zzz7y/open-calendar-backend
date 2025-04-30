@@ -61,7 +61,10 @@ class NoteController(
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody(required = true) dto: NoteDto): ResponseEntity<NoteDto> {
+    fun update(
+        @PathVariable(name = "id", required = true) id: UUID,
+        @Valid @RequestBody(required = true) dto: NoteDto
+    ): ResponseEntity<NoteDto> {
         val updated: NoteDto = _noteService.update(id, dto)
         return ResponseEntity.ok(updated)
     }

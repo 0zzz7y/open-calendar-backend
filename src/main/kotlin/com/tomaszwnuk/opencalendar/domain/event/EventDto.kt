@@ -48,4 +48,3 @@ data class EventDto(
     description = description,
     categoryId = categoryId
 ), Schedulable
-

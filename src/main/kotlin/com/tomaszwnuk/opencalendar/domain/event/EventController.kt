@@ -49,8 +49,14 @@ class EventController(
     fun filter(
         @RequestParam(name = "title", required = false) title: String?,
         @RequestParam(name = "description", required = false) description: String?,
-        @RequestParam(name = "dateFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateFrom: String?,
-        @RequestParam(name = "dateTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateTo: String?,
+        @RequestParam(
+            name = "dateFrom",
+            required = false
+        ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateFrom: String?,
+        @RequestParam(
+            name = "dateTo",
+            required = false
+        ) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateTo: String?,
         @RequestParam(name = "recurringPattern", required = false) recurringPattern: String?,
         @RequestParam(name = "calendarId", required = false) calendarId: UUID?,
         @RequestParam(name = "categoryId", required = false) categoryId: UUID?,
@@ -70,7 +76,10 @@ class EventController(
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody(required = true) dto: EventDto): ResponseEntity<EventDto> {
+    fun update(
+        @PathVariable(name = "id", required = true) id: UUID,
+        @Valid @RequestBody(required = true) dto: EventDto
+    ): ResponseEntity<EventDto> {
         val updated: EventDto = _eventService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
