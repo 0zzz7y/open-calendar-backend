@@ -1,32 +1,33 @@
 package com.tomaszwnuk.opencalendar.task
 
-import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
-import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.domain.category.Category
-import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
-import com.tomaszwnuk.opencalendar.domain.task.*
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import com.tomaszwnuk.opencalendar.domain.task.Task
+import com.tomaszwnuk.opencalendar.domain.task.TaskDto
+import com.tomaszwnuk.opencalendar.domain.task.TaskFilterDto
+import com.tomaszwnuk.opencalendar.domain.task.TaskRepository
+import com.tomaszwnuk.opencalendar.domain.task.TaskService
+import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
-import org.mockito.kotlin.*
-import org.mockito.quality.Strictness
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
-import java.awt.Color
-import java.util.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import java.util.Optional
+import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class TaskServiceTest {
+internal class TaskServiceTest {
 
     @Mock
     private lateinit var _taskRepository: TaskRepository
@@ -37,101 +38,278 @@ class TaskServiceTest {
     @Mock
     private lateinit var _categoryRepository: CategoryRepository
 
-    @InjectMocks
-    private lateinit var _taskService: TaskService
+    private lateinit var _service: TaskService
 
-    private lateinit var _sampleCalendar: Calendar
-
-    private lateinit var _sampleCategory: Category
-
-    private lateinit var _sampleTask: Task
-
-    private lateinit var _sampleTaskDto: TaskDto
-
-    private lateinit var _pageable: Pageable
+    private val sampleCalendar = Calendar(
+        id = UUID.randomUUID(), title = "Development Calendar", emoji = "💻"
+    )
+    private val sampleCategory = Category(
+        id = UUID.randomUUID(), title = "High Priority", color = "#FF4500"
+    )
 
     @BeforeEach
-    fun setup() {
-        _sampleCalendar = Calendar(
-            id = UUID.randomUUID(),
-            title = "Personal",
-            emoji = "\uD83C\uDFE0"
-        )
-        _sampleCategory = Category(
-            id = UUID.randomUUID(),
-            title = "Training",
-            color = CategoryColorHelper.toHex(Color.GREEN)
-        )
-        _sampleTask = Task(
-            id = UUID.randomUUID(),
-            title = "Daily Standup",
-            description = null,
-            status = TaskStatus.TODO,
-            calendar = _sampleCalendar,
-            category = _sampleCategory
-        )
-        _sampleTaskDto = _sampleTask.toDto()
-        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+    fun setUp() {
+        _service = TaskService(_taskRepository, _calendarRepository, _categoryRepository)
     }
 
     @Test
     fun `should return created task`() {
-        whenever(_calendarRepository.findById(_sampleTaskDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
-        whenever(_categoryRepository.findById(_sampleTaskDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
-        doReturn(_sampleTask).whenever(_taskRepository).save(any())
+        val dto = TaskDto(
+            title = "Code Review",
+            description = "Review team's pull requests",
+            status = TaskStatus.TODO,
+            calendarId = sampleCalendar.id,
+            categoryId = sampleCategory.id
+        )
+        val savedId = UUID.randomUUID()
 
-        val result: TaskDto = _taskService.create(_sampleTaskDto)
+        whenever(_calendarRepository.findById(sampleCalendar.id)).thenReturn(Optional.of(sampleCalendar))
+        whenever(_categoryRepository.findById(sampleCategory.id)).thenReturn(Optional.of(sampleCategory))
+        whenever(_taskRepository.save(any<Task>())).thenAnswer { invocation ->
+            val arg = invocation.getArgument<Task>(0)
+            arg.copy(id = savedId)
+        }
 
-        assertNotNull(result)
-        assertEquals(_sampleTask.id, result.id)
-        assertEquals(_sampleTask.title, result.title)
-        assertEquals(_sampleTask.status, result.status)
+        val result = _service.create(dto)
 
-        verify(_taskRepository).save(any())
+        assertNotNull(result.id)
+        assertEquals(savedId, result.id)
+        assertEquals("Code Review", result.title)
+        assertEquals(TaskStatus.TODO, result.status)
+        assertEquals(sampleCalendar.id, result.calendarId)
+        assertEquals(sampleCategory.id, result.categoryId)
+
+        verify(_calendarRepository).findById(sampleCalendar.id)
+        verify(_categoryRepository).findById(sampleCategory.id)
+        verify(_taskRepository).save(argThat { title == "Code Review" && status == TaskStatus.TODO })
+    }
+
+    @Test
+    fun `should throw error when creating task with missing calendar`() {
+        val dto = TaskDto(
+            title = "Deployment",
+            description = "Deploy new release",
+            status = TaskStatus.TODO,
+            calendarId = UUID.randomUUID(),
+            categoryId = null
+        )
+        whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.empty())
+
+        assertThrows<NoSuchElementException> { _service.create(dto) }
+
+        verify(_calendarRepository).findById(dto.calendarId)
+        verify(_taskRepository, never()).save(any<Task>())
     }
 
     @Test
     fun `should return task by id`() {
-        val id: UUID = _sampleTask.id
-        whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
+        val id = UUID.randomUUID()
+        val task = Task(
+            id = id,
+            title = "Sprint Planning",
+            description = "Discuss upcoming sprint goals",
+            status = TaskStatus.IN_PROGRESS,
+            calendar = sampleCalendar,
+            category = null
+        )
+        whenever(_taskRepository.findById(id)).thenReturn(Optional.of(task))
 
-        val result: TaskDto = _taskService.getById(id)
+        val result = _service.getById(id)
 
-        assertNotNull(result)
-        assertEquals(_sampleTask.id, result.id)
-        assertEquals(_sampleTask.title, result.title)
-        assertEquals(_sampleTask.status, result.status)
+        assertEquals(id, result.id)
+        assertEquals("Sprint Planning", result.title)
+        assertEquals(TaskStatus.IN_PROGRESS, result.status)
 
         verify(_taskRepository).findById(id)
     }
 
     @Test
-    fun `should return updated task`() {
-        val updatedTask: Task = _sampleTask.copy(title = "Updated Task")
+    fun `should throw error when task id not found`() {
+        val id = UUID.randomUUID()
+        whenever(_taskRepository.findById(id)).thenReturn(Optional.empty())
 
-        whenever(_taskRepository.findById(_sampleTask.id)).thenReturn(Optional.of(_sampleTask))
-        whenever(_calendarRepository.findById(_sampleTaskDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
-        whenever(_categoryRepository.findById(_sampleTaskDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
-        doReturn(updatedTask).whenever(_taskRepository).save(any())
-
-        val result: TaskDto = _taskService.update(_sampleTask.id, _sampleTaskDto)
-
-        assertNotNull(result)
-        assertEquals(updatedTask.id, result.id)
-        assertEquals("Updated Task", result.title)
-
-        verify(_taskRepository).save(any())
+        assertThrows<NoSuchElementException> { _service.getById(id) }
+        verify(_taskRepository).findById(id)
     }
 
     @Test
-    fun `should delete task by id`() {
-        val id: UUID = _sampleTask.id
-        whenever(_taskRepository.findById(id)).thenReturn(Optional.of(_sampleTask))
-        doNothing().whenever(_taskRepository).delete(_sampleTask)
+    fun `should return all tasks`() {
+        val bugFix = Task(
+            title = "Bug Fix",
+            description = "Fix critical production bug",
+            status = TaskStatus.TODO,
+            calendar = sampleCalendar
+        )
+        val writeDocs = Task(
+            title = "Write Documentation",
+            description = "Document new API endpoints",
+            status = TaskStatus.DONE,
+            calendar = sampleCalendar
+        )
+        whenever(_taskRepository.findAll()).thenReturn(listOf(bugFix, writeDocs))
 
-        _taskService.delete(id)
-
-        verify(_taskRepository).delete(_sampleTask)
+        val result = _service.getAll()
+        assertEquals(2, result.size)
+        assertTrue(result.any { it.title == "Bug Fix" })
+        assertTrue(result.any { it.status == TaskStatus.DONE })
+        verify(_taskRepository).findAll()
     }
 
+    @Test
+    fun `should return tasks by calendar id`() {
+        val id = sampleCalendar.id
+        val teamSync = Task(
+            title = "Team Sync",
+            description = "Weekly team stand-up",
+            status = TaskStatus.TODO,
+            calendar = sampleCalendar
+        )
+        whenever(_taskRepository.findAllByCalendarId(id)).thenReturn(listOf(teamSync))
+
+        val result = _service.getAllByCalendarId(id)
+        assertEquals(1, result.size)
+        assertEquals("Team Sync", result[0].title)
+        verify(_taskRepository).findAllByCalendarId(id)
+    }
+
+    @Test
+    fun `should return tasks by category id`() {
+        val id = sampleCategory.id
+        val securityAudit = Task(
+            title = "Security Audit",
+            description = "Review security protocols",
+            status = TaskStatus.TODO,
+            calendar = sampleCalendar,
+            category = sampleCategory
+        )
+        whenever(_taskRepository.findAllByCategoryId(id)).thenReturn(listOf(securityAudit))
+
+        val result = _service.getAllByCategoryId(id)
+        assertEquals(1, result.size)
+        assertEquals("Security Audit", result[0].title)
+        verify(_taskRepository).findAllByCategoryId(id)
+    }
+
+    @Test
+    fun `should return filtered tasks`() {
+        val filter = TaskFilterDto(
+            title = "Release",
+            description = null,
+            status = TaskStatus.DONE,
+            calendarId = null,
+            categoryId = null
+        )
+        val releaseTask = Task(
+            title = "Release v2.0",
+            description = "Deploy version 2.0",
+            status = TaskStatus.DONE,
+            calendar = sampleCalendar
+        )
+        whenever(_taskRepository.filter("Release", null, TaskStatus.DONE, null, null))
+            .thenReturn(listOf(releaseTask))
+
+        val result = _service.filter(filter)
+        assertEquals(1, result.size)
+        assertEquals("Release v2.0", result[0].title)
+        verify(_taskRepository).filter("Release", null, TaskStatus.DONE, null, null)
+    }
+
+    @Test
+    fun `should return updated task`() {
+        val id = UUID.randomUUID()
+        val existing = Task(
+            id = id,
+            title = "Draft Report",
+            description = "Compile initial draft report",
+            status = TaskStatus.TODO,
+            calendar = sampleCalendar,
+            category = sampleCategory
+        )
+        val dto = existing.toDto().copy(status = TaskStatus.IN_PROGRESS)
+        whenever(_taskRepository.findById(id)).thenReturn(Optional.of(existing))
+        whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.of(sampleCalendar))
+        whenever(_categoryRepository.findById(dto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
+        whenever(_taskRepository.save(any<Task>())).thenAnswer { it.getArgument<Task>(0) }
+
+        val result = _service.update(id, dto)
+        assertEquals(TaskStatus.IN_PROGRESS, result.status)
+        verify(_taskRepository).findById(id)
+        verify(_taskRepository).save(argThat { status == TaskStatus.IN_PROGRESS })
+    }
+
+    @Test
+    fun `should throw error when updating non existing task`() {
+        val id = UUID.randomUUID()
+        val dto = TaskDto(
+            id = null,
+            title = "Ghost Task",
+            description = null,
+            status = TaskStatus.TODO,
+            calendarId = sampleCalendar.id,
+            categoryId = null
+        )
+        whenever(_taskRepository.findById(id)).thenReturn(Optional.empty())
+
+        assertThrows<NoSuchElementException> { _service.update(id, dto) }
+        verify(_taskRepository).findById(id)
+    }
+
+    @Test
+    fun `should delete task when exists`() {
+        val id = UUID.randomUUID()
+        val cleanupTask = Task(
+            title = "Log Cleanup",
+            description = "Clean up old logs",
+            status = TaskStatus.TODO,
+            calendar = sampleCalendar
+        )
+        whenever(_taskRepository.findById(id)).thenReturn(Optional.of(cleanupTask))
+        doNothing().whenever(_taskRepository).delete(cleanupTask)
+
+        _service.delete(id)
+        verify(_taskRepository).findById(id)
+        verify(_taskRepository).delete(cleanupTask)
+    }
+
+    @Test
+    fun `should delete all tasks by calendar id`() {
+        val calId = sampleCalendar.id
+        val databaseCleanup = Task(
+            title = "Database Cleanup",
+            description = "Remove outdated records",
+            status = TaskStatus.TODO,
+            calendar = sampleCalendar
+        )
+        val logArchiving = databaseCleanup.copy(
+            id = UUID.randomUUID(),
+            title = "Log Archiving",
+            description = "Archive system logs"
+        )
+        whenever(_taskRepository.findAllByCalendarId(calId)).thenReturn(listOf(databaseCleanup, logArchiving))
+        doNothing().whenever(_taskRepository).deleteAll(listOf(databaseCleanup, logArchiving))
+
+        _service.deleteAllByCalendarId(calId)
+        verify(_taskRepository).findAllByCalendarId(calId)
+        verify(_taskRepository).deleteAll(listOf(databaseCleanup, logArchiving))
+    }
+
+    @Test
+    fun `should clear category for all tasks by category id`() {
+        val catId = sampleCategory.id
+        val auditTask = Task(
+            title = "Security Audit",
+            description = "Review security compliance",
+            status = TaskStatus.TODO,
+            calendar = sampleCalendar,
+            category = sampleCategory
+        )
+        val complianceFollowUp = auditTask.copy(id = UUID.randomUUID())
+        whenever(_taskRepository.findAllByCategoryId(catId)).thenReturn(listOf(auditTask, complianceFollowUp))
+        whenever(_taskRepository.save(any<Task>())).thenAnswer { it.getArgument<Task>(0) }
+
+        _service.deleteAllCategoryByCategoryId(catId)
+        verify(_taskRepository).findAllByCategoryId(catId)
+        verify(_taskRepository).save(argThat { id == auditTask.id && category == null })
+        verify(_taskRepository).save(argThat { id == complianceFollowUp.id && category == null })
+    }
 }

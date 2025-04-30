@@ -1,33 +1,22 @@
 package com.tomaszwnuk.opencalendar.note
 
-import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
-import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.domain.category.Category
-import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
 import com.tomaszwnuk.opencalendar.domain.note.*
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.*
-import org.mockito.quality.Strictness
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
-import java.awt.Color
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class NoteServiceTest {
+internal class NoteServiceTest {
 
     @Mock
     private lateinit var _noteRepository: NoteRepository
@@ -38,129 +27,272 @@ class NoteServiceTest {
     @Mock
     private lateinit var _categoryRepository: CategoryRepository
 
-    @InjectMocks
-    private lateinit var _noteService: NoteService
+    private lateinit var _service: NoteService
 
-    private lateinit var _sampleCalendar: Calendar
-
-    private lateinit var _sampleCategory: Category
-
-    private lateinit var _sampleNote: Note
-
-    private lateinit var _sampleNoteDto: NoteDto
-
-    private lateinit var _pageable: Pageable
+    private val sampleCalendar = Calendar(
+        id = UUID.randomUUID(), title = "Project Calendar", emoji = "📅"
+    )
+    private val sampleCategory = Category(
+        id = UUID.randomUUID(), title = "Announcements", color = "#FFA500"
+    )
 
     @BeforeEach
-    fun setup() {
-        _sampleCalendar = Calendar(
-            id = UUID.randomUUID(),
-            title = "Personal",
-            emoji = "\uD83C\uDFE0"
-        )
-        _sampleCategory = Category(
-            id = UUID.randomUUID(),
-            title = "Shopping",
-            color = CategoryColorHelper.toHex(Color.YELLOW)
-        )
-        _sampleNote = Note(
-            id = UUID.randomUUID(),
-            title = "Groceries",
-            description = "Buy milk, eggs, and bread",
-            calendar = _sampleCalendar,
-            category = _sampleCategory
-        )
-        _sampleNoteDto = _sampleNote.toDto()
-        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+    fun setUp() {
+        _service = NoteService(_noteRepository, _calendarRepository, _categoryRepository)
     }
 
     @Test
     fun `should return created note`() {
-        whenever(_calendarRepository.findById(_sampleNoteDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
-        whenever(_categoryRepository.findById(_sampleNoteDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
-        doReturn(_sampleNote).whenever(_noteRepository).save(any())
+        val dto = NoteDto(
+            title = "Weekly Update",
+            description = "Team progress overview",
+            calendarId = sampleCalendar.id,
+            categoryId = sampleCategory.id
+        )
+        val savedId = UUID.randomUUID()
 
-        val result: NoteDto = _noteService.create(_sampleNoteDto)
+        whenever(_calendarRepository.findById(sampleCalendar.id)).thenReturn(Optional.of(sampleCalendar))
+        whenever(_categoryRepository.findById(sampleCategory.id)).thenReturn(Optional.of(sampleCategory))
+        whenever(_noteRepository.save(any<Note>())).thenAnswer { invocation ->
+            val arg = invocation.getArgument<Note>(0)
+            arg.copy(id = savedId)
+        }
 
-        assertNotNull(result)
-        assertEquals(_sampleNote.id, result.id)
-        assertEquals(_sampleNote.title, result.title)
-        assertEquals(_sampleNote.description, result.description)
+        val result = _service.create(dto)
 
-        verify(_noteRepository).save(any())
+        assertNotNull(result.id)
+        assertEquals(savedId, result.id)
+        assertEquals("Weekly Update", result.title)
+        assertEquals("Team progress overview", result.description)
+        assertEquals(sampleCalendar.id, result.calendarId)
+        assertEquals(sampleCategory.id, result.categoryId)
+
+        verify(_calendarRepository).findById(sampleCalendar.id)
+        verify(_categoryRepository).findById(sampleCategory.id)
+        verify(_noteRepository).save(argThat { title == "Weekly Update" && description == "Team progress overview" })
+    }
+
+    @Test
+    fun `should throw error when creating note with missing calendar`() {
+        val dto = NoteDto(
+            title = "Missing Calendar",
+            description = "No calendar available",
+            calendarId = UUID.randomUUID(),
+            categoryId = null
+        )
+        whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.empty())
+
+        assertThrows<NoSuchElementException> {
+            _service.create(dto)
+        }
+
+        verify(_calendarRepository).findById(dto.calendarId)
+        verify(_noteRepository, never()).save(any<Note>())
     }
 
     @Test
     fun `should return note by id`() {
-        val id: UUID = _sampleNote.id
-        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
+        val id = UUID.randomUUID()
+        val note = Note(
+            id = id,
+            title = "Memo",
+            description = "Keep this in mind",
+            calendar = sampleCalendar,
+            category = null
+        )
+        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(note))
 
-        val result: NoteDto = _noteService.getById(id)
+        val result = _service.getById(id)
 
-        assertNotNull(result)
-        assertEquals(_sampleNote.id, result.id)
-        assertEquals(_sampleNote.title, result.title)
-        assertEquals(_sampleNote.description, result.description)
+        assertEquals(id, result.id)
+        assertEquals("Memo", result.title)
+        assertEquals("Keep this in mind", result.description)
 
         verify(_noteRepository).findById(id)
     }
 
     @Test
-    fun `should return paginated list of filtered notes`() {
-        val filter = NoteFilterDto(title = "Groceries")
-        val notes: List<Note> = listOf(_sampleNote, _sampleNote.copy(), _sampleNote.copy())
+    fun `should throw error when note id not found`() {
+        val id = UUID.randomUUID()
+        whenever(_noteRepository.findById(id)).thenReturn(Optional.empty())
 
-        whenever(
-            _noteRepository.filter(
-                eq(filter.title),
-                isNull(),
-                isNull(),
-                isNull()
-            )
-        ).thenReturn(notes)
+        assertThrows<NoSuchElementException> {
+            _service.getById(id)
+        }
 
-        val result: List<NoteDto> = _noteService.filter(filter)
+        verify(_noteRepository).findById(id)
+    }
 
-        assertEquals(notes.size, result.size)
-        assertEquals(notes.map { it.title }, result.map { it.title })
-
-        verify(_noteRepository).filter(
-            eq(filter.title),
-            isNull(),
-            isNull(),
-            isNull()
+    @Test
+    fun `should return all notes by calendar id`() {
+        val note1 = Note(
+            title = "Standup Notes", description = "Daily standup summary",
+            calendar = sampleCalendar
         )
+        val note2 = Note(
+            title = "Planning Notes", description = "Sprint planning details",
+            calendar = sampleCalendar
+        )
+        whenever(_noteRepository.findAllByCalendarId(sampleCalendar.id)).thenReturn(listOf(note1, note2))
+
+        val result = _service.getAllByCalendarId(sampleCalendar.id)
+
+        assertEquals(2, result.size)
+        assertTrue(result.any { it.title == "Standup Notes" })
+        assertTrue(result.any { it.title == "Planning Notes" })
+
+        verify(_noteRepository).findAllByCalendarId(sampleCalendar.id)
+    }
+
+    @Test
+    fun `should return all notes by category id`() {
+        val note = Note(
+            title = "Announcement", description = "New policy",
+            calendar = sampleCalendar,
+            category = sampleCategory
+        )
+        whenever(_noteRepository.findAllByCategoryId(sampleCategory.id)).thenReturn(listOf(note))
+
+        val result = _service.getAllByCategoryId(sampleCategory.id)
+
+        assertEquals(1, result.size)
+        assertEquals("Announcement", result[0].title)
+
+        verify(_noteRepository).findAllByCategoryId(sampleCategory.id)
+    }
+
+    @Test
+    fun `should return all notes`() {
+        val n1 = Note(
+            title = "Note One", description = "Desc one",
+            calendar = sampleCalendar
+        )
+        val n2 = Note(
+            title = "Note Two", description = "Desc two",
+            calendar = sampleCalendar
+        )
+        whenever(_noteRepository.findAll()).thenReturn(listOf(n1, n2))
+
+        val result = _service.getAll()
+
+        assertEquals(2, result.size)
+        assertTrue(result.any { it.title == "Note One" })
+        assertTrue(result.any { it.title == "Note Two" })
+
+        verify(_noteRepository).findAll()
+    }
+
+    @Test
+    fun `should return filtered notes`() {
+        val filter = NoteFilterDto(
+            title = "Standup", description = null,
+            calendarId = null, categoryId = null
+        )
+        val standupNote = Note(
+            title = "Standup Notes", description = "Morning updates",
+            calendar = sampleCalendar
+        )
+        whenever(_noteRepository.filter("Standup", null, null, null)).thenReturn(listOf(standupNote))
+
+        val result = _service.filter(filter)
+
+        assertEquals(1, result.size)
+        assertEquals("Standup Notes", result[0].title)
+
+        verify(_noteRepository).filter("Standup", null, null, null)
     }
 
     @Test
     fun `should return updated note`() {
-        val id: UUID = _sampleNote.id
-        val updatedNote: Note = _sampleNote.copy(title = "Updated note")
+        val id = UUID.randomUUID()
+        val existing = Note(
+            id = id,
+            title = "Draft",
+            description = "Initial draft",
+            calendar = sampleCalendar,
+            category = sampleCategory
+        )
+        val dto = existing.toDto().copy(title = "Final Draft", description = "Updated draft")
+        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(existing))
+        whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.of(sampleCalendar))
+        whenever(_categoryRepository.findById(dto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
+        whenever(_noteRepository.save(any<Note>())).thenAnswer { it.getArgument<Note>(0) }
 
-        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
-        whenever(_calendarRepository.findById(_sampleNoteDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
-        whenever(_categoryRepository.findById(_sampleNoteDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
-        doReturn(updatedNote).whenever(_noteRepository).save(any())
+        val result = _service.update(id, dto)
 
-        val result: NoteDto = _noteService.update(id, _sampleNoteDto)
-
-        assertNotNull(result)
-        assertEquals(updatedNote.id, result.id)
-        assertEquals("Updated note", result.title)
-        assertEquals(updatedNote.description, result.description)
-
-        verify(_noteRepository).save(any())
+        assertEquals("Final Draft", result.title)
+        assertEquals("Updated draft", result.description)
+        verify(_noteRepository).findById(id)
+        verify(_noteRepository).save(argThat { title == "Final Draft" && description == "Updated draft" })
     }
 
     @Test
-    fun `should delete note by id`() {
-        val id: UUID = _sampleNote.id
-        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(_sampleNote))
-        doNothing().whenever(_noteRepository).delete(_sampleNote)
+    fun `should throw error when updating non existing note`() {
+        val id = UUID.randomUUID()
+        val dto = NoteDto(
+            id = null,
+            title = "Ghost Note",
+            description = "Does not exist",
+            calendarId = sampleCalendar.id,
+            categoryId = null
+        )
+        whenever(_noteRepository.findById(id)).thenReturn(Optional.empty())
 
-        _noteService.delete(id)
+        assertThrows<NoSuchElementException> {
+            _service.update(id, dto)
+        }
 
-        verify(_noteRepository).delete(_sampleNote)
+        verify(_noteRepository).findById(id)
     }
 
+    @Test
+    fun `should delete note when exists`() {
+        val id = UUID.randomUUID()
+        val existing = Note(
+            title = "Reminder",
+            description = "Pay bills",
+            calendar = sampleCalendar
+        )
+        whenever(_noteRepository.findById(id)).thenReturn(Optional.of(existing))
+        doNothing().whenever(_noteRepository).delete(existing)
+
+        _service.delete(id)
+
+        verify(_noteRepository).findById(id)
+        verify(_noteRepository).delete(existing)
+    }
+
+    @Test
+    fun `should delete all notes by calendar id`() {
+        val calId = sampleCalendar.id
+        val noteA = Note(
+            title = "Note A", description = "Desc A", calendar = sampleCalendar
+        )
+        val noteB = noteA.copy(id = UUID.randomUUID())
+        whenever(_noteRepository.findAllByCalendarId(calId)).thenReturn(listOf(noteA, noteB))
+        doNothing().whenever(_noteRepository).deleteAll(listOf(noteA, noteB))
+
+        _service.deleteByCalendarId(calId)
+
+        verify(_noteRepository).findAllByCalendarId(calId)
+        verify(_noteRepository).deleteAll(listOf(noteA, noteB))
+    }
+
+    @Test
+    fun `should clear category for all notes by category id`() {
+        val catId = sampleCategory.id
+        val note1 = Note(
+            title = "Cat Note 1", description = "Desc1",
+            calendar = sampleCalendar, category = sampleCategory
+        )
+        val note2 = note1.copy(id = UUID.randomUUID())
+        whenever(_noteRepository.findAllByCategoryId(catId)).thenReturn(listOf(note1, note2))
+        whenever(_noteRepository.save(any<Note>())).thenAnswer { it.getArgument<Note>(0) }
+
+        _service.deleteCategoryByCategoryId(catId)
+
+        verify(_noteRepository).findAllByCategoryId(catId)
+        verify(_noteRepository).save(argThat { id == note1.id && category == null })
+        verify(_noteRepository).save(argThat { id == note2.id && category == null })
+    }
 }

@@ -1,35 +1,24 @@
 package com.tomaszwnuk.opencalendar.event
 
-import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
-import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.domain.category.Category
-import com.tomaszwnuk.opencalendar.domain.category.CategoryColorHelper
 import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
 import com.tomaszwnuk.opencalendar.domain.event.*
 import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.junit.jupiter.MockitoSettings
 import org.mockito.kotlin.*
-import org.mockito.quality.Strictness
-import org.springframework.data.domain.PageImpl
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
-import java.awt.Color
 import java.time.LocalDateTime
 import java.util.*
 
 @ExtendWith(MockitoExtension::class)
-@MockitoSettings(strictness = Strictness.LENIENT)
-class EventServiceTest {
+internal class EventServiceTest {
 
     @Mock
     private lateinit var _eventRepository: EventRepository
@@ -40,141 +29,316 @@ class EventServiceTest {
     @Mock
     private lateinit var _categoryRepository: CategoryRepository
 
-    @InjectMocks
-    private lateinit var _eventService: EventService
+    private lateinit var _service: EventService
 
-    private lateinit var _sampleCalendar: Calendar
+    private val sampleCalendar = Calendar(
+        id = UUID.randomUUID(), title = "Work Calendar", emoji = "🟢"
+    )
 
-    private lateinit var _sampleCategory: Category
+    private val sampleCategory = Category(
+        id = UUID.randomUUID(), title = "Business", color = "#FF0000"
+    )
 
-    private lateinit var _pageable: Pageable
-
-    private lateinit var _sampleEvent: Event
-
-    private lateinit var _sampleEventDto: EventDto
+    private val now: LocalDateTime = LocalDateTime.now()
 
     @BeforeEach
-    fun setup() {
-        _sampleCalendar = Calendar(
-            id = UUID.randomUUID(),
-            title = "Work",
-            emoji = "💼"
-        )
-        _sampleCategory = Category(
-            id = UUID.randomUUID(),
-            title = "Meeting",
-            color = CategoryColorHelper.toHex(Color.GREEN),
-        )
-        _sampleEvent = Event(
-            id = UUID.randomUUID(),
-            title = "Daily Standup",
-            description = "Team sync",
-            startDate = LocalDateTime.now(),
-            endDate = LocalDateTime.now().plusHours(1),
-            recurringPattern = RecurringPattern.DAILY,
-            calendar = _sampleCalendar,
-            category = _sampleCategory
-        )
-        _sampleEventDto = _sampleEvent.toDto()
-        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
+    fun setUp() {
+        _service = EventService(_eventRepository, _calendarRepository, _categoryRepository)
     }
 
     @Test
     fun `should return created event`() {
-        whenever(_calendarRepository.findById(_sampleEventDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
-        whenever(_categoryRepository.findById(_sampleEventDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
-        doReturn(_sampleEvent).whenever(_eventRepository).save(any())
+        val dto = EventDto(
+            title = "Team Meeting",
+            description = "Quarterly strategy discussion",
+            startDate = now,
+            endDate = now.plusHours(1),
+            recurringPattern = RecurringPattern.NONE,
+            calendarId = sampleCalendar.id,
+            categoryId = sampleCategory.id
+        )
+        val savedId = UUID.randomUUID()
 
-        val result: EventDto = _eventService.create(_sampleEventDto)
+        whenever(_calendarRepository.findById(sampleCalendar.id)).thenReturn(Optional.of(sampleCalendar))
+        whenever(_categoryRepository.findById(sampleCategory.id)).thenReturn(Optional.of(sampleCategory))
+        whenever(_eventRepository.save(any<Event>())).thenAnswer { invocation ->
+            val arg = invocation.getArgument<Event>(0)
+            arg.copy(id = savedId)
+        }
 
-        assertNotNull(result)
-        assertEquals(_sampleEvent.id, result.id)
-        assertEquals(_sampleEvent.title, result.title)
-        assertEquals(_sampleEvent.description, result.description)
-        assertEquals(_sampleEvent.startDate, result.startDate)
-        assertEquals(_sampleEvent.endDate, result.endDate)
-        assertEquals(_sampleEvent.recurringPattern, result.recurringPattern)
+        val result = _service.create(dto)
 
-        verify(_eventRepository).save(any())
+        assertNotNull(result.id)
+        assertEquals(savedId, result.id)
+        assertEquals("Team Meeting", result.title)
+        assertEquals(sampleCalendar.id, result.calendarId)
+        assertEquals(sampleCategory.id, result.categoryId)
+
+        verify(_calendarRepository).findById(sampleCalendar.id)
+        verify(_categoryRepository).findById(sampleCategory.id)
+        verify(_eventRepository).save(argThat { title == "Team Meeting" && calendar.id == sampleCalendar.id })
+    }
+
+    @Test
+    fun `should throw error when creating event with missing calendar`() {
+        val dto = EventDto(
+            title = "Product Launch",
+            description = null,
+            startDate = now,
+            endDate = now.plusHours(2),
+            recurringPattern = RecurringPattern.NONE,
+            calendarId = UUID.randomUUID(),
+            categoryId = null
+        )
+        whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.empty())
+
+        assertThrows<NoSuchElementException> {
+            _service.create(dto)
+        }
+
+        verify(_calendarRepository).findById(dto.calendarId)
+        verify(_eventRepository, never()).save(any<Event>())
     }
 
     @Test
     fun `should return event by id`() {
-        val id: UUID = _sampleEvent.id
-        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
+        val id = UUID.randomUUID()
+        val event = Event(
+            id = id,
+            title = "Client Call",
+            description = "Discuss contract",
+            startDate = now,
+            endDate = now.plusHours(1),
+            recurringPattern = RecurringPattern.NONE,
+            calendar = sampleCalendar,
+            category = null
+        )
+        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(event))
 
-        val result: EventDto = _eventService.getById(id)
+        val result = _service.getById(id)
 
-        assertNotNull(result)
-        assertEquals(_sampleEvent.id, result.id)
-        assertEquals(_sampleEvent.title, result.title)
-        assertEquals(_sampleEvent.description, result.description)
+        assertEquals(id, result.id)
+        assertEquals("Client Call", result.title)
 
         verify(_eventRepository).findById(id)
     }
 
     @Test
-    fun `should return paginated list of filtered events`() {
-        val filter = EventFilterDto(title = "Event")
-        val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
+    fun `should throw error when event id not found`() {
+        val id = UUID.randomUUID()
+        whenever(_eventRepository.findById(id)).thenReturn(Optional.empty())
 
+        assertThrows<NoSuchElementException> {
+            _service.getById(id)
+        }
+
+        verify(_eventRepository).findById(id)
+    }
+
+    @Test
+    fun `should return all events`() {
+        val launchEvent = Event(
+            title = "Product Launch",
+            description = "Launch new product",
+            startDate = now,
+            endDate = now.plusHours(2),
+            calendar = sampleCalendar
+        )
+        val reviewEvent = Event(
+            title = "Retrospective",
+            description = "Team retrospective",
+            startDate = now,
+            endDate = now.plusHours(1),
+            calendar = sampleCalendar
+        )
+        whenever(_eventRepository.findAll()).thenReturn(listOf(launchEvent, reviewEvent))
+
+        val result = _service.getAll()
+
+        assertEquals(2, result.size)
+        assertTrue(result.any { it.title == "Product Launch" })
+        assertTrue(result.any { it.title == "Retrospective" })
+
+        verify(_eventRepository).findAll()
+    }
+
+    @Test
+    fun `should return events by calendar id`() {
+        val id = sampleCalendar.id
+        val workshop = Event(
+            title = "Workshop",
+            description = "Skills workshop",
+            startDate = now,
+            endDate = now.plusHours(3),
+            calendar = sampleCalendar
+        )
+        whenever(_eventRepository.findAllByCalendarId(id)).thenReturn(listOf(workshop))
+
+        val result = _service.getAllByCalendarId(id)
+
+        assertEquals(1, result.size)
+        assertEquals("Workshop", result[0].title)
+
+        verify(_eventRepository).findAllByCalendarId(id)
+    }
+
+    @Test
+    fun `should return events by category id`() {
+        val id = sampleCategory.id
+        val training = Event(
+            title = "Training Session",
+            description = "Employee training",
+            startDate = now,
+            endDate = now.plusHours(2),
+            calendar = sampleCalendar,
+            category = sampleCategory
+        )
+        whenever(_eventRepository.findAllByCategoryId(id)).thenReturn(listOf(training))
+
+        val result = _service.getAllByCategoryId(id)
+
+        assertEquals(1, result.size)
+        assertEquals("Training Session", result[0].title)
+
+        verify(_eventRepository).findAllByCategoryId(id)
+    }
+
+    @Test
+    fun `should return filtered events`() {
+        val filter = EventFilterDto(
+            title = "Strategy Meeting",
+            description = null,
+            dateFrom = null,
+            dateTo = null,
+            recurringPattern = null,
+            calendarId = null,
+            categoryId = null
+        )
+        val strategyEvent = Event(
+            title = "Strategy Meeting",
+            description = "Planning for Q3",
+            startDate = now,
+            endDate = now.plusHours(1),
+            calendar = sampleCalendar
+        )
         whenever(
             _eventRepository.filter(
-                eq(filter.title),
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull()
+                "Strategy Meeting", null, null, null, null, null, null
             )
-        ).thenReturn(events)
+        ).thenReturn(listOf(strategyEvent))
 
-        val result: List<EventDto> = _eventService.filter(filter)
+        val result = _service.filter(filter)
 
-        assertEquals(events.size, result.size)
-        assertEquals(events.map { it.title }, result.map { it.title })
+        assertEquals(1, result.size)
+        assertEquals("Strategy Meeting", result[0].title)
 
-        verify(_eventRepository).filter(
-            eq(filter.title),
-            isNull(),
-            isNull(),
-            isNull(),
-            isNull(),
-            isNull(),
-            isNull()
-        )
+        verify(_eventRepository).filter("Strategy Meeting", null, null, null, null, null, null)
     }
 
     @Test
     fun `should return updated event`() {
-        val id: UUID = _sampleEvent.id
-        val updatedEvent: Event = _sampleEvent.copy(title = "Updated Event")
+        val id = UUID.randomUUID()
+        val existing = Event(
+            id = id,
+            title = "Planning Session",
+            description = "Initial planning",
+            startDate = now,
+            endDate = now.plusHours(1),
+            recurringPattern = RecurringPattern.NONE,
+            calendar = sampleCalendar,
+            category = sampleCategory
+        )
+        val dto = existing.toDto().copy(title = "Planning Review")
+        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(existing))
+        whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.of(sampleCalendar))
+        whenever(_categoryRepository.findById(dto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
+        whenever(_eventRepository.save(any<Event>())).thenAnswer { it.getArgument<Event>(0) }
 
-        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
-        whenever(_calendarRepository.findById(_sampleEventDto.calendarId)).thenReturn(Optional.of(_sampleCalendar))
-        whenever(_categoryRepository.findById(_sampleEventDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
-        doReturn(updatedEvent).whenever(_eventRepository).save(any())
+        val result = _service.update(id, dto)
 
-        val result: EventDto = _eventService.update(id, _sampleEventDto)
-
-        assertNotNull(result)
-        assertEquals(updatedEvent.id, result.id)
-        assertEquals("Updated Event", result.title)
-        assertEquals(updatedEvent.description, result.description)
-
-        verify(_eventRepository).save(any())
+        assertEquals("Planning Review", result.title)
+        verify(_eventRepository).findById(id)
+        verify(_eventRepository).save(argThat { title == "Planning Review" })
     }
 
     @Test
-    fun `should delete event by id`() {
-        val id: UUID = _sampleEvent.id
-        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(_sampleEvent))
-        doNothing().whenever(_eventRepository).delete(_sampleEvent)
+    fun `should throw error when updating non existing event`() {
+        val id = UUID.randomUUID()
+        val dto = EventDto(
+            id = null,
+            title = "Resume Meeting",
+            startDate = now,
+            endDate = now.plusHours(1),
+            recurringPattern = RecurringPattern.NONE,
+            calendarId = sampleCalendar.id
+        )
+        whenever(_eventRepository.findById(id)).thenReturn(Optional.empty())
 
-        _eventService.delete(id)
+        assertThrows<NoSuchElementException> {
+            _service.update(id, dto)
+        }
 
-        verify(_eventRepository).delete(_sampleEvent)
+        verify(_eventRepository).findById(id)
     }
 
+    @Test
+    fun `should delete event when exists`() {
+        val id = UUID.randomUUID()
+        val deadlineEvent = Event(
+            title = "Project Deadline",
+            description = "Submit final report",
+            startDate = now,
+            endDate = now.plusHours(1),
+            calendar = sampleCalendar
+        )
+        whenever(_eventRepository.findById(id)).thenReturn(Optional.of(deadlineEvent))
+        doNothing().whenever(_eventRepository).delete(deadlineEvent)
+
+        _service.delete(id)
+
+        verify(_eventRepository).findById(id)
+        verify(_eventRepository).delete(deadlineEvent)
+    }
+
+    @Test
+    fun `should delete all events by calendar id`() {
+        val calId = sampleCalendar.id
+        val planning = Event(
+            title = "Sprint Planning",
+            description = "Plan next sprint",
+            startDate = now,
+            endDate = now.plusHours(2),
+            calendar = sampleCalendar
+        )
+        val planningFollowUp = planning.copy(id = UUID.randomUUID())
+        whenever(_eventRepository.findAllByCalendarId(calId)).thenReturn(listOf(planning, planningFollowUp))
+        doNothing().whenever(_eventRepository).deleteAll(listOf(planning, planningFollowUp))
+
+        _service.deleteAllByCalendarId(calId)
+
+        verify(_eventRepository).findAllByCalendarId(calId)
+        verify(_eventRepository).deleteAll(listOf(planning, planningFollowUp))
+    }
+
+    @Test
+    fun `should delete all events by category id`() {
+        val catId = sampleCategory.id
+        val budgetReview = Event(
+            title = "Budget Review",
+            description = "Review quarterly budget",
+            startDate = now,
+            endDate = now.plusHours(1),
+            calendar = sampleCalendar,
+            category = sampleCategory
+        )
+        val budgetFollowUp = budgetReview.copy(id = UUID.randomUUID())
+        whenever(_eventRepository.findAllByCategoryId(catId)).thenReturn(listOf(budgetReview, budgetFollowUp))
+        whenever(_eventRepository.save(any<Event>())).thenAnswer { it.getArgument<Event>(0) }
+
+        _service.deleteAllByCategoryId(catId)
+
+        verify(_eventRepository).findAllByCategoryId(catId)
+        verify(_eventRepository).save(argThat { id == budgetReview.id && category == null })
+        verify(_eventRepository).save(argThat { id == budgetFollowUp.id && category == null })
+    }
 }
