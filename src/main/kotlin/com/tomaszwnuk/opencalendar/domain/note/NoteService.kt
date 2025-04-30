@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.domain.note
 
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
@@ -12,6 +16,14 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * Service class for managing notes.
+ * Provides methods for creating, retrieving, updating, and deleting notes.
+ *
+ * @property _noteRepository Repository for managing Note entities.
+ * @property _calendarRepository Repository for managing Calendar entities.
+ * @property _categoryRepository Repository for managing Category entities.
+ */
 @Service
 class NoteService(
     private val _noteRepository: NoteRepository,
@@ -19,8 +31,18 @@ class NoteService(
     private val _categoryRepository: CategoryRepository
 ) {
 
+    /**
+     * Timer used for logging execution time of operations.
+     */
     private var _timer: Long = 0
 
+    /**
+     * Creates a new note and evicts related cache entries.
+     *
+     * @param dto The data transfer object containing note details.
+     *
+     * @return The created note as a DTO.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["allNotes"], allEntries = true),
@@ -47,6 +69,13 @@ class NoteService(
         return created.toDto()
     }
 
+    /**
+     * Retrieves a note by its unique identifier and caches the result.
+     *
+     * @param id The UUID of the note to retrieve.
+     *
+     * @return The retrieved note as a DTO.
+     */
     @Cacheable(cacheNames = ["noteById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): NoteDto {
         info(this, "Fetching note with id $id")
@@ -58,6 +87,13 @@ class NoteService(
         return note.toDto()
     }
 
+    /**
+     * Retrieves all notes associated with a specific calendar and caches the result.
+     *
+     * @param calendarId The UUID of the calendar.
+     *
+     * @return A list of notes as DTOs.
+     */
     @Cacheable(cacheNames = ["calendarNotes"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<NoteDto> {
         info(this, "Fetching all notes for calendar with id $calendarId")
@@ -69,6 +105,13 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all notes associated with a specific category and caches the result.
+     *
+     * @param categoryId The UUID of the category.
+     *
+     * @return A list of notes as DTOs.
+     */
     @Cacheable(cacheNames = ["categoryNotes"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<NoteDto> {
         info(this, "Fetching all notes for category with id $categoryId")
@@ -80,6 +123,11 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all notes and caches the result.
+     *
+     * @return A list of all notes as DTOs.
+     */
     @Cacheable(cacheNames = ["allNotes"], condition = "#result != null")
     fun getAll(): List<NoteDto> {
         info(this, "Fetching all notes")
@@ -91,6 +139,13 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
+    /**
+     * Filters notes based on the provided criteria.
+     *
+     * @param filter The filter criteria as a DTO.
+     *
+     * @return A list of filtered notes as DTOs.
+     */
     fun filter(filter: NoteFilterDto): List<NoteDto> {
         info(this, "Filtering notes with $filter")
         _timer = System.currentTimeMillis()
@@ -106,6 +161,14 @@ class NoteService(
         return filtered.map { it.toDto() }
     }
 
+    /**
+     * Updates an existing note and evicts related cache entries.
+     *
+     * @param id The UUID of the note to update.
+     * @param dto The data transfer object containing updated note details.
+     *
+     * @return The updated note as a DTO.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["noteById"], key = "#id"),
@@ -134,6 +197,11 @@ class NoteService(
         return updated.toDto()
     }
 
+    /**
+     * Deletes a note by its unique identifier and evicts related cache entries.
+     *
+     * @param id The UUID of the note to delete.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["noteById"], key = "#id"),
@@ -152,6 +220,11 @@ class NoteService(
         info(this, "Deleted note $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Deletes all notes associated with a specific calendar and evicts related cache entries.
+     *
+     * @param calendarId The UUID of the calendar.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["noteById"], key = "#id", condition = "#id != null"),
@@ -170,6 +243,11 @@ class NoteService(
         info(this, "Deleted all notes for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Removes the category association from all notes of a specific category and evicts related cache entries.
+     *
+     * @param categoryId The UUID of the category.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["noteById"], key = "#id", condition = "#id != null"),

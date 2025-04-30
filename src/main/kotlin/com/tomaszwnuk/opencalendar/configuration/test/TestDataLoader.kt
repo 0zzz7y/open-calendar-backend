@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.configuration.test
 
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
@@ -19,6 +23,16 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ * Component responsible for loading test data into the database.
+ * This class is executed on application startup for specific profiles.
+ *
+ * @property _calendarRepository Repository for managing `Calendar` entities.
+ * @property _categoryRepository Repository for managing `Category` entities.
+ * @property _eventRepository Repository for managing `Event` entities.
+ * @property _taskRepository Repository for managing `Task` entities.
+ * @property _noteRepository Repository for managing `Note` entities.
+ */
 @Suppress("unused")
 @Profile("production", "development", "test")
 @Component
@@ -30,8 +44,16 @@ class TestDataLoader(
     private val _noteRepository: NoteRepository
 ) : CommandLineRunner {
 
+    /**
+     * Timer used for logging execution time of operations.
+     */
     private var _timer: Long = System.currentTimeMillis()
 
+    /**
+     * Executes the test data loading process.
+     *
+     * @param arguments Command-line arguments passed to the application.
+     */
     override fun run(vararg arguments: String?) {
         if (_calendarRepository.count() > 0) {
             info(this, "Test data already loaded. Skipping...")
@@ -49,6 +71,11 @@ class TestDataLoader(
         info(this, "Test data loaded in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Creates and saves sample `Calendar` entities.
+     *
+     * @return A map of calendar identifiers to `Calendar` entities.
+     */
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
 
@@ -65,6 +92,11 @@ class TestDataLoader(
         return calendars
     }
 
+    /**
+     * Creates and saves sample `Category` entities.
+     *
+     * @return A map of category identifiers to `Category` entities.
+     */
     private fun createCategories(): Map<String, Category> {
         _timer = System.currentTimeMillis()
 
@@ -96,6 +128,12 @@ class TestDataLoader(
         return categories
     }
 
+    /**
+     * Creates and saves sample `Event` entities.
+     *
+     * @param calendars A map of calendar identifiers to `Calendar` entities.
+     * @param categories A map of category identifiers to `Category` entities.
+     */
     private fun createEvents(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
         val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
@@ -220,6 +258,12 @@ class TestDataLoader(
         )
     }
 
+    /**
+     * Creates and saves sample `Task` entities.
+     *
+     * @param calendars A map of calendar identifiers to `Calendar` entities.
+     * @param categories A map of category identifiers to `Category` entities.
+     */
     private fun createTasks(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
 
@@ -249,6 +293,12 @@ class TestDataLoader(
         _taskRepository.saveAll(listOf(walkTheDog, buyGroceries, studyForExam))
     }
 
+    /**
+     * Creates and saves sample `Note` entities.
+     *
+     * @param calendars A map of calendar identifiers to `Calendar` entities.
+     * @param categories A map of category identifiers to `Category` entities.
+     */
     private fun createNotes(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
 

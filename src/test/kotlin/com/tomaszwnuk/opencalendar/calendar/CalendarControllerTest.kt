@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.calendar
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -25,27 +29,57 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import java.util.*
 
+/**
+ * Unit tests for the `CalendarController` class.
+ * Verifies the behavior of the controller's endpoints using mocked dependencies.
+ */
 @ExtendWith(MockitoExtension::class)
 internal class CalendarControllerTest {
 
+    /**
+     * Mocked instance of `CalendarService` for simulating calendar-related operations.
+     */
     @Mock
     private lateinit var _calendarService: com.tomaszwnuk.opencalendar.domain.calendar.CalendarService
 
+    /**
+     * Mocked instance of `EventService` for simulating event-related operations.
+     */
     @Mock
     private lateinit var _eventService: EventService
 
+    /**
+     * Mocked instance of `TaskService` for simulating task-related operations.
+     */
     @Mock
     private lateinit var _taskService: TaskService
 
+    /**
+     * Mocked instance of `NoteService` for simulating note-related operations.
+     */
     @Mock
     private lateinit var _noteService: NoteService
 
+    /**
+     * Injected instance of `CalendarController` with mocked dependencies.
+     */
     @InjectMocks
     private lateinit var _controller: CalendarController
 
+    /**
+     * MockMvc instance for simulating HTTP requests to the controller.
+     */
     private lateinit var _mockMvc: MockMvc
+
+    /**
+     * ObjectMapper instance for serializing and deserializing JSON.
+     */
     private lateinit var _objectMapper: ObjectMapper
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes `MockMvc` and `ObjectMapper`.
+     */
     @BeforeEach
     fun setUp() {
         _objectMapper = ObjectMapper()
@@ -55,6 +89,10 @@ internal class CalendarControllerTest {
             .build()
     }
 
+    /**
+     * Tests the creation of a calendar.
+     * Verifies that the endpoint returns a 201 Created status and the created calendar.
+     */
     @Test
     fun `should create calendar with status code 201 Created`() {
         val dto = CalendarDto(id = null, title = "Calendar", emoji = "🟢")
@@ -71,6 +109,10 @@ internal class CalendarControllerTest {
             .andExpect(content().json(_objectMapper.writeValueAsString(created)))
     }
 
+    /**
+     * Tests retrieving all calendars.
+     * Verifies that the endpoint returns a 200 OK status and a list of calendars.
+     */
     @Test
     fun `should return all calendars with status code 200 OK`() {
         val dto1 = CalendarDto(id = UUID.randomUUID(), title = "Work Calendar", emoji = "🟢")
@@ -88,6 +130,10 @@ internal class CalendarControllerTest {
             .andExpect(jsonPath("$.content[1].emoji").value("🔵"))
     }
 
+    /**
+     * Tests retrieving a calendar by its ID.
+     * Verifies that the endpoint returns a 200 OK status and the requested calendar.
+     */
     @Test
     fun `should return calendar by id with status code 200 OK`() {
         val id = UUID.randomUUID()
@@ -99,6 +145,10 @@ internal class CalendarControllerTest {
             .andExpect(content().json(_objectMapper.writeValueAsString(dto)))
     }
 
+    /**
+     * Tests filtering calendars based on criteria.
+     * Verifies that the endpoint returns a 200 OK status and a list of filtered calendars.
+     */
     @Test
     fun `should return list of filtered calendars with status code 200 OK`() {
         val dto = CalendarDto(id = UUID.randomUUID(), title = "Project Calendar", emoji = "🟢")
@@ -115,6 +165,10 @@ internal class CalendarControllerTest {
             .andExpect(jsonPath("$.content[0].title").value("Project Calendar"))
     }
 
+    /**
+     * Tests updating a calendar.
+     * Verifies that the endpoint returns a 200 OK status and the updated calendar.
+     */
     @Test
     fun `should update calendar with status code 200 OK`() {
         val id = UUID.randomUUID()
@@ -130,6 +184,10 @@ internal class CalendarControllerTest {
             .andExpect(content().json(_objectMapper.writeValueAsString(dto)))
     }
 
+    /**
+     * Tests deleting a calendar.
+     * Verifies that the endpoint returns a 204 No Content status.
+     */
     @Test
     fun `should delete calendar with status code 204 No Content`() {
         val id = UUID.randomUUID()
@@ -141,4 +199,5 @@ internal class CalendarControllerTest {
         _mockMvc.perform(delete("/calendars/$id"))
             .andExpect(status().isNoContent)
     }
+
 }

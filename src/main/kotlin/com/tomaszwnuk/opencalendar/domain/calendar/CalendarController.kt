@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.domain.calendar
 
 import com.tomaszwnuk.opencalendar.domain.event.EventDto
@@ -18,6 +22,14 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
+/**
+ * REST controller for managing calendars and their related entities.
+ *
+ * @property _calendarService Service for managing calendar entities.
+ * @property _eventService Service for managing event entities.
+ * @property _taskService Service for managing task entities.
+ * @property _noteService Service for managing note entities.
+ */
 @Suppress("unused")
 @RestController
 @RequestMapping("/calendars")
@@ -28,12 +40,26 @@ class CalendarController(
     private val _noteService: NoteService
 ) {
 
+    /**
+     * Creates a new calendar.
+     *
+     * @param dto The calendar data transfer object containing the details of the calendar to create.
+     *
+     * @return A `ResponseEntity` containing the created calendar.
+     */
     @PostMapping
     fun create(@Valid @RequestBody(required = true) dto: CalendarDto): ResponseEntity<CalendarDto> {
         val created: CalendarDto = _calendarService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
+    /**
+     * Retrieves all calendars with pagination.
+     *
+     * @param pageable The pagination and sorting information.
+     *
+     * @return A `ResponseEntity` containing a paginated list of calendars.
+     */
     @GetMapping
     fun getAll(
         @PageableDefault(
@@ -46,12 +72,27 @@ class CalendarController(
         return ResponseEntity.ok(calendars.toPage(pageable))
     }
 
+    /**
+     * Retrieves a calendar by its ID.
+     *
+     * @param id The unique identifier of the calendar.
+     *
+     * @return A `ResponseEntity` containing the calendar details.
+     */
     @GetMapping("/{id}")
     fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<CalendarDto> {
         val calendar: CalendarDto = _calendarService.getById(id)
         return ResponseEntity.ok(calendar)
     }
 
+    /**
+     * Retrieves events associated with a specific calendar.
+     *
+     * @param id The unique identifier of the calendar.
+     * @param pageable The pagination and sorting information.
+     *
+     * @return A `ResponseEntity` containing a paginated list of events.
+     */
     @GetMapping("/{id}/events")
     fun getEvents(
         @PathVariable(name = "id", required = true) id: UUID,
@@ -61,6 +102,14 @@ class CalendarController(
         return ResponseEntity.ok(events.toPage(pageable))
     }
 
+    /**
+     * Retrieves tasks associated with a specific calendar.
+     *
+     * @param id The unique identifier of the calendar.
+     * @param pageable The pagination and sorting information.
+     *
+     * @return A `ResponseEntity` containing a paginated list of tasks.
+     */
     @GetMapping("/{id}/tasks")
     fun getTasks(
         @PathVariable(name = "id", required = true) id: UUID,
@@ -70,6 +119,14 @@ class CalendarController(
         return ResponseEntity.ok(tasks.toPage(pageable))
     }
 
+    /**
+     * Retrieves notes associated with a specific calendar.
+     *
+     * @param id The unique identifier of the calendar.
+     * @param pageable The pagination and sorting information.
+     *
+     * @return A `ResponseEntity` containing a paginated list of notes.
+     */
     @GetMapping("/{id}/notes")
     fun getNotes(
         @PathVariable(name = "id", required = true) id: UUID,
@@ -79,6 +136,14 @@ class CalendarController(
         return ResponseEntity.ok(notes.toPage(pageable))
     }
 
+    /**
+     * Retrieves all items (events, tasks, notes) associated with a specific calendar.
+     *
+     * @param id The unique identifier of the calendar.
+     * @param pageable The pagination and sorting information.
+     *
+     * @return A `ResponseEntity` containing a list of items with their types.
+     */
     @GetMapping("/{id}/items")
     fun getAllItems(
         @PathVariable(name = "id", required = true) id: UUID,
@@ -102,6 +167,15 @@ class CalendarController(
         return ResponseEntity.ok(items)
     }
 
+    /**
+     * Filters calendars based on title and emoji.
+     *
+     * @param title The title to filter by (optional).
+     * @param emoji The emoji to filter by (optional).
+     * @param pageable The pagination and sorting information.
+     *
+     * @return A `ResponseEntity` containing a paginated list of filtered calendars.
+     */
     @GetMapping("/filter")
     fun filter(
         @RequestParam(name = "title", required = false) title: String?,
@@ -116,6 +190,14 @@ class CalendarController(
         return ResponseEntity.ok(calendars.toPage(pageable))
     }
 
+    /**
+     * Updates an existing calendar.
+     *
+     * @param id The unique identifier of the calendar to update.
+     * @param dto The calendar data transfer object containing the updated details.
+     *
+     * @return A `ResponseEntity` containing the updated calendar.
+     */
     @PutMapping("/{id}")
     fun update(
         @PathVariable(name = "id", required = true) id: UUID,
@@ -125,6 +207,13 @@ class CalendarController(
         return ResponseEntity.ok(updated)
     }
 
+    /**
+     * Deletes a calendar and its associated entities (events, tasks, notes).
+     *
+     * @param id The unique identifier of the calendar to delete.
+     *
+     * @return A `ResponseEntity` with no content.
+     */
     @DeleteMapping("/{id}")
     fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
         _eventService.deleteAllByCalendarId(id)

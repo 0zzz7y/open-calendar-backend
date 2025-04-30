@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.category
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -35,34 +39,72 @@ import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
 
+/**
+ * Unit tests for the `CategoryController` class.
+ * Verifies the behavior of the controller's endpoints using mocked dependencies.
+ */
 @ExtendWith(MockitoExtension::class)
 internal class CategoryControllerTest {
 
+    /**
+     * Mocked instance of `CategoryService` for simulating category-related operations.
+     */
     @Mock
     private lateinit var _categoryService: CategoryService
 
+    /**
+     * Mocked instance of `EventService` for simulating event-related operations.
+     */
     @Mock
     private lateinit var _eventService: EventService
 
+    /**
+     * Mocked instance of `TaskService` for simulating task-related operations.
+     */
     @Mock
     private lateinit var _taskService: TaskService
 
+    /**
+     * Mocked instance of `NoteService` for simulating note-related operations.
+     */
     @Mock
     private lateinit var _noteService: NoteService
 
+    /**
+     * Injected instance of `CategoryController` with mocked dependencies.
+     */
     @InjectMocks
     private lateinit var _controller: CategoryController
 
+    /**
+     * MockMvc instance for simulating HTTP requests to the controller.
+     */
     private lateinit var _mockMvc: MockMvc
 
+    /**
+     * ObjectMapper instance for serializing and deserializing JSON.
+     */
     private lateinit var _objectMapper: ObjectMapper
 
+    /**
+     * Sample `Category` instance used in tests.
+     */
     private lateinit var _sampleCategory: Category
 
+    /**
+     * Sample `CategoryDto` instance used in tests.
+     */
     private lateinit var _sampleCategoryDto: CategoryDto
 
+    /**
+     * Pageable instance for simulating pagination in tests.
+     */
     private lateinit var _pageable: Pageable
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes `MockMvc`, `ObjectMapper`, and sample data.
+     */
     @BeforeEach
     fun setUp() {
         _sampleCategory = Category(
@@ -82,6 +124,10 @@ internal class CategoryControllerTest {
             .build()
     }
 
+    /**
+     * Tests the creation of a category.
+     * Verifies that the endpoint returns a 201 Created status and the created category.
+     */
     @Test
     fun `should return created category with status code 201 Created`() {
         whenever(_categoryService.create(eq(_sampleCategoryDto))).thenReturn(_sampleCategoryDto)
@@ -94,6 +140,10 @@ internal class CategoryControllerTest {
         verify(_categoryService).create(eq(_sampleCategoryDto))
     }
 
+    /**
+     * Tests retrieving all categories with pagination.
+     * Verifies that the endpoint returns a 200 OK status and a paginated list of categories.
+     */
     @Test
     fun `should return paginated list of all categories with status code 200 OK`() {
         val categories = listOf(_sampleCategory, _sampleCategory.copy(), _sampleCategory.copy())
@@ -109,6 +159,10 @@ internal class CategoryControllerTest {
         verify(_categoryService).getAll()
     }
 
+    /**
+     * Tests retrieving a category by its ID.
+     * Verifies that the endpoint returns a 200 OK status and the requested category.
+     */
     @Test
     fun `should return category by id with status code 200 OK`() {
         val id = _sampleCategory.id
@@ -122,6 +176,10 @@ internal class CategoryControllerTest {
         verify(_categoryService).getById(id)
     }
 
+    /**
+     * Tests retrieving events associated with a category.
+     * Verifies that the endpoint returns a 200 OK status and a paginated list of events.
+     */
     @Test
     fun `should return paginated list of category events with status code 200 OK`() {
         val id = _sampleCategory.id
@@ -148,6 +206,10 @@ internal class CategoryControllerTest {
         verify(_eventService).getAllByCategoryId(id)
     }
 
+    /**
+     * Tests retrieving tasks associated with a category.
+     * Verifies that the endpoint returns a 200 OK status and a paginated list of tasks.
+     */
     @Test
     fun `should return paginated list of category tasks with status code 200 OK`() {
         val id = _sampleCategory.id
@@ -171,6 +233,10 @@ internal class CategoryControllerTest {
         verify(_taskService).getAllByCategoryId(id)
     }
 
+    /**
+     * Tests retrieving notes associated with a category.
+     * Verifies that the endpoint returns a 200 OK status and a paginated list of notes.
+     */
     @Test
     fun `should return paginated list of category notes with status code 200 OK`() {
         val id = _sampleCategory.id
@@ -193,6 +259,10 @@ internal class CategoryControllerTest {
         verify(_noteService).getAllByCategoryId(id)
     }
 
+    /**
+     * Tests retrieving a combined list of items (events, tasks, notes) associated with a category.
+     * Verifies that the endpoint returns a 200 OK status and a combined list of items.
+     */
     @Test
     fun `should return combined list of items with status code 200 OK`() {
         val id = _sampleCategory.id
@@ -237,6 +307,10 @@ internal class CategoryControllerTest {
         verify(_noteService).getAllByCategoryId(id)
     }
 
+    /**
+     * Tests updating a category.
+     * Verifies that the endpoint returns a 200 OK status and the updated category.
+     */
     @Test
     fun `should update category with status code 200 OK`() {
         val dto = _sampleCategory.toDto()
@@ -252,6 +326,10 @@ internal class CategoryControllerTest {
         verify(_categoryService).update(_sampleCategory.id, dto)
     }
 
+    /**
+     * Tests deleting a category.
+     * Verifies that the endpoint returns a 204 No Content status.
+     */
     @Test
     fun `should delete category with status code 204 No Content`() {
         doNothing().whenever(_categoryService).delete(_sampleCategory.id)
@@ -263,4 +341,5 @@ internal class CategoryControllerTest {
 
         verify(_categoryService).delete(_sampleCategory.id)
     }
+
 }

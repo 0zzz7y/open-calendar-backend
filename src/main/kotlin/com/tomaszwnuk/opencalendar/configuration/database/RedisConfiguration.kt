@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.configuration.database
 
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -17,14 +21,28 @@ import org.springframework.data.redis.serializer.RedisSerializationContext
 import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.Duration
 
+/**
+ * Configuration class for Redis caching.
+ * This class sets up the Redis template and cache manager for the application.
+ */
 @Suppress("unused")
 @Configuration
 @EnableCaching
 class RedisConfiguration(
+    /**
+     * The `ObjectMapper` used for serializing and deserializing Redis cache values.
+     */
     @Qualifier("redisObjectMapper")
     private val _objectMapper: ObjectMapper
 ) {
 
+    /**
+     * Configures the `RedisTemplate` bean for interacting with Redis.
+     *
+     * @param redisConnectionFactory The factory for creating Redis connections.
+     *
+     * @return The configured `RedisTemplate` instance.
+     */
     @Bean
     fun redisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, Any> {
         val template = RedisTemplate<String, Any>()
@@ -40,6 +58,14 @@ class RedisConfiguration(
         return template
     }
 
+    /**
+     * Configures the `CacheManager` bean for managing application caches.
+     * Falls back to an in-memory cache if Redis is unavailable.
+     *
+     * @param redisConnectionFactory The factory for creating Redis connections.
+     *
+     * @return The configured `CacheManager` instance.
+     */
     @Bean
     fun cacheManager(redisConnectionFactory: RedisConnectionFactory): CacheManager {
         return try {

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.domain.calendar
 
 import com.tomaszwnuk.opencalendar.utility.logger.info
@@ -9,13 +13,30 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * Service class for managing calendar entities.
+ * Provides methods for creating, retrieving, updating, and deleting calendars.
+ *
+ * @property _calendarRepository The repository for accessing calendar data.
+ */
 @Service
 class CalendarService(
     private val _calendarRepository: CalendarRepository
 ) {
 
+    /**
+     * Timer used for logging execution time of operations.
+     */
     private var _timer: Long = 0
 
+    /**
+     * Creates a new calendar.
+     * Evicts the cache for all calendars after creation.
+     *
+     * @param dto The data transfer object containing calendar details.
+     *
+     * @return The created calendar as a DTO.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
@@ -40,6 +61,12 @@ class CalendarService(
         return created.toDto()
     }
 
+    /**
+     * Retrieves all calendars.
+     * Caches the result if it is not null.
+     *
+     * @return A list of all calendars as DTOs.
+     */
     @Cacheable(cacheNames = ["allCalendars"], condition = "#result != null")
     fun getAll(): List<CalendarDto> {
         info(this, "Fetching all calendars")
@@ -51,6 +78,14 @@ class CalendarService(
         return calendars.map { it.toDto() }
     }
 
+    /**
+     * Retrieves a calendar by its ID.
+     * Caches the result if the ID is not null.
+     *
+     * @param id The unique identifier of the calendar.
+     *
+     * @return The calendar as a DTO.
+     */
     @Cacheable(cacheNames = ["calendarById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): CalendarDto {
         info(this, "Fetching calendar with id $id")
@@ -62,6 +97,13 @@ class CalendarService(
         return calendar.toDto()
     }
 
+    /**
+     * Filters calendars based on the provided criteria.
+     *
+     * @param filter The filter criteria for calendars.
+     *
+     * @return A list of calendars matching the filter as DTOs.
+     */
     fun filter(filter: CalendarFilterDto): List<CalendarDto> {
         info(this, "Filtering calendars with $filter")
         _timer = System.currentTimeMillis()
@@ -75,6 +117,15 @@ class CalendarService(
         return calendars.map { it.toDto() }
     }
 
+    /**
+     * Updates an existing calendar.
+     * Evicts the cache for the specific calendar and all calendars after updating.
+     *
+     * @param id The unique identifier of the calendar to update.
+     * @param dto The data transfer object containing updated calendar details.
+     *
+     * @return The updated calendar as a DTO.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["calendarById"], key = "#id"),
@@ -104,6 +155,12 @@ class CalendarService(
         return updated.toDto()
     }
 
+    /**
+     * Deletes a calendar by its ID.
+     * Evicts the cache for the specific calendar and all calendars after deletion.
+     *
+     * @param id The unique identifier of the calendar to delete.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["calendarById"], key = "#id", condition = "#id != null"),

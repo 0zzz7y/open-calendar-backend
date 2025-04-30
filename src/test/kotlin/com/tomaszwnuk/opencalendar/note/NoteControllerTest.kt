@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.note
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
@@ -24,19 +28,44 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.util.UUID
 
+/**
+ * Unit tests for the `NoteController` class.
+ * Verifies the behavior of the controller's endpoints using mocked dependencies.
+ */
 @ExtendWith(MockitoExtension::class)
 internal class NoteControllerTest {
 
+    /**
+     * Mocked instance of `NoteService` for simulating note-related operations.
+     */
     @Mock
     private lateinit var _noteService: NoteService
 
+    /**
+     * Injected instance of `NoteController` with mocked dependencies.
+     */
     @InjectMocks
     private lateinit var _controller: NoteController
 
+    /**
+     * Pageable instance for simulating pagination in tests.
+     */
     private lateinit var _pageable: Pageable
+
+    /**
+     * Sample UUID used for testing.
+     */
     private lateinit var _sampleId: UUID
+
+    /**
+     * Sample `NoteDto` instance used in tests.
+     */
     private lateinit var _sampleDto: NoteDto
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes `Pageable`, sample UUID, and sample `NoteDto`.
+     */
     @BeforeEach
     fun setUp() {
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
@@ -50,6 +79,10 @@ internal class NoteControllerTest {
         )
     }
 
+    /**
+     * Tests the creation of a note.
+     * Verifies that the endpoint returns a 201 Created status and the created note.
+     */
     @Test
     fun `should create note with status code 201 Created`() {
         whenever(_noteService.create(eq(_sampleDto))).thenReturn(_sampleDto)
@@ -61,6 +94,10 @@ internal class NoteControllerTest {
         verify(_noteService).create(eq(_sampleDto))
     }
 
+    /**
+     * Tests retrieving all notes.
+     * Verifies that the endpoint returns a 200 OK status and a list of notes.
+     */
     @Test
     fun `should return all notes with status code 200 OK`() {
         val note1 = _sampleDto.copy(id = UUID.randomUUID(), title = "Standup Notes")
@@ -77,6 +114,10 @@ internal class NoteControllerTest {
         verify(_noteService).getAll()
     }
 
+    /**
+     * Tests retrieving a note by its ID.
+     * Verifies that the endpoint returns a 200 OK status and the requested note.
+     */
     @Test
     fun `should return note by id with status code 200 OK`() {
         whenever(_noteService.getById(_sampleId)).thenReturn(_sampleDto)
@@ -88,6 +129,10 @@ internal class NoteControllerTest {
         verify(_noteService).getById(_sampleId)
     }
 
+    /**
+     * Tests filtering notes based on criteria.
+     * Verifies that the endpoint returns a 200 OK status and a list of filtered notes.
+     */
     @Test
     fun `should return filtered notes with status code 200 OK`() {
         val filtered = _sampleDto.copy(id = UUID.randomUUID(), title = "Release Notes")
@@ -107,6 +152,10 @@ internal class NoteControllerTest {
         verify(_noteService).filter(any<NoteFilterDto>())
     }
 
+    /**
+     * Tests updating a note.
+     * Verifies that the endpoint returns a 200 OK status and the updated note.
+     */
     @Test
     fun `should update note with status code 200 OK`() {
         val updated = _sampleDto.copy(title = "Sprint Retrospective")
@@ -119,6 +168,10 @@ internal class NoteControllerTest {
         verify(_noteService).update(_sampleId, _sampleDto)
     }
 
+    /**
+     * Tests deleting a note.
+     * Verifies that the endpoint returns a 204 No Content status.
+     */
     @Test
     fun `should delete note with status code 204 No Content`() {
         doNothing().whenever(_noteService).delete(_sampleId)
@@ -128,4 +181,5 @@ internal class NoteControllerTest {
         assert(response.statusCode == HttpStatus.NO_CONTENT)
         verify(_noteService).delete(_sampleId)
     }
+
 }

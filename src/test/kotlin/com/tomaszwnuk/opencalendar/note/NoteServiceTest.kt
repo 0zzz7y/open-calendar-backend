@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.note
 
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
@@ -15,32 +19,63 @@ import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.*
 import java.util.*
 
+/**
+ * Unit tests for the `NoteService` class.
+ * Verifies the behavior of the service methods using mocked dependencies.
+ */
 @ExtendWith(MockitoExtension::class)
 internal class NoteServiceTest {
 
+    /**
+     * Mocked instance of `NoteRepository` for simulating note-related database operations.
+     */
     @Mock
     private lateinit var _noteRepository: NoteRepository
 
+    /**
+     * Mocked instance of `CalendarRepository` for simulating calendar-related database operations.
+     */
     @Mock
     private lateinit var _calendarRepository: CalendarRepository
 
+    /**
+     * Mocked instance of `CategoryRepository` for simulating category-related database operations.
+     */
     @Mock
     private lateinit var _categoryRepository: CategoryRepository
 
+    /**
+     * Instance of `NoteService` under test.
+     */
     private lateinit var _service: NoteService
 
+    /**
+     * Sample `Calendar` instance used in tests.
+     */
     private val sampleCalendar = Calendar(
         id = UUID.randomUUID(), title = "Project Calendar", emoji = "📅"
     )
+
+    /**
+     * Sample `Category` instance used in tests.
+     */
     private val sampleCategory = Category(
         id = UUID.randomUUID(), title = "Announcements", color = "#FFA500"
     )
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes the `NoteService` with mocked repositories.
+     */
     @BeforeEach
     fun setUp() {
         _service = NoteService(_noteRepository, _calendarRepository, _categoryRepository)
     }
 
+    /**
+     * Tests the creation of a note.
+     * Verifies that the service returns the created note with a generated ID.
+     */
     @Test
     fun `should return created note`() {
         val dto = NoteDto(
@@ -72,6 +107,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).save(argThat { title == "Weekly Update" && description == "Team progress overview" })
     }
 
+    /**
+     * Tests the creation of a note with a missing calendar.
+     * Verifies that the service throws a `NoSuchElementException`.
+     */
     @Test
     fun `should throw error when creating note with missing calendar`() {
         val dto = NoteDto(
@@ -90,6 +129,10 @@ internal class NoteServiceTest {
         verify(_noteRepository, never()).save(any<Note>())
     }
 
+    /**
+     * Tests retrieving a note by its ID.
+     * Verifies that the service returns the correct note.
+     */
     @Test
     fun `should return note by id`() {
         val id = UUID.randomUUID()
@@ -111,6 +154,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).findById(id)
     }
 
+    /**
+     * Tests retrieving a note by a non-existent ID.
+     * Verifies that the service throws a `NoSuchElementException`.
+     */
     @Test
     fun `should throw error when note id not found`() {
         val id = UUID.randomUUID()
@@ -123,6 +170,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).findById(id)
     }
 
+    /**
+     * Tests retrieving all notes by calendar ID.
+     * Verifies that the service returns a list of notes associated with the specified calendar.
+     */
     @Test
     fun `should return all notes by calendar id`() {
         val note1 = Note(
@@ -144,6 +195,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).findAllByCalendarId(sampleCalendar.id)
     }
 
+    /**
+     * Tests retrieving all notes by category ID.
+     * Verifies that the service returns a list of notes associated with the specified category.
+     */
     @Test
     fun `should return all notes by category id`() {
         val note = Note(
@@ -161,6 +216,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).findAllByCategoryId(sampleCategory.id)
     }
 
+    /**
+     * Tests retrieving all notes.
+     * Verifies that the service returns a list of all notes.
+     */
     @Test
     fun `should return all notes`() {
         val n1 = Note(
@@ -182,6 +241,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).findAll()
     }
 
+    /**
+     * Tests filtering notes based on criteria.
+     * Verifies that the service returns a list of matching notes.
+     */
     @Test
     fun `should return filtered notes`() {
         val filter = NoteFilterDto(
@@ -202,6 +265,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).filter("Standup", null, null, null)
     }
 
+    /**
+     * Tests updating a note.
+     * Verifies that the service updates the note and returns the updated entity.
+     */
     @Test
     fun `should return updated note`() {
         val id = UUID.randomUUID()
@@ -226,6 +293,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).save(argThat { title == "Final Draft" && description == "Updated draft" })
     }
 
+    /**
+     * Tests updating a non-existent note.
+     * Verifies that the service throws a `NoSuchElementException`.
+     */
     @Test
     fun `should throw error when updating non existing note`() {
         val id = UUID.randomUUID()
@@ -245,6 +316,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).findById(id)
     }
 
+    /**
+     * Tests deleting a note that exists.
+     * Verifies that the service deletes the note.
+     */
     @Test
     fun `should delete note when exists`() {
         val id = UUID.randomUUID()
@@ -262,6 +337,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).delete(existing)
     }
 
+    /**
+     * Tests deleting all notes by calendar ID.
+     * Verifies that the service deletes all notes associated with the specified calendar.
+     */
     @Test
     fun `should delete all notes by calendar id`() {
         val calId = sampleCalendar.id
@@ -278,6 +357,10 @@ internal class NoteServiceTest {
         verify(_noteRepository).deleteAll(listOf(noteA, noteB))
     }
 
+    /**
+     * Tests clearing the category for all notes by category ID.
+     * Verifies that the service removes the category association from all notes in the specified category.
+     */
     @Test
     fun `should clear category for all notes by category id`() {
         val catId = sampleCategory.id
@@ -295,4 +378,5 @@ internal class NoteServiceTest {
         verify(_noteRepository).save(argThat { id == note1.id && category == null })
         verify(_noteRepository).save(argThat { id == note2.id && category == null })
     }
+
 }

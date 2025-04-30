@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.event
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
@@ -28,23 +32,49 @@ import org.springframework.http.ResponseEntity
 import java.time.LocalDateTime
 import java.util.UUID
 
+/**
+ * Unit tests for the `EventController` class.
+ * Verifies the behavior of the controller's endpoints using mocked dependencies.
+ */
 @ExtendWith(MockitoExtension::class)
 internal class EventControllerTest {
 
+    /**
+     * Mocked instance of `EventService` for simulating event-related operations.
+     */
     @Mock
     private lateinit var _eventService: EventService
 
+    /**
+     * Injected instance of `EventController` with mocked dependencies.
+     */
     @InjectMocks
     private lateinit var _controller: EventController
 
+    /**
+     * Pageable instance for simulating pagination in tests.
+     */
     private lateinit var _pageable: Pageable
 
+    /**
+     * Sample UUID used for testing.
+     */
     private lateinit var _sampleId: UUID
 
+    /**
+     * Sample `EventDto` instance used in tests.
+     */
     private lateinit var _sampleDto: EventDto
 
+    /**
+     * Current timestamp used for creating sample data.
+     */
     private val _now: LocalDateTime = LocalDateTime.now()
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes `Pageable`, sample UUID, and sample `EventDto`.
+     */
     @BeforeEach
     fun setUp() {
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
@@ -61,6 +91,10 @@ internal class EventControllerTest {
         )
     }
 
+    /**
+     * Tests the creation of an event.
+     * Verifies that the endpoint returns a 201 Created status and the created event.
+     */
     @Test
     fun `should create event with status code 201 Created`() {
         whenever(_eventService.create(eq(_sampleDto))).thenReturn(_sampleDto)
@@ -72,6 +106,10 @@ internal class EventControllerTest {
         verify(_eventService).create(eq(_sampleDto))
     }
 
+    /**
+     * Tests retrieving all events.
+     * Verifies that the endpoint returns a 200 OK status and a list of events.
+     */
     @Test
     fun `should return all events with status code 200 OK`() {
         val dto1 = _sampleDto.copy(id = UUID.randomUUID(), title = "Product Launch")
@@ -88,6 +126,10 @@ internal class EventControllerTest {
         verify(_eventService).getAll()
     }
 
+    /**
+     * Tests retrieving an event by its ID.
+     * Verifies that the endpoint returns a 200 OK status and the requested event.
+     */
     @Test
     fun `should return event by id with status code 200 OK`() {
         whenever(_eventService.getById(_sampleId)).thenReturn(_sampleDto)
@@ -99,6 +141,10 @@ internal class EventControllerTest {
         verify(_eventService).getById(_sampleId)
     }
 
+    /**
+     * Tests filtering events based on criteria.
+     * Verifies that the endpoint returns a 200 OK status and a list of filtered events.
+     */
     @Test
     fun `should return filtered events with status code 200 OK`() {
         val dateFrom = _now.minusDays(1).toString()
@@ -127,6 +173,10 @@ internal class EventControllerTest {
         verify(_eventService).filter(any<EventFilterDto>())
     }
 
+    /**
+     * Tests updating an event.
+     * Verifies that the endpoint returns a 200 OK status and the updated event.
+     */
     @Test
     fun `should update event with status code 200 OK`() {
         val updatedDto = _sampleDto.copy(title = "Planning Review")
@@ -139,6 +189,10 @@ internal class EventControllerTest {
         verify(_eventService).update(_sampleId, _sampleDto)
     }
 
+    /**
+     * Tests deleting an event.
+     * Verifies that the endpoint returns a 204 No Content status.
+     */
     @Test
     fun `should delete event with status code 204 No Content`() {
         doNothing().whenever(_eventService).delete(_sampleId)
@@ -148,4 +202,5 @@ internal class EventControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
         verify(_eventService).delete(_sampleId)
     }
+
 }

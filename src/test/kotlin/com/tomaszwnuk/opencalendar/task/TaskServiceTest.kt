@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.task
 
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
@@ -26,32 +30,63 @@ import org.mockito.kotlin.whenever
 import java.util.Optional
 import java.util.UUID
 
+/**
+ * Unit tests for the `TaskService` class.
+ * Verifies the behavior of the service methods using mocked dependencies.
+ */
 @ExtendWith(MockitoExtension::class)
 internal class TaskServiceTest {
 
+    /**
+     * Mocked instance of `TaskRepository` for simulating task-related database operations.
+     */
     @Mock
     private lateinit var _taskRepository: TaskRepository
 
+    /**
+     * Mocked instance of `CalendarRepository` for simulating calendar-related database operations.
+     */
     @Mock
     private lateinit var _calendarRepository: CalendarRepository
 
+    /**
+     * Mocked instance of `CategoryRepository` for simulating category-related database operations.
+     */
     @Mock
     private lateinit var _categoryRepository: CategoryRepository
 
+    /**
+     * Instance of `TaskService` under test.
+     */
     private lateinit var _service: TaskService
 
+    /**
+     * Sample `Calendar` instance used in tests.
+     */
     private val sampleCalendar = Calendar(
         id = UUID.randomUUID(), title = "Development Calendar", emoji = "💻"
     )
+
+    /**
+     * Sample `Category` instance used in tests.
+     */
     private val sampleCategory = Category(
         id = UUID.randomUUID(), title = "High Priority", color = "#FF4500"
     )
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes the `TaskService` with mocked repositories.
+     */
     @BeforeEach
     fun setUp() {
         _service = TaskService(_taskRepository, _calendarRepository, _categoryRepository)
     }
 
+    /**
+     * Tests the creation of a task.
+     * Verifies that the service returns the created task with a generated ID.
+     */
     @Test
     fun `should return created task`() {
         val dto = TaskDto(
@@ -84,6 +119,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).save(argThat { title == "Code Review" && status == TaskStatus.TODO })
     }
 
+    /**
+     * Tests the creation of a task with a missing calendar.
+     * Verifies that the service throws a `NoSuchElementException`.
+     */
     @Test
     fun `should throw error when creating task with missing calendar`() {
         val dto = TaskDto(
@@ -101,6 +140,10 @@ internal class TaskServiceTest {
         verify(_taskRepository, never()).save(any<Task>())
     }
 
+    /**
+     * Tests retrieving a task by its ID.
+     * Verifies that the service returns the correct task.
+     */
     @Test
     fun `should return task by id`() {
         val id = UUID.randomUUID()
@@ -123,6 +166,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).findById(id)
     }
 
+    /**
+     * Tests retrieving a task by a non-existent ID.
+     * Verifies that the service throws a `NoSuchElementException`.
+     */
     @Test
     fun `should throw error when task id not found`() {
         val id = UUID.randomUUID()
@@ -132,6 +179,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).findById(id)
     }
 
+    /**
+     * Tests retrieving all tasks.
+     * Verifies that the service returns a list of all tasks.
+     */
     @Test
     fun `should return all tasks`() {
         val bugFix = Task(
@@ -155,6 +206,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).findAll()
     }
 
+    /**
+     * Tests retrieving tasks by calendar ID.
+     * Verifies that the service returns a list of tasks associated with the specified calendar.
+     */
     @Test
     fun `should return tasks by calendar id`() {
         val id = sampleCalendar.id
@@ -172,6 +227,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).findAllByCalendarId(id)
     }
 
+    /**
+     * Tests retrieving tasks by category ID.
+     * Verifies that the service returns a list of tasks associated with the specified category.
+     */
     @Test
     fun `should return tasks by category id`() {
         val id = sampleCategory.id
@@ -190,6 +249,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).findAllByCategoryId(id)
     }
 
+    /**
+     * Tests filtering tasks based on criteria.
+     * Verifies that the service returns a list of matching tasks.
+     */
     @Test
     fun `should return filtered tasks`() {
         val filter = TaskFilterDto(
@@ -214,6 +277,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).filter("Release", null, TaskStatus.DONE, null, null)
     }
 
+    /**
+     * Tests updating a task.
+     * Verifies that the service updates the task and returns the updated entity.
+     */
     @Test
     fun `should return updated task`() {
         val id = UUID.randomUUID()
@@ -237,6 +304,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).save(argThat { status == TaskStatus.IN_PROGRESS })
     }
 
+    /**
+     * Tests updating a non-existent task.
+     * Verifies that the service throws a `NoSuchElementException`.
+     */
     @Test
     fun `should throw error when updating non existing task`() {
         val id = UUID.randomUUID()
@@ -254,6 +325,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).findById(id)
     }
 
+    /**
+     * Tests deleting a task that exists.
+     * Verifies that the service deletes the task.
+     */
     @Test
     fun `should delete task when exists`() {
         val id = UUID.randomUUID()
@@ -271,6 +346,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).delete(cleanupTask)
     }
 
+    /**
+     * Tests deleting all tasks by calendar ID.
+     * Verifies that the service deletes all tasks associated with the specified calendar.
+     */
     @Test
     fun `should delete all tasks by calendar id`() {
         val calId = sampleCalendar.id
@@ -293,6 +372,10 @@ internal class TaskServiceTest {
         verify(_taskRepository).deleteAll(listOf(databaseCleanup, logArchiving))
     }
 
+    /**
+     * Tests clearing the category for all tasks by category ID.
+     * Verifies that the service removes the category association from all tasks in the specified category.
+     */
     @Test
     fun `should clear category for all tasks by category id`() {
         val catId = sampleCategory.id
@@ -312,4 +395,5 @@ internal class TaskServiceTest {
         verify(_taskRepository).save(argThat { id == auditTask.id && category == null })
         verify(_taskRepository).save(argThat { id == complianceFollowUp.id && category == null })
     }
+
 }

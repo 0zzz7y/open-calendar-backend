@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.domain.task
 
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
@@ -12,6 +16,14 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * Service class for managing tasks.
+ * Provides methods for creating, retrieving, updating, deleting, and filtering tasks.
+ *
+ * @property _taskRepository Repository for performing CRUD operations on tasks.
+ * @property _calendarRepository Repository for accessing calendar entities.
+ * @property _categoryRepository Repository for accessing category entities.
+ */
 @Service
 class TaskService(
     private val _taskRepository: TaskRepository,
@@ -19,8 +31,19 @@ class TaskService(
     private val _categoryRepository: CategoryRepository
 ) {
 
+    /**
+     * Timer used for measuring execution time of operations.
+     */
     private var _timer: Long = 0
 
+    /**
+     * Creates a new task and saves it to the repository.
+     * Evicts relevant caches after the task is created.
+     *
+     * @param dto The data transfer object containing task details.
+     *
+     * @return The created task as a DTO.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["allTasks"], allEntries = true),
@@ -48,6 +71,14 @@ class TaskService(
         return created.toDto()
     }
 
+    /**
+     * Retrieves a task by its unique identifier.
+     * Caches the result for future requests.
+     *
+     * @param id The unique identifier of the task.
+     *
+     * @return The task as a DTO.
+     */
     @Cacheable(cacheNames = ["taskById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): TaskDto {
         info(this, "Fetching task with id $id")
@@ -59,6 +90,12 @@ class TaskService(
         return task.toDto()
     }
 
+    /**
+     * Retrieves all tasks from the repository.
+     * Caches the result for future requests.
+     *
+     * @return A list of all tasks as DTOs.
+     */
     @Cacheable(cacheNames = ["allTasks"], condition = "#result != null")
     fun getAll(): List<TaskDto> {
         info(this, "Fetching all tasks")
@@ -70,6 +107,14 @@ class TaskService(
         return tasks.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all tasks associated with a specific calendar.
+     * Caches the result for future requests.
+     *
+     * @param calendarId The unique identifier of the calendar.
+     *
+     * @return A list of tasks associated with the calendar as DTOs.
+     */
     @Cacheable(cacheNames = ["calendarTasks"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<TaskDto> {
         info(this, "Fetching all tasks for calendar with id $calendarId")
@@ -81,6 +126,14 @@ class TaskService(
         return tasks.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all tasks associated with a specific category.
+     * Caches the result for future requests.
+     *
+     * @param categoryId The unique identifier of the category.
+     *
+     * @return A list of tasks associated with the category as DTOs.
+     */
     @Cacheable(cacheNames = ["categoryTasks"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<TaskDto> {
         info(this, "Fetching all tasks for category with id $categoryId")
@@ -92,6 +145,13 @@ class TaskService(
         return tasks.map { it.toDto() }
     }
 
+    /**
+     * Filters tasks based on the provided criteria.
+     *
+     * @param filter The filter criteria encapsulated in a DTO.
+     *
+     * @return A list of tasks matching the filter criteria as DTOs.
+     */
     fun filter(filter: TaskFilterDto): List<TaskDto> {
         info(this, "Filtering tasks with $filter")
         _timer = System.currentTimeMillis()
@@ -108,6 +168,15 @@ class TaskService(
         return filteredTasks.map { it.toDto() }
     }
 
+    /**
+     * Updates an existing task with new details.
+     * Evicts relevant caches after the task is updated.
+     *
+     * @param id The unique identifier of the task to update.
+     * @param dto The data transfer object containing updated task details.
+     *
+     * @return The updated task as a DTO.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["taskById"], key = "#id"),
@@ -137,6 +206,12 @@ class TaskService(
         return updated.toDto()
     }
 
+    /**
+     * Deletes a task by its unique identifier.
+     * Evicts relevant caches after the task is deleted.
+     *
+     * @param id The unique identifier of the task to delete.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["taskById"], key = "#id"),
@@ -155,6 +230,12 @@ class TaskService(
         info(this, "Deleted task $task in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Deletes all tasks associated with a specific calendar.
+     * Evicts relevant caches after the tasks are deleted.
+     *
+     * @param calendarId The unique identifier of the calendar.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["taskById"], key = "#id", condition = "#id != null"),
@@ -173,6 +254,12 @@ class TaskService(
         info(this, "Deleted all tasks for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Removes the category association from all tasks associated with a specific category.
+     * Evicts relevant caches after the tasks are updated.
+     *
+     * @param categoryId The unique identifier of the category.
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["taskById"], key = "#id", condition = "#id != null"),

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.category
 
 import com.tomaszwnuk.opencalendar.domain.category.Category
@@ -21,19 +25,37 @@ import org.mockito.kotlin.whenever
 import java.util.*
 import java.util.Optional
 
+/**
+ * Unit tests for the `CategoryService` class.
+ * Verifies the behavior of the service methods using mocked dependencies.
+ */
 @ExtendWith(MockitoExtension::class)
 internal class CategoryServiceTest {
 
+    /**
+     * Mocked instance of `CategoryRepository` for simulating database operations.
+     */
     @Mock
     private lateinit var _repository: CategoryRepository
 
+    /**
+     * Instance of `CategoryService` under test.
+     */
     private lateinit var _service: CategoryService
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes the `CategoryService` with the mocked repository.
+     */
     @BeforeEach
     fun setUp() {
         _service = CategoryService(_repository)
     }
 
+    /**
+     * Tests the creation of a category.
+     * Verifies that the service returns the created category with a generated ID.
+     */
     @Test
     fun `should return created category`() {
         val dto = CategoryDto(title = "Category", color = "#00FF00")
@@ -56,6 +78,10 @@ internal class CategoryServiceTest {
         verify(_repository).save(argThat { title == "Category" && color == "#00FF00" })
     }
 
+    /**
+     * Tests the creation of a category with a duplicate title.
+     * Verifies that the service throws an `IllegalArgumentException`.
+     */
     @Test
     fun `should throw error when creating category with duplicate title`() {
         val dto = CategoryDto(title = "Duplicate Title", color = "#00FF00")
@@ -70,6 +96,10 @@ internal class CategoryServiceTest {
         verify(_repository, never()).save(any<Category>())
     }
 
+    /**
+     * Tests retrieving all categories.
+     * Verifies that the service returns a list of all categories.
+     */
     @Test
     fun `should return all categories`() {
         val cat1 = Category(id = UUID.randomUUID(), title = "Work", color = "#00FF00")
@@ -86,6 +116,10 @@ internal class CategoryServiceTest {
         verify(_repository).findAll()
     }
 
+    /**
+     * Tests retrieving a category by its ID.
+     * Verifies that the service returns the correct category.
+     */
     @Test
     fun `should return category by id`() {
         val id = UUID.randomUUID()
@@ -102,6 +136,10 @@ internal class CategoryServiceTest {
         verify(_repository).findById(id)
     }
 
+    /**
+     * Tests retrieving a category by a non-existent ID.
+     * Verifies that the service throws a `NoSuchElementException`.
+     */
     @Test
     fun `should throw error when category id not found`() {
         val id = UUID.randomUUID()
@@ -115,6 +153,10 @@ internal class CategoryServiceTest {
         verify(_repository).findById(id)
     }
 
+    /**
+     * Tests filtering categories based on criteria.
+     * Verifies that the service returns a list of matching categories.
+     */
     @Test
     fun `should return list of filtered categories`() {
         val filter = CategoryFilterDto(title = "Filter", color = "#00FF00")
@@ -131,6 +173,10 @@ internal class CategoryServiceTest {
         verify(_repository).filter("Filter", "#00FF00")
     }
 
+    /**
+     * Tests updating a category with the same title.
+     * Verifies that the service updates the category and returns the updated entity.
+     */
     @Test
     fun `should return updated category with old title`() {
         val id = UUID.randomUUID()
@@ -150,6 +196,10 @@ internal class CategoryServiceTest {
         verify(_repository).save(argThat { color == "#FF0000" })
     }
 
+    /**
+     * Tests updating a category with a new title.
+     * Verifies that the service updates the category and returns the updated entity.
+     */
     @Test
     fun `should return updated category with new title`() {
         val id = UUID.randomUUID()
@@ -170,6 +220,10 @@ internal class CategoryServiceTest {
         verify(_repository).save(argThat { title == "New" && color == "#FF0000" })
     }
 
+    /**
+     * Tests updating a category with a duplicate title.
+     * Verifies that the service throws an `IllegalArgumentException`.
+     */
     @Test
     fun `should throw error when updating to duplicate title`() {
         val id = UUID.randomUUID()
@@ -188,6 +242,10 @@ internal class CategoryServiceTest {
         verify(_repository, never()).save(any<Category>())
     }
 
+    /**
+     * Tests deleting a category that exists.
+     * Verifies that the service deletes the category.
+     */
     @Test
     fun `should delete category when exists`() {
         val id = UUID.randomUUID()
@@ -202,6 +260,10 @@ internal class CategoryServiceTest {
         verify(_repository).delete(existing)
     }
 
+    /**
+     * Tests deleting a category that does not exist.
+     * Verifies that the service throws a `NoSuchElementException`.
+     */
     @Test
     fun `should throw error when deleting non existing category`() {
         val id = UUID.randomUUID()
@@ -215,4 +277,5 @@ internal class CategoryServiceTest {
         verify(_repository).findById(id)
         verify(_repository, never()).delete(any<Category>())
     }
+
 }

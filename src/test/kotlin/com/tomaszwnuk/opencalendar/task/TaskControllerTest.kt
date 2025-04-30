@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.task
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
@@ -17,19 +21,44 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.util.*
 
+/**
+ * Unit tests for the `TaskController` class.
+ * Verifies the behavior of the controller's endpoints using mocked dependencies.
+ */
 @ExtendWith(MockitoExtension::class)
 internal class TaskControllerTest {
 
+    /**
+     * Mocked instance of `TaskService` for simulating task-related operations.
+     */
     @Mock
     private lateinit var _taskService: TaskService
 
+    /**
+     * Injected instance of `TaskController` with mocked dependencies.
+     */
     @InjectMocks
     private lateinit var _controller: TaskController
 
+    /**
+     * Pageable instance for simulating pagination in tests.
+     */
     private lateinit var _pageable: Pageable
+
+    /**
+     * Sample UUID used for testing.
+     */
     private lateinit var _sampleId: UUID
+
+    /**
+     * Sample `TaskDto` instance used in tests.
+     */
     private lateinit var _sampleDto: TaskDto
 
+    /**
+     * Sets up the test environment before each test.
+     * Initializes `Pageable`, sample UUID, and sample `TaskDto`.
+     */
     @BeforeEach
     fun setUp() {
         _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
@@ -44,6 +73,10 @@ internal class TaskControllerTest {
         )
     }
 
+    /**
+     * Tests the creation of a task.
+     * Verifies that the endpoint returns a 201 Created status and the created task.
+     */
     @Test
     fun `should create task with status code 201 Created`() {
         whenever(_taskService.create(eq(_sampleDto))).thenReturn(_sampleDto)
@@ -55,6 +88,10 @@ internal class TaskControllerTest {
         verify(_taskService).create(eq(_sampleDto))
     }
 
+    /**
+     * Tests retrieving all tasks.
+     * Verifies that the endpoint returns a 200 OK status and a list of tasks.
+     */
     @Test
     fun `should return all tasks with status code 200 OK`() {
         val taskOne =
@@ -72,6 +109,10 @@ internal class TaskControllerTest {
         verify(_taskService).getAll()
     }
 
+    /**
+     * Tests retrieving a task by its ID.
+     * Verifies that the endpoint returns a 200 OK status and the requested task.
+     */
     @Test
     fun `should return task by id with status code 200 OK`() {
         whenever(_taskService.getById(_sampleId)).thenReturn(_sampleDto)
@@ -83,6 +124,10 @@ internal class TaskControllerTest {
         verify(_taskService).getById(_sampleId)
     }
 
+    /**
+     * Tests filtering tasks based on criteria.
+     * Verifies that the endpoint returns a 200 OK status and a list of filtered tasks.
+     */
     @Test
     fun `should return filtered tasks with status code 200 OK`() {
         val filteredDto = _sampleDto.copy(id = UUID.randomUUID(), title = "Deployment")
@@ -103,6 +148,10 @@ internal class TaskControllerTest {
         verify(_taskService).filter(any<TaskFilterDto>())
     }
 
+    /**
+     * Tests updating a task.
+     * Verifies that the endpoint returns a 200 OK status and the updated task.
+     */
     @Test
     fun `should update task with status code 200 OK`() {
         val updatedDto = _sampleDto.copy(status = TaskStatus.IN_PROGRESS)
@@ -115,6 +164,10 @@ internal class TaskControllerTest {
         verify(_taskService).update(_sampleId, _sampleDto)
     }
 
+    /**
+     * Tests deleting a task.
+     * Verifies that the endpoint returns a 204 No Content status.
+     */
     @Test
     fun `should delete task with status code 204 No Content`() {
         doNothing().whenever(_taskService).delete(_sampleId)
@@ -124,4 +177,5 @@ internal class TaskControllerTest {
         assert(response.statusCode == HttpStatus.NO_CONTENT)
         verify(_taskService).delete(_sampleId)
     }
+
 }

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) Tomasz Wnuk
+ */
+
 package com.tomaszwnuk.opencalendar.configuration.serialization
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect
@@ -12,10 +16,20 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 
+/**
+ * Configuration class for Jackson ObjectMapper.
+ * This class provides beans for customizing JSON serialization and deserialization.
+ */
 @Suppress("unused")
 @Configuration
 class JacksonConfiguration {
 
+    /**
+     * Configures the primary `ObjectMapper` bean.
+     * This mapper is used for general JSON serialization and deserialization.
+     *
+     * @return The configured `ObjectMapper` instance.
+     */
     @Bean
     @Primary
     fun objectMapper(): ObjectMapper {
@@ -25,6 +39,12 @@ class JacksonConfiguration {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
+    /**
+     * Configures a specialized `ObjectMapper` bean for Redis serialization.
+     * This mapper includes additional settings for handling polymorphic types and visibility.
+     *
+     * @return The configured `ObjectMapper` instance for Redis.
+     */
     @Suppress("deprecated")
     @Bean(name = ["redisObjectMapper"])
     @Qualifier("redisObjectMapper")
@@ -36,7 +56,7 @@ class JacksonConfiguration {
             .activateDefaultTyping(
                 LaissezFaireSubTypeValidator.instance,
                 ObjectMapper.DefaultTyping.EVERYTHING,
-                JsonTypeInfo.As.PROPERTY,
+                JsonTypeInfo.As.PROPERTY
             )
             .setVisibility(
                 PropertyAccessor.ALL,
