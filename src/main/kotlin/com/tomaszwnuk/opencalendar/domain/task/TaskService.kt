@@ -23,7 +23,6 @@ class TaskService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["taskById"], key = "#id"),
             CacheEvict(cacheNames = ["allTasks"], allEntries = true),
             CacheEvict(cacheNames = ["calendarTasks"], allEntries = true),
             CacheEvict(cacheNames = ["categoryTasks"], allEntries = true)
@@ -49,7 +48,7 @@ class TaskService(
         return created.toDto()
     }
 
-    @Cacheable(cacheNames = ["taskById"], key = "#id")
+    @Cacheable(cacheNames = ["taskById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): TaskDto {
         info(this, "Fetching task with id $id")
         _timer = System.currentTimeMillis()
@@ -60,7 +59,7 @@ class TaskService(
         return task.toDto()
     }
 
-    @Cacheable(cacheNames = ["allTasks"])
+    @Cacheable(cacheNames = ["allTasks"], condition = "#result != null")
     fun getAll(): List<TaskDto> {
         info(this, "Fetching all tasks")
         _timer = System.currentTimeMillis()
@@ -71,7 +70,7 @@ class TaskService(
         return tasks.map { it.toDto() }
     }
 
-    @Cacheable(cacheNames = ["calendarTasks"], key = "#calendarId")
+    @Cacheable(cacheNames = ["calendarTasks"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<TaskDto> {
         info(this, "Fetching all tasks for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
@@ -82,7 +81,7 @@ class TaskService(
         return tasks.map { it.toDto() }
     }
 
-    @Cacheable(cacheNames = ["categoryTasks"], key = "#categoryId")
+    @Cacheable(cacheNames = ["categoryTasks"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<TaskDto> {
         info(this, "Fetching all tasks for category with id $categoryId")
         _timer = System.currentTimeMillis()
@@ -176,7 +175,7 @@ class TaskService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["taskById"], key = "#id"),
+            CacheEvict(cacheNames = ["taskById"], key = "#id", condition = "#id != null"),
             CacheEvict(cacheNames = ["allTasks"], allEntries = true),
             CacheEvict(cacheNames = ["calendarTasks"], allEntries = true),
             CacheEvict(cacheNames = ["categoryTasks"], allEntries = true)
@@ -186,7 +185,7 @@ class TaskService(
         info(this, "Updating all tasks for category with id $categoryId.")
         _timer = System.currentTimeMillis()
 
-        val tasks: List<Task> = _taskRepository.findAllByCategoryId(categoryId = categoryId)
+        val tasks: List<Task> = _taskRepository.findAllByCategoryId(categoryId)
         tasks.forEach { task ->
             val withoutCategory = task.copy(category = null)
             _taskRepository.save(withoutCategory)

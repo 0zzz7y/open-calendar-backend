@@ -23,7 +23,6 @@ class NoteService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["noteById"], key = "#id"),
             CacheEvict(cacheNames = ["allNotes"], allEntries = true),
             CacheEvict(cacheNames = ["calendarNotes"], allEntries = true),
             CacheEvict(cacheNames = ["categoryNotes"], allEntries = true)
@@ -48,7 +47,7 @@ class NoteService(
         return created.toDto()
     }
 
-    @Cacheable(cacheNames = ["noteById"], key = "#id")
+    @Cacheable(cacheNames = ["noteById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): NoteDto {
         info(this, "Fetching note with id $id")
         _timer = System.currentTimeMillis()
@@ -59,7 +58,7 @@ class NoteService(
         return note.toDto()
     }
 
-    @Cacheable(cacheNames = ["calendarNotes"], key = "#calendarId")
+    @Cacheable(cacheNames = ["calendarNotes"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<NoteDto> {
         info(this, "Fetching all notes for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
@@ -70,7 +69,7 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
-    @Cacheable(cacheNames = ["categoryNotes"], key = "#categoryId")
+    @Cacheable(cacheNames = ["categoryNotes"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<NoteDto> {
         info(this, "Fetching all notes for category with id $categoryId")
         _timer = System.currentTimeMillis()
@@ -81,7 +80,7 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
-    @Cacheable(cacheNames = ["allNotes"])
+    @Cacheable(cacheNames = ["allNotes"], condition = "#result != null")
     fun getAll(): List<NoteDto> {
         info(this, "Fetching all notes")
         _timer = System.currentTimeMillis()
@@ -173,7 +172,7 @@ class NoteService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["noteById"], key = "#id"),
+            CacheEvict(cacheNames = ["noteById"], key = "#id", condition = "#id != null"),
             CacheEvict(cacheNames = ["allNotes"], allEntries = true),
             CacheEvict(cacheNames = ["calendarNotes"], allEntries = true),
             CacheEvict(cacheNames = ["categoryNotes"], allEntries = true)

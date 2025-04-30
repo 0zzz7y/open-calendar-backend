@@ -40,7 +40,7 @@ class CategoryService(
         return created.toDto()
     }
 
-    @Cacheable(cacheNames = ["allCategories"])
+    @Cacheable(cacheNames = ["allCategories"], condition = "#result != null")
     fun getAll(): List<CategoryDto> {
         info(this, "Fetching all categories")
         _timer = System.currentTimeMillis()
@@ -51,7 +51,7 @@ class CategoryService(
         return categories.map { it.toDto() }
     }
 
-    @Cacheable(cacheNames = ["categoryById"], key = "#id")
+    @Cacheable(cacheNames = ["categoryById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): CategoryDto {
         info(this, "Fetching category with id $id")
         _timer = System.currentTimeMillis()
@@ -77,8 +77,8 @@ class CategoryService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["allCategories"], allEntries = true),
-            CacheEvict(cacheNames = ["categoryById"], key = "#id")
+            CacheEvict(cacheNames = ["categoryById"], key = "#id"),
+            CacheEvict(cacheNames = ["allCategories"], allEntries = true)
         ]
     )
     fun update(id: UUID, dto: CategoryDto): CategoryDto {
@@ -106,8 +106,8 @@ class CategoryService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["allCategories"], allEntries = true),
-            CacheEvict(cacheNames = ["categoryById"], key = "#id")
+            CacheEvict(cacheNames = ["categoryById"], key = "#id", condition = "#id != null"),
+            CacheEvict(cacheNames = ["allCategories"], allEntries = true)
         ]
     )
     fun delete(id: UUID) {

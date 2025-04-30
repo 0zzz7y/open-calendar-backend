@@ -19,7 +19,7 @@ class NoteController(
 ) {
 
     @PostMapping
-    fun create(@Valid @RequestBody dto: NoteDto): ResponseEntity<NoteDto> {
+    fun create(@Valid @RequestBody(required = true) dto: NoteDto): ResponseEntity<NoteDto> {
         val created: NoteDto = _noteService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
@@ -37,17 +37,17 @@ class NoteController(
     }
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: UUID): ResponseEntity<NoteDto> {
+    fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<NoteDto> {
         val note: NoteDto = _noteService.getById(id)
         return ResponseEntity.ok(note)
     }
 
     @GetMapping("/filter")
     fun filter(
-        @RequestParam(required = false) title: String?,
-        @RequestParam(required = false) description: String?,
-        @RequestParam(required = false) calendarId: UUID?,
-        @RequestParam(required = false) categoryId: UUID?,
+        @RequestParam(name = "title", required = false) title: String?,
+        @RequestParam(name = "description", required = false) description: String?,
+        @RequestParam(name = "calendarId", required = false) calendarId: UUID?,
+        @RequestParam(name = "categoryId", required = false) categoryId: UUID?,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
         val filter = NoteFilterDto(
@@ -61,13 +61,13 @@ class NoteController(
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: UUID, @Valid @RequestBody dto: NoteDto): ResponseEntity<NoteDto> {
+    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody(required = true) dto: NoteDto): ResponseEntity<NoteDto> {
         val updated: NoteDto = _noteService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
         _noteService.delete(id)
         return ResponseEntity.noContent().build()
     }

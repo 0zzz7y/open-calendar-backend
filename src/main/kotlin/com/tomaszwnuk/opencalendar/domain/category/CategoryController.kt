@@ -29,7 +29,7 @@ class CategoryController(
 ) {
 
     @PostMapping
-    fun create(@Valid @RequestBody dto: CategoryDto): ResponseEntity<CategoryDto> {
+    fun create(@Valid @RequestBody(required = true) dto: CategoryDto): ResponseEntity<CategoryDto> {
         val created: CategoryDto = _categoryService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
@@ -47,14 +47,14 @@ class CategoryController(
     }
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: UUID): ResponseEntity<CategoryDto> {
+    fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<CategoryDto> {
         val category: CategoryDto = _categoryService.getById(id)
         return ResponseEntity.ok(category)
     }
 
     @GetMapping("/{id}/events")
     fun getEvents(
-        @PathVariable id: UUID,
+        @PathVariable(name = "id", required = true) id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val events: List<EventDto> = _eventService.getAllByCategoryId(id)
@@ -63,7 +63,7 @@ class CategoryController(
 
     @GetMapping("/{id}/tasks")
     fun getTasks(
-        @PathVariable id: UUID,
+        @PathVariable(name = "id", required = true) id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val tasks: List<TaskDto> = _taskService.getAllByCategoryId(id)
@@ -72,7 +72,7 @@ class CategoryController(
 
     @GetMapping("/{id}/notes")
     fun getNotes(
-        @PathVariable id: UUID,
+        @PathVariable(name = "id", required = true) id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
         val notes: List<NoteDto> = _noteService.getAllByCategoryId(id)
@@ -81,7 +81,7 @@ class CategoryController(
 
     @GetMapping("/{id}/items")
     fun getAllItems(
-        @PathVariable id: UUID,
+        @PathVariable(name = "id", required = true) id: UUID,
         @PageableDefault(
             size = 10,
             sort = ["createdAt"],
@@ -104,8 +104,8 @@ class CategoryController(
 
     @GetMapping("/filter")
     fun filter(
-        @RequestParam(required = false) title: String?,
-        @RequestParam(required = false) color: String?,
+        @RequestParam(name = "title", required = false) title: String?,
+        @RequestParam(name = "color", required = false) color: String?,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<CategoryDto>> {
         val filter = CategoryFilterDto(
@@ -117,13 +117,13 @@ class CategoryController(
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: UUID, @Valid @RequestBody dto: CategoryDto): ResponseEntity<CategoryDto> {
+    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody(required = true) dto: CategoryDto): ResponseEntity<CategoryDto> {
         val updated: CategoryDto = _categoryService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
         _eventService.deleteAllByCategoryId(id)
         _taskService.deleteAllCategoryByCategoryId(id)
         _noteService.deleteCategoryByCategoryId(id)

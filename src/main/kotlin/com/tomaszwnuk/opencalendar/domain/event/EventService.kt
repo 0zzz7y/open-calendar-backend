@@ -23,7 +23,6 @@ class EventService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["eventById"], key = "#id"),
             CacheEvict(cacheNames = ["allEvents"], allEntries = true),
             CacheEvict(cacheNames = ["calendarEvents"], allEntries = true),
             CacheEvict(cacheNames = ["categoryEvents"], allEntries = true)
@@ -51,7 +50,7 @@ class EventService(
         return created.toDto()
     }
 
-    @Cacheable(cacheNames = ["eventById"], key = "#id")
+    @Cacheable(cacheNames = ["eventById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): EventDto {
         info(this, "Fetching event with id $id")
         _timer = System.currentTimeMillis()
@@ -62,7 +61,7 @@ class EventService(
         return event.toDto()
     }
 
-    @Cacheable(cacheNames = ["allEvents"])
+    @Cacheable(cacheNames = ["allEvents"], condition = "#result != null")
     fun getAll(): List<EventDto> {
         info(this, "Fetching all events")
         _timer = System.currentTimeMillis()
@@ -73,7 +72,7 @@ class EventService(
         return events.map { it.toDto() }
     }
 
-    @Cacheable(cacheNames = ["calendarEvents"], key = "#calendarId")
+    @Cacheable(cacheNames = ["calendarEvents"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<EventDto> {
         info(this, "Fetching all events for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
@@ -84,7 +83,7 @@ class EventService(
         return events.map { it.toDto() }
     }
 
-    @Cacheable(cacheNames = ["categoryEvents"], key = "#categoryId")
+    @Cacheable(cacheNames = ["categoryEvents"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<EventDto> {
         info(this, "Fetching all events for category with id $categoryId")
         _timer = System.currentTimeMillis()
@@ -174,7 +173,7 @@ class EventService(
         info(this, "Deleting all events for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
 
-        val events: List<Event> = _eventRepository.findAllByCalendarId(calendarId = calendarId)
+        val events: List<Event> = _eventRepository.findAllByCalendarId(calendarId)
 
         _eventRepository.deleteAll(events)
         info(this, "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
@@ -182,7 +181,7 @@ class EventService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["eventById"], key = "#id"),
+            CacheEvict(cacheNames = ["eventById"], key = "#id", condition = "#id != null"),
             CacheEvict(cacheNames = ["allEvents"], allEntries = true),
             CacheEvict(cacheNames = ["calendarEvents"], allEntries = true),
             CacheEvict(cacheNames = ["categoryEvents"], allEntries = true)

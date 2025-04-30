@@ -22,7 +22,7 @@ class EventController(
 ) {
 
     @PostMapping
-    fun create(@Valid @RequestBody dto: EventDto): ResponseEntity<EventDto> {
+    fun create(@Valid @RequestBody(required = true) dto: EventDto): ResponseEntity<EventDto> {
         val created: EventDto = _eventService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
@@ -40,20 +40,20 @@ class EventController(
     }
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: UUID): ResponseEntity<EventDto> {
+    fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<EventDto> {
         val event: EventDto = _eventService.getById(id)
         return ResponseEntity.ok(event)
     }
 
     @GetMapping("/filter")
     fun filter(
-        @RequestParam(required = false) title: String?,
-        @RequestParam(required = false) description: String?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateFrom: String?,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateTo: String?,
-        @RequestParam(required = false) recurringPattern: String?,
-        @RequestParam(required = false) calendarId: UUID?,
-        @RequestParam(required = false) categoryId: UUID?,
+        @RequestParam(name = "title", required = false) title: String?,
+        @RequestParam(name = "description", required = false) description: String?,
+        @RequestParam(name = "dateFrom", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateFrom: String?,
+        @RequestParam(name = "dateTo", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) dateTo: String?,
+        @RequestParam(name = "recurringPattern", required = false) recurringPattern: String?,
+        @RequestParam(name = "calendarId", required = false) calendarId: UUID?,
+        @RequestParam(name = "categoryId", required = false) categoryId: UUID?,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val filter = EventFilterDto(
@@ -70,13 +70,13 @@ class EventController(
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: UUID, @Valid @RequestBody dto: EventDto): ResponseEntity<EventDto> {
+    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody(required = true) dto: EventDto): ResponseEntity<EventDto> {
         val updated: EventDto = _eventService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
         _eventService.delete(id)
         return ResponseEntity.noContent().build()
     }

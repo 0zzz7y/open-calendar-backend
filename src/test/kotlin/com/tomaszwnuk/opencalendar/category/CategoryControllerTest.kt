@@ -76,7 +76,7 @@ class CategoryControllerTest {
 
     @Test
     fun `should return created category with status code 201 Created`() {
-        whenever(_categoryService.create(_sampleCategoryDto)).thenReturn(_sampleCategory)
+        whenever(_categoryService.create(_sampleCategoryDto)).thenReturn(_sampleCategoryDto)
 
         val response: ResponseEntity<CategoryDto> = _categoryController.create(_sampleCategoryDto)
 
@@ -89,7 +89,7 @@ class CategoryControllerTest {
     @Test
     fun `should return paginated list of all categories with status code 200 OK`() {
         val categories: List<Category> = listOf(_sampleCategory, _sampleCategory.copy(), _sampleCategory.copy())
-        whenever(_categoryService.getAll()).thenReturn(categories)
+        whenever(_categoryService.getAll()).thenReturn(categories.map {it.toDto()})
 
         val response: ResponseEntity<Page<CategoryDto>> = _categoryController.getAll(_pageable)
 
@@ -104,7 +104,7 @@ class CategoryControllerTest {
     @Test
     fun `should return category by id with status code 200 OK`() {
         val id: UUID = _sampleCategory.id
-        whenever(_categoryService.getById(id)).thenReturn(_sampleCategory)
+        whenever(_categoryService.getById(id)).thenReturn(_sampleCategoryDto)
 
         val response: ResponseEntity<CategoryDto> = _categoryController.getById(id)
 
@@ -118,7 +118,7 @@ class CategoryControllerTest {
     fun `should return paginated list of filtered categories with status code 200 OK`() {
         val filter = CategoryFilterDto(title = "Personal")
         val categories: List<Category> = listOf(_sampleCategory, _sampleCategory.copy(), _sampleCategory.copy())
-        whenever(_categoryService.filter(filter)).thenReturn(categories)
+        whenever(_categoryService.filter(filter)).thenReturn(categories.map{it.toDto()})
 
         val response: ResponseEntity<Page<CategoryDto>> = _categoryController.filter(filter.title, null, _pageable)
 
@@ -256,7 +256,7 @@ class CategoryControllerTest {
     @Test
     fun `should return updated category with status code 200 OK`() {
         val updatedCategory: Category = _sampleCategory.copy(title = "Work")
-        whenever(_categoryService.update(_sampleCategory.id, _sampleCategoryDto)).thenReturn(updatedCategory)
+        whenever(_categoryService.update(_sampleCategory.id, _sampleCategoryDto)).thenReturn(updatedCategory.toDto())
 
         val response: ResponseEntity<CategoryDto> = _categoryController.update(_sampleCategory.id, _sampleCategoryDto)
 

@@ -17,7 +17,7 @@ import java.util.*
 class TaskController(private val _taskService: TaskService) {
 
     @PostMapping
-    fun create(@Valid @RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
+    fun create(@Valid @RequestBody(required = true) dto: TaskDto): ResponseEntity<TaskDto> {
         val created: TaskDto = _taskService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
@@ -35,18 +35,18 @@ class TaskController(private val _taskService: TaskService) {
     }
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: UUID): ResponseEntity<TaskDto> {
+    fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<TaskDto> {
         val task: TaskDto = _taskService.getById(id)
         return ResponseEntity.ok(task)
     }
 
     @GetMapping("/filter")
     fun filter(
-        @RequestParam(required = false) title: String?,
-        @RequestParam(required = false) description: String?,
-        @RequestParam(required = false) status: String?,
-        @RequestParam(required = false) calendarId: UUID?,
-        @RequestParam(required = false) categoryId: UUID?,
+        @RequestParam(name = "title", required = false) title: String?,
+        @RequestParam(name = "description", required = false) description: String?,
+        @RequestParam(name = "status", required = false) status: String?,
+        @RequestParam(name = "calendarId", required = false) calendarId: UUID?,
+        @RequestParam(name = "categoryId", required = false) categoryId: UUID?,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val filter = TaskFilterDto(
@@ -61,13 +61,13 @@ class TaskController(private val _taskService: TaskService) {
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: UUID, @Valid @RequestBody dto: TaskDto): ResponseEntity<TaskDto> {
+    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody(required = true) dto: TaskDto): ResponseEntity<TaskDto> {
         val updated: TaskDto = _taskService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
         _taskService.delete(id)
         return ResponseEntity.noContent().build()
     }

@@ -29,7 +29,7 @@ class CalendarController(
 ) {
 
     @PostMapping
-    fun create(@Valid @RequestBody dto: CalendarDto): ResponseEntity<CalendarDto> {
+    fun create(@Valid @RequestBody(required = true) dto: CalendarDto): ResponseEntity<CalendarDto> {
         val created: CalendarDto = _calendarService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
@@ -47,14 +47,14 @@ class CalendarController(
     }
 
     @GetMapping("/{id}")
-    fun getById(@PathVariable id: UUID): ResponseEntity<CalendarDto> {
+    fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<CalendarDto> {
         val calendar: CalendarDto = _calendarService.getById(id)
         return ResponseEntity.ok(calendar)
     }
 
     @GetMapping("/{id}/events")
     fun getEvents(
-        @PathVariable id: UUID,
+        @PathVariable(name = "id", required = true) id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val events: List<EventDto> = _eventService.getAllByCalendarId(id)
@@ -63,7 +63,7 @@ class CalendarController(
 
     @GetMapping("/{id}/tasks")
     fun getTasks(
-        @PathVariable id: UUID,
+        @PathVariable(name = "id", required = true) id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val tasks: List<TaskDto> = _taskService.getAllByCalendarId(id)
@@ -72,7 +72,7 @@ class CalendarController(
 
     @GetMapping("/{id}/notes")
     fun getNotes(
-        @PathVariable id: UUID,
+        @PathVariable(name = "id", required = true) id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
         val notes: List<NoteDto> = _noteService.getAllByCalendarId(id)
@@ -81,7 +81,7 @@ class CalendarController(
 
     @GetMapping("/{id}/items")
     fun getAllItems(
-        @PathVariable id: UUID,
+        @PathVariable(name = "id", required = true) id: UUID,
         @PageableDefault(
             size = 10,
             sort = ["createdAt"],
@@ -104,8 +104,8 @@ class CalendarController(
 
     @GetMapping("/filter")
     fun filter(
-        @RequestParam(required = false) title: String?,
-        @RequestParam(required = false) emoji: String?,
+        @RequestParam(name = "title", required = false) title: String?,
+        @RequestParam(name = "emoji", required = false) emoji: String?,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<CalendarDto>> {
         val filter = CalendarFilterDto(
@@ -117,13 +117,13 @@ class CalendarController(
     }
 
     @PutMapping("/{id}")
-    fun update(@PathVariable id: UUID, @Valid @RequestBody dto: CalendarDto): ResponseEntity<CalendarDto> {
+    fun update(@PathVariable(name = "id", required = true) id: UUID, @Valid @RequestBody dto: CalendarDto): ResponseEntity<CalendarDto> {
         val updated: CalendarDto = _calendarService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
 
     @DeleteMapping("/{id}")
-    fun delete(@PathVariable id: UUID): ResponseEntity<Void> {
+    fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
         _eventService.deleteAllByCalendarId(id)
         _taskService.deleteAllByCalendarId(id)
         _noteService.deleteByCalendarId(id)

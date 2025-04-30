@@ -51,7 +51,7 @@ class CategoryServiceTest {
         whenever(_categoryRepository.existsByTitle(_sampleCategoryDto.title)).thenReturn(false)
         doReturn(_sampleCategory).whenever(_categoryRepository).save(any())
 
-        val result: Category = _categoryService.create(_sampleCategoryDto)
+        val result: CategoryDto = _categoryService.create(_sampleCategoryDto)
 
         assertNotNull(result)
         assertEquals(_sampleCategory.id, result.id)
@@ -70,7 +70,7 @@ class CategoryServiceTest {
         )
         whenever(_categoryRepository.findAll()).thenReturn(categories)
 
-        val result: List<Category> = _categoryService.getAll()
+        val result: List<CategoryDto> = _categoryService.getAll()
 
         assertEquals(categories.size, result.size)
         assertEquals(categories.map { it.id }, result.map { it.id })
@@ -84,7 +84,7 @@ class CategoryServiceTest {
         val id: UUID = _sampleCategory.id
         whenever(_categoryRepository.findById(id)).thenReturn(Optional.of(_sampleCategory))
 
-        val result: Category = _categoryService.getById(id)
+        val result: CategoryDto = _categoryService.getById(id)
 
         assertNotNull(result)
         assertEquals(_sampleCategory.id, result.id)
@@ -102,10 +102,9 @@ class CategoryServiceTest {
             _sampleCategory.copy(id = UUID.randomUUID()),
             _sampleCategory.copy(id = UUID.randomUUID())
         )
-        whenever(_categoryRepository.filter(eq(filter.title), isNull()))
-            .thenReturn(categories)
+        whenever(_categoryRepository.filter(eq(filter.title), isNull())).thenReturn(categories)
 
-        val result: List<Category> = _categoryService.filter(filter)
+        val result: List<CategoryDto> = _categoryService.filter(filter)
 
         assertEquals(categories.size, result.size)
         assertEquals(categories.map { it.title }, result.map { it.title })
@@ -122,7 +121,7 @@ class CategoryServiceTest {
         whenever(_categoryRepository.existsByTitle(updatedCategory.title)).thenReturn(false)
         doReturn(updatedCategory).whenever(_categoryRepository).save(any())
 
-        val result: Category = _categoryService.update(id, updatedCategory.toDto())
+        val result: CategoryDto = _categoryService.update(id, updatedCategory.toDto())
 
         assertNotNull(result)
         assertEquals(updatedCategory.id, result.id)

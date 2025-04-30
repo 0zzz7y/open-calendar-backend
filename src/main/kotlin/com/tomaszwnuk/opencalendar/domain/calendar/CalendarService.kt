@@ -39,7 +39,7 @@ class CalendarService(
         return created.toDto()
     }
 
-    @Cacheable(cacheNames = ["allCalendars"])
+    @Cacheable(cacheNames = ["allCalendars"], condition = "#result != null")
     fun getAll(): List<CalendarDto> {
         info(this, "Fetching all calendars")
         _timer = System.currentTimeMillis()
@@ -50,7 +50,7 @@ class CalendarService(
         return calendars.map { it.toDto() }
     }
 
-    @Cacheable(cacheNames = ["calendarById"], key = "#id")
+    @Cacheable(cacheNames = ["calendarById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): CalendarDto {
         info(this, "Fetching calendar with id $id")
         _timer = System.currentTimeMillis()
@@ -105,7 +105,7 @@ class CalendarService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["calendarById"], key = "#id"),
+            CacheEvict(cacheNames = ["calendarById"], key = "#id", condition = "#id != null"),
             CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
         ]
     )
