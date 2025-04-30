@@ -81,7 +81,7 @@ class CalendarControllerTest {
         val sampleCalendar = Calendar(id = id, title = title, emoji = emoji)
         val sampleCalendarDto: CalendarDto = sampleCalendar.toDto()
 
-        whenever(_calendarService.create(sampleCalendarDto)).thenReturn(sampleCalendar)
+        whenever(_calendarService.create(sampleCalendarDto)).thenReturn(sampleCalendarDto)
 
         val response: ResponseEntity<CalendarDto> = _calendarController.create(sampleCalendarDto)
 
@@ -96,7 +96,8 @@ class CalendarControllerTest {
 
     @Test
     fun `should return paginated list of all calendars with status code 200 OK`() {
-        val calendars: List<Calendar> = listOf(_sampleCalendar, _sampleCalendar.copy(), _sampleCalendar.copy())
+        val calendars: List<CalendarDto> =
+            listOf(_sampleCalendarDto, _sampleCalendarDto.copy(), _sampleCalendarDto.copy())
         whenever(_calendarService.getAll()).thenReturn(calendars)
 
         val response: ResponseEntity<Page<CalendarDto>> = _calendarController.getAll(_pageable)
@@ -112,7 +113,7 @@ class CalendarControllerTest {
     @Test
     fun `should return calendar by id with status code 200 OK`() {
         val id: UUID = _sampleCalendar.id
-        whenever(_calendarService.getById(id)).thenReturn(_sampleCalendar)
+        whenever(_calendarService.getById(id)).thenReturn(_sampleCalendarDto)
 
         val response: ResponseEntity<CalendarDto> = _calendarController.getById(id)
 
@@ -140,7 +141,7 @@ class CalendarControllerTest {
         ).toDto()
         val events: List<EventDto> = listOf(event, event, event)
 
-        whenever(_eventService.getAllDtosByCalendarId(id)).thenReturn(events)
+        whenever(_eventService.getAllByCalendarId(id)).thenReturn(events)
 
         val response: ResponseEntity<Page<EventDto>> = _calendarController.getEvents(id, _pageable)
 
@@ -148,7 +149,7 @@ class CalendarControllerTest {
         assertEquals(events.size.toLong(), response.body?.totalElements)
         assertEquals(events.map { it.title }, response.body?.content?.map { it.title })
 
-        verify(_eventService).getAllDtosByCalendarId(id)
+        verify(_eventService).getAllByCalendarId(id)
     }
 
     @Test
@@ -229,7 +230,7 @@ class CalendarControllerTest {
             category = null
         ).toDto()
 
-        whenever(_eventService.getAllDtosByCalendarId(id)).thenReturn(listOf(event))
+        whenever(_eventService.getAllByCalendarId(id)).thenReturn(listOf(event))
         whenever(_taskService.getAllByCalendarId(id)).thenReturn(listOf(task))
         whenever(_noteService.getAllByCalendarId(id)).thenReturn(listOf(note))
 
@@ -246,7 +247,7 @@ class CalendarControllerTest {
     fun `should return updated calendar with status code 200 OK`() {
         val updatedCalendar = _sampleCalendar.copy(title = "Updated Title")
 
-        whenever(_calendarService.update(_sampleCalendar.id, _sampleCalendarDto)).thenReturn(updatedCalendar)
+        whenever(_calendarService.update(_sampleCalendar.id, _sampleCalendarDto)).thenReturn(updatedCalendar.toDto())
 
         val response = _calendarController.update(_sampleCalendar.id, _sampleCalendarDto)
 

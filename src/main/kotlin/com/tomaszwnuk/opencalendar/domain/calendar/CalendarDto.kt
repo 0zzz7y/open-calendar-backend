@@ -1,15 +1,15 @@
 package com.tomaszwnuk.opencalendar.domain.calendar
 
+import com.tomaszwnuk.opencalendar.domain.entity.EntityDto
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.EMOJI_MAXIMUM_LENGTH
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.TITLE_MAXIMUM_LENGTH
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
-import java.io.Serializable
 import java.util.*
 
 data class CalendarDto(
 
-    val id: UUID? = null,
+    override val id: UUID? = null,
 
     @field:NotBlank(message = "Title cannot be blank.")
     @field:Size(
@@ -24,4 +24,4 @@ data class CalendarDto(
     )
     val emoji: String
 
-) : Serializable
+) : EntityDto(id = id)

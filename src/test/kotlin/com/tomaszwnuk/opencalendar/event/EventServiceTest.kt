@@ -103,7 +103,7 @@ class EventServiceTest {
         val events: List<Event> = listOf(_sampleEvent, _sampleEvent.copy(), _sampleEvent.copy())
         whenever(_eventRepository.findAll(_pageable)).thenReturn(PageImpl(events))
 
-        val result: List<EventDto> = _eventService.getAllDtos()
+        val result: List<EventDto> = _eventService.getAll()
 
         assertEquals(events.size, result.size)
         assertEquals(events.map { it.id }, result.map { it.id })
@@ -144,7 +144,7 @@ class EventServiceTest {
             )
         ).thenReturn(events)
 
-        val result: List<EventDto> = _eventService.filterDtos(filter)
+        val result: List<EventDto> = _eventService.filter(filter)
 
         assertEquals(events.size, result.size)
         assertEquals(events.map { it.title }, result.map { it.title })
@@ -170,7 +170,7 @@ class EventServiceTest {
         whenever(_categoryRepository.findById(_sampleEventDto.categoryId!!)).thenReturn(Optional.of(_sampleCategory))
         doReturn(updatedEvent).whenever(_eventRepository).save(any())
 
-        val result: EventDto = _eventService.updateDto(id, _sampleEventDto)
+        val result: EventDto = _eventService.update(id, _sampleEventDto)
 
         assertNotNull(result)
         assertEquals(updatedEvent.id, result.id)

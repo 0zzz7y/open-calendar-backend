@@ -6,7 +6,7 @@ import java.util.*
 
 open class RecordDto(
 
-    id: UUID? = null,
+    override val id: UUID? = null,
 
     open val title: String? = null,
 

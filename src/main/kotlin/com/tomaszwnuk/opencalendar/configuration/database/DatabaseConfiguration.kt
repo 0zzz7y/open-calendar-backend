@@ -20,21 +20,21 @@ import javax.sql.DataSource
     ]
 )
 class DatabaseConfiguration(
-    @Value("\${spring.datasource.url}") private val url: String,
-    @Value("\${spring.datasource.driver-class-name}") private val driverClassName: String,
-    @Value("\${spring.datasource.username:}") private val username: String?,
-    @Value("\${spring.datasource.password:}") private val password: String?
+    @Value("\${spring.datasource.url}") private val _url: String,
+    @Value("\${spring.datasource.driver-class-name}") private val _driverClassName: String,
+    @Value("\${spring.datasource.username:}") private val _username: String?,
+    @Value("\${spring.datasource.password:}") private val _password: String?
 ) {
 
     @Bean
     @Primary
     fun dataSource(): DataSource {
         val dataSource = DriverManagerDataSource()
-        dataSource.url = url
-        dataSource.setDriverClassName(driverClassName)
+        dataSource.url = _url
+        dataSource.setDriverClassName(_driverClassName)
 
-        if (!username.isNullOrBlank()) dataSource.username = username
-        if (!password.isNullOrBlank()) dataSource.password = password
+        if (!_username.isNullOrBlank()) dataSource.username = _username
+        if (!_password.isNullOrBlank()) dataSource.password = _password
 
         return dataSource
     }

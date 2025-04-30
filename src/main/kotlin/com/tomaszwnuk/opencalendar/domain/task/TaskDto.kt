@@ -6,7 +6,6 @@ import com.tomaszwnuk.opencalendar.domain.record.RecordDto
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
-import java.io.Serializable
 import java.util.*
 
 data class TaskDto(
@@ -34,4 +33,4 @@ data class TaskDto(
 
     override val categoryId: UUID? = null
 
-) : RecordDto(id, title, description, categoryId), Serializable
+) : RecordDto(id, title, description, categoryId)

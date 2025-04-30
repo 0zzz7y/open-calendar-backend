@@ -56,7 +56,7 @@ class CalendarServiceTest {
         whenever(_calendarRepository.existsByTitle(title)).thenReturn(false)
         doReturn(_sampleCalendar).whenever(_calendarRepository).save(any())
 
-        val result: Calendar = _calendarService.create(_sampleCalendarDto)
+        val result: CalendarDto = _calendarService.create(_sampleCalendarDto)
 
         assertNotNull(result)
         assertEquals(id, result.id)
@@ -75,7 +75,7 @@ class CalendarServiceTest {
         )
         whenever(_calendarRepository.findAll(_pageable)).thenReturn(PageImpl(calendars))
 
-        val result: List<Calendar> = _calendarService.getAll()
+        val result: List<CalendarDto> = _calendarService.getAll()
 
         assertEquals(calendars.size, result.size)
         assertEquals(calendars.map { it.id }, result.map { it.id })
@@ -89,7 +89,7 @@ class CalendarServiceTest {
         val id: UUID = _sampleCalendar.id
         whenever(_calendarRepository.findById(id)).thenReturn(Optional.of(_sampleCalendar))
 
-        val result: Calendar = _calendarService.getById(id)
+        val result: CalendarDto = _calendarService.getById(id)
 
         assertNotNull(result)
         assertEquals(id, result.id)
@@ -110,7 +110,7 @@ class CalendarServiceTest {
         whenever(_calendarRepository.filter(eq(filter.title), eq(filter.emoji)))
             .thenReturn(calendars)
 
-        val result: List<Calendar> = _calendarService.filter(filter)
+        val result: List<CalendarDto> = _calendarService.filter(filter)
 
         assertEquals(calendars.size, result.size)
         assertEquals(calendars.map { it.title }, result.map { it.title })
@@ -128,7 +128,7 @@ class CalendarServiceTest {
         whenever(_calendarRepository.existsByTitle(updatedTitle)).thenReturn(false)
         doReturn(updatedCalendar).whenever(_calendarRepository).save(any())
 
-        val result: Calendar = _calendarService.update(id, updatedCalendar.toDto())
+        val result: CalendarDto = _calendarService.update(id, updatedCalendar.toDto())
 
         assertNotNull(result)
         assertEquals(updatedCalendar.id, result.id)

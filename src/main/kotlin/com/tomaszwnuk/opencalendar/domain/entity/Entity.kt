@@ -7,6 +7,7 @@ import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import java.io.Serializable
 import java.time.LocalDateTime
 import java.util.*
 
@@ -19,7 +20,7 @@ abstract class Entity(
     @Column(columnDefinition = COLUMN_DEFINITION_ID, nullable = false, updatable = false)
     val id: UUID = UUID.randomUUID()
 
-) {
+) : Serializable {
 
     @CreatedDate
     @Convert(converter = LocalDateTimeConverter::class)

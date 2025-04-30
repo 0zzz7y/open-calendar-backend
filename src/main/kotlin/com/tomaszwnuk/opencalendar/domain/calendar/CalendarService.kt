@@ -21,54 +21,57 @@ class CalendarService(
             CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
         ]
     )
-    fun create(dto: CalendarDto): Calendar {
+    fun create(dto: CalendarDto): CalendarDto {
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
         _calendarRepository.assertNameDoesNotExist(
             name = dto.title,
             existsByName = { _calendarRepository.existsByTitle(it) }
         )
+
         val calendar = Calendar(
             title = dto.title,
             emoji = dto.emoji
         )
-
         val created: Calendar = _calendarRepository.save(calendar)
-        info(this, "Created $created in ${System.currentTimeMillis() - _timer} ms")
 
-        return created
+        info(this, "Created $created in ${System.currentTimeMillis() - _timer} ms")
+        return created.toDto()
     }
 
     @Cacheable(cacheNames = ["allCalendars"])
-    fun getAll(): List<Calendar> {
+    fun getAll(): List<CalendarDto> {
         info(this, "Fetching all calendars")
         _timer = System.currentTimeMillis()
+
         val calendars: List<Calendar> = _calendarRepository.findAll()
+
         info(this, "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
-        return calendars
+        return calendars.map { it.toDto() }
     }
 
     @Cacheable(cacheNames = ["calendarById"], key = "#id")
-    fun getById(id: UUID): Calendar {
+    fun getById(id: UUID): CalendarDto {
         info(this, "Fetching calendar with id $id")
         _timer = System.currentTimeMillis()
 
         val calendar: Calendar = _calendarRepository.findOrThrow(id)
 
         info(this, "Found $calendar in ${System.currentTimeMillis() - _timer} ms")
-        return calendar
+        return calendar.toDto()
     }
 
-    fun filter(filter: CalendarFilterDto): List<Calendar> {
+    fun filter(filter: CalendarFilterDto): List<CalendarDto> {
         info(this, "Filtering calendars with $filter")
         _timer = System.currentTimeMillis()
+
         val calendars: List<Calendar> = _calendarRepository.filter(
             title = filter.title,
             emoji = filter.emoji
         )
 
         info(this, "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
-        return calendars
+        return calendars.map { it.toDto() }
     }
 
     @Caching(
@@ -77,11 +80,11 @@ class CalendarService(
             CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
         ]
     )
-    fun update(id: UUID, dto: CalendarDto): Calendar {
+    fun update(id: UUID, dto: CalendarDto): CalendarDto {
         info(this, "Updating $dto")
         _timer = System.currentTimeMillis()
-        val existing: Calendar = getById(id)
 
+        val existing: Calendar = _calendarRepository.findOrThrow(id = id)
         val isNameChanged: Boolean = !(dto.title.equals(existing.title, ignoreCase = true))
         if (isNameChanged) {
             _calendarRepository.assertNameDoesNotExist(
@@ -94,11 +97,10 @@ class CalendarService(
             title = dto.title,
             emoji = dto.emoji
         )
-
         val updated: Calendar = _calendarRepository.save(changed)
-        info(this, "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
 
-        return updated
+        info(this, "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
+        return updated.toDto()
     }
 
     @Caching(
@@ -110,9 +112,10 @@ class CalendarService(
     fun delete(id: UUID) {
         info(this, "Deleting calendar with id $id.")
         _timer = System.currentTimeMillis()
-        val existing: Calendar = getById(id)
 
+        val existing: Calendar = _calendarRepository.findOrThrow(id = id)
         _calendarRepository.delete(existing)
+
         info(this, "Deleted calendar $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 

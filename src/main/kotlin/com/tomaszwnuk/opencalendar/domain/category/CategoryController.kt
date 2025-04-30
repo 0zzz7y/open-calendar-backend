@@ -2,12 +2,12 @@ package com.tomaszwnuk.opencalendar.domain.category
 
 import com.tomaszwnuk.opencalendar.domain.event.EventDto
 import com.tomaszwnuk.opencalendar.domain.event.EventService
+import com.tomaszwnuk.opencalendar.domain.mapper.ItemTypeMapper.toMapWithType
+import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage
 import com.tomaszwnuk.opencalendar.domain.note.NoteDto
 import com.tomaszwnuk.opencalendar.domain.note.NoteService
 import com.tomaszwnuk.opencalendar.domain.task.TaskDto
 import com.tomaszwnuk.opencalendar.domain.task.TaskService
-import com.tomaszwnuk.opencalendar.domain.mapper.ItemTypeMapper.toMapWithType
-import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -30,7 +30,7 @@ class CategoryController(
 
     @PostMapping
     fun create(@Valid @RequestBody dto: CategoryDto): ResponseEntity<CategoryDto> {
-        val created: CategoryDto = _categoryService.create(dto).toDto()
+        val created: CategoryDto = _categoryService.create(dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
@@ -42,13 +42,13 @@ class CategoryController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<Page<CategoryDto>> {
-        val categories: List<CategoryDto> = _categoryService.getAll().map { it.toDto() }
+        val categories: List<CategoryDto> = _categoryService.getAll()
         return ResponseEntity.ok(categories.toPage(pageable))
     }
 
     @GetMapping("/{id}")
     fun getById(@PathVariable id: UUID): ResponseEntity<CategoryDto> {
-        val category: CategoryDto = _categoryService.getById(id).toDto()
+        val category: CategoryDto = _categoryService.getById(id)
         return ResponseEntity.ok(category)
     }
 
@@ -57,7 +57,7 @@ class CategoryController(
         @PathVariable id: UUID,
         @PageableDefault(size = 10, sort = ["createdAt"], direction = Sort.Direction.DESC) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
-        val events: List<EventDto> = _eventService.getAllDtosByCategoryId(id)
+        val events: List<EventDto> = _eventService.getAllByCategoryId(id)
         return ResponseEntity.ok(events.toPage(pageable))
     }
 
@@ -88,7 +88,7 @@ class CategoryController(
             direction = Sort.Direction.DESC
         ) pageable: Pageable
     ): ResponseEntity<List<Map<String, Any>>> {
-        val events: Page<Map<String, Any>> = _eventService.getAllDtosByCategoryId(id).map {
+        val events: Page<Map<String, Any>> = _eventService.getAllByCategoryId(id).map {
             it.toMapWithType("event")
         }.toPage(pageable)
         val tasks: Page<Map<String, Any>> = _taskService.getAllByCategoryId(id).map {
@@ -112,13 +112,13 @@ class CategoryController(
             title = title,
             color = color
         )
-        val categories: List<CategoryDto> = _categoryService.filter(filter).map { it.toDto() }
+        val categories: List<CategoryDto> = _categoryService.filter(filter)
         return ResponseEntity.ok(categories.toPage(pageable))
     }
 
     @PutMapping("/{id}")
     fun update(@PathVariable id: UUID, @Valid @RequestBody dto: CategoryDto): ResponseEntity<CategoryDto> {
-        val updated: CategoryDto = _categoryService.update(id, dto).toDto()
+        val updated: CategoryDto = _categoryService.update(id, dto)
         return ResponseEntity.ok(updated)
     }
 
