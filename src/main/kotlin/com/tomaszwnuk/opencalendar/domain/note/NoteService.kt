@@ -154,7 +154,7 @@ class NoteService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["noteById"], key = "#id"),
+            CacheEvict(cacheNames = ["noteById"], key = "#id", condition = "#id != null"),
             CacheEvict(cacheNames = ["allNotes"], allEntries = true),
             CacheEvict(cacheNames = ["calendarNotes"], allEntries = true),
             CacheEvict(cacheNames = ["categoryNotes"], allEntries = true)
@@ -188,7 +188,6 @@ class NoteService(
             _noteRepository.save(withoutCategory)
         }
 
-        _noteRepository.deleteAll(notes)
         info(this, "Updated category to null for all notes in ${System.currentTimeMillis() - _timer} ms")
     }
 

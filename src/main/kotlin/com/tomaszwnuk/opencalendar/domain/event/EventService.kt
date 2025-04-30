@@ -163,7 +163,7 @@ class EventService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["eventById"], key = "#id"),
+            CacheEvict(cacheNames = ["eventById"], key = "#id", condition = "#id != null"),
             CacheEvict(cacheNames = ["allEvents"], allEntries = true),
             CacheEvict(cacheNames = ["calendarEvents"], allEntries = true),
             CacheEvict(cacheNames = ["categoryEvents"], allEntries = true)
@@ -197,7 +197,6 @@ class EventService(
             _eventRepository.save(withoutCategory)
         }
 
-        _eventRepository.deleteAll(events)
         info(this, "Deleted all events for category with id $categoryId in ${System.currentTimeMillis() - _timer} ms")
     }
 

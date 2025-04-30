@@ -157,7 +157,7 @@ class TaskService(
 
     @Caching(
         evict = [
-            CacheEvict(cacheNames = ["taskById"], key = "#id"),
+            CacheEvict(cacheNames = ["taskById"], key = "#id", condition = "#id != null"),
             CacheEvict(cacheNames = ["allTasks"], allEntries = true),
             CacheEvict(cacheNames = ["calendarTasks"], allEntries = true),
             CacheEvict(cacheNames = ["categoryTasks"], allEntries = true)
@@ -191,7 +191,6 @@ class TaskService(
             _taskRepository.save(withoutCategory)
         }
 
-        _taskRepository.deleteAll(tasks)
         info(this, "Updated category to null for all tasks in ${System.currentTimeMillis() - _timer} ms")
     }
 
