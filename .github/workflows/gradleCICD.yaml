@@ -7,42 +7,78 @@ on:
     branches: [ "main" ]
 
 jobs:
-  ci:
-    name: Build → Test → Submit
+  checkout:
+    name: Checkout Repository
     runs-on: ubuntu-latest
-
-    services:
-      redis:
-        image: redis:7-alpine
-        ports: [ "6379:6379" ]
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    env:
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-
+    outputs:
+      repo-path: ${{ steps.set-path.outputs.repo-path }}
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
+      - id: set-path
+        run: echo "repo-path=." >> $GITHUB_OUTPUT
 
+  setup-java:
+    name: Set Up JDK
+    needs: checkout
+    runs-on: ubuntu-latest
+    outputs:
+      java-version: 21
+    steps:
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+  setup-gradle:
+    name: Set Up Gradle
+    needs: setup-java
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gradle Setup
+        uses: gradle/actions/setup-gradle@v4
+
+  build:
+    name: Build Application
+    needs: setup-gradle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-
       - name: Build
         run: ./gradlew clean build --info --stacktrace
 
-      - name: Run Tests
+  test:
+    name: Run Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Test
         run: ./gradlew test
 
-      - name: Submit Dependency Graph
+  dependency-submission:
+    name: Submit Dependency Graph
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+      - name: Submit dependency graph
         uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
