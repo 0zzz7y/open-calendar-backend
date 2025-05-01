@@ -25,78 +25,24 @@ jobs:
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
 
-  checkout:
-    name: Checkout Repository
-    runs-on: ubuntu-latest
-    outputs:
-      repo-path: ${{ steps.set-path.outputs.repo-path }}
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      - id: set-path
-        run: echo "repo-path=." >> $GITHUB_OUTPUT
 
-  setup-java:
-    name: Set Up JDK
-    needs: checkout
-    runs-on: ubuntu-latest
-    outputs:
-      java-version: 21
-    steps:
-      - uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-
-  setup-gradle:
-    name: Set Up Gradle
-    needs: setup-java
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Gradle Setup
-        uses: gradle/actions/setup-gradle@v4
-
-  build:
-    name: Build Application
-    needs: setup-gradle
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: temurin
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Build
         run: ./gradlew clean build --info --stacktrace
 
-  test:
-    name: Run Tests
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Test
+      - name: Run Tests
         run: ./gradlew test
 
-  dependency-submission:
-    name: Submit Dependency Graph
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: 21
-          distribution: temurin
-      - name: Submit dependency graph
+      - name: Submit Dependency Graph
         uses: gradle/actions/dependency-submission@af1da67850ed9a4cedd57bfd976089dd991e2582
