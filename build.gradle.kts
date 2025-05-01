@@ -68,3 +68,13 @@ tasks.withType<org.springframework.boot.gradle.tasks.bundling.BootJar> {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.test {
+    testLogging {
+        events("failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showExceptions = true
+        showStackTraces = true
+        showStandardStreams = true
+    }
+}
