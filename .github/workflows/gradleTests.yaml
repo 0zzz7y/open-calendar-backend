@@ -20,7 +20,7 @@ jobs:
       - name: Set Up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: 21
+          java-version: "21"
           distribution: temurin
 
   run-tests:
