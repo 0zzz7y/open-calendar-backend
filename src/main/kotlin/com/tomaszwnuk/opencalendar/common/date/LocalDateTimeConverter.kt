@@ -30,11 +30,11 @@ class LocalDateTimeConverter : AttributeConverter<LocalDateTime, Long> {
     /**
      * Converts a database column value (epoch milliseconds) to a `LocalDateTime` entity attribute.
      *
-     * @param databaseData The epoch milliseconds value from the database.
+     * @param data The epoch milliseconds value from the database.
      *
      * @return The corresponding `LocalDateTime` value, or `null` if the input is `null`.
      */
-    override fun convertToEntityAttribute(databaseData: Long?): LocalDateTime? =
-        databaseData?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime() }
+    override fun convertToEntityAttribute(data: Long?): LocalDateTime? =
+        data?.let { Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDateTime() }
 
 }

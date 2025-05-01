@@ -4,11 +4,7 @@
 
 package com.tomaszwnuk.opencalendar.category
 
-import com.tomaszwnuk.opencalendar.domain.category.Category
-import com.tomaszwnuk.opencalendar.domain.category.CategoryDto
-import com.tomaszwnuk.opencalendar.domain.category.CategoryFilterDto
-import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
-import com.tomaszwnuk.opencalendar.domain.category.CategoryService
+import com.tomaszwnuk.opencalendar.domain.category.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -16,14 +12,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.*
 import java.util.*
-import java.util.Optional
 
 /**
  * Unit tests for the `CategoryService` class.

@@ -79,9 +79,7 @@ class RedisConfiguration(
             RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(configuration)
                 .build()
-                .also {
-                    info(this, "Redis cache manager initialized successfully.")
-                }
+                .also { info(this, "Redis cache manager initialized successfully.") }
         } catch (exception: Exception) {
             info(this, "Redis cache manager is not available. Falling back to in-memory cache")
             ConcurrentMapCacheManager()

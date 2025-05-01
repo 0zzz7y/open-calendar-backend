@@ -26,7 +26,8 @@ import javax.sql.DataSource
         "com.tomaszwnuk.opencalendar.domain.note",
         "com.tomaszwnuk.opencalendar.domain.event"
     ]
-) class DatabaseConfiguration(
+)
+class DatabaseConfiguration(
 
     /**
      * The URL of the database, injected from the application properties.

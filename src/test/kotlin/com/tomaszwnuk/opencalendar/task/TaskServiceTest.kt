@@ -8,12 +8,7 @@ import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.domain.category.Category
 import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
-import com.tomaszwnuk.opencalendar.domain.task.Task
-import com.tomaszwnuk.opencalendar.domain.task.TaskDto
-import com.tomaszwnuk.opencalendar.domain.task.TaskFilterDto
-import com.tomaszwnuk.opencalendar.domain.task.TaskRepository
-import com.tomaszwnuk.opencalendar.domain.task.TaskService
-import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
+import com.tomaszwnuk.opencalendar.domain.task.*
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -21,14 +16,8 @@ import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argThat
-import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import java.util.Optional
-import java.util.UUID
+import org.mockito.kotlin.*
+import java.util.*
 
 /**
  * Unit tests for the `TaskService` class.
