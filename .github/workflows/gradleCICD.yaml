@@ -54,6 +54,21 @@ jobs:
       - name: Build
         run: ./gradlew clean build --info --stacktrace
 
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+
   test:
     name: Run Tests
     needs: build
@@ -67,6 +82,21 @@ jobs:
           distribution: temurin
       - name: Test
         run: ./gradlew test
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
 
   dependency-submission:
     name: Submit Dependency Graph
