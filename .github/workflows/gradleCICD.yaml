@@ -65,7 +65,7 @@ jobs:
           java-version: 21
           distribution: temurin
       - name: Test
-        run: ./gradlew test
+        run: ./gradlew test --info --stacktrace
 
   dependency-submission:
     name: Submit Dependency Graph
