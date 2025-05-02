@@ -1,4 +1,4 @@
-# ──────────────────── Dependencies ────────────────────
+# ───────────────────────── Dependencies ─────────────────────────
 FROM gradle:8.5-jdk21 AS dependencies
 
 WORKDIR /app
@@ -9,7 +9,7 @@ COPY gradle ./gradle
 
 RUN gradle dependencies --no-daemon
 
-# ──────────────────── Build ────────────────────
+# ───────────────────────── Build ─────────────────────────
 FROM gradle:8.5-jdk21 AS builder
 
 WORKDIR /app
@@ -18,12 +18,14 @@ COPY . .
 
 RUN gradle bootJar --no-daemon
 
-# ──────────────────── Production ────────────────────
+# ───────────────────────── Production ─────────────────────────
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
 COPY --from=builder /app/build/libs/*.jar app.jar
+
+RUN mkdir -p /app/database
 
 EXPOSE 8080
 
