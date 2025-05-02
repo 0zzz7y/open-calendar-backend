@@ -4,7 +4,6 @@
 
 package com.tomaszwnuk.opencalendar.domain.event
 
-import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
 import java.time.LocalDateTime
 import java.util.*
 

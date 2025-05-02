@@ -2,7 +2,7 @@
  * Copyright (c) Tomasz Wnuk
  */
 
-package com.tomaszwnuk.opencalendar.domain.other
+package com.tomaszwnuk.opencalendar.domain.event
 
 import java.time.LocalDateTime
 

@@ -12,7 +12,7 @@ import com.tomaszwnuk.opencalendar.domain.event.Event
 import com.tomaszwnuk.opencalendar.domain.event.EventRepository
 import com.tomaszwnuk.opencalendar.domain.note.Note
 import com.tomaszwnuk.opencalendar.domain.note.NoteRepository
-import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
+import com.tomaszwnuk.opencalendar.domain.event.RecurringPattern
 import com.tomaszwnuk.opencalendar.domain.task.Task
 import com.tomaszwnuk.opencalendar.domain.task.TaskRepository
 import com.tomaszwnuk.opencalendar.domain.task.TaskStatus

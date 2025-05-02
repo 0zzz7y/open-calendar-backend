@@ -10,7 +10,7 @@ import com.tomaszwnuk.opencalendar.domain.event.EventController
 import com.tomaszwnuk.opencalendar.domain.event.EventDto
 import com.tomaszwnuk.opencalendar.domain.event.EventFilterDto
 import com.tomaszwnuk.opencalendar.domain.event.EventService
-import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
+import com.tomaszwnuk.opencalendar.domain.event.RecurringPattern
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

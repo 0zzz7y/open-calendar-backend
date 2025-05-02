@@ -13,7 +13,7 @@ import com.tomaszwnuk.opencalendar.domain.event.EventDto
 import com.tomaszwnuk.opencalendar.domain.event.EventService
 import com.tomaszwnuk.opencalendar.domain.note.NoteDto
 import com.tomaszwnuk.opencalendar.domain.note.NoteService
-import com.tomaszwnuk.opencalendar.domain.other.RecurringPattern
+import com.tomaszwnuk.opencalendar.domain.event.RecurringPattern
 import com.tomaszwnuk.opencalendar.domain.task.TaskDto
 import com.tomaszwnuk.opencalendar.domain.task.TaskService
 import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
