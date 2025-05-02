@@ -7,7 +7,7 @@ spring:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     show-sql: true
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
 
   sql:
     init:
