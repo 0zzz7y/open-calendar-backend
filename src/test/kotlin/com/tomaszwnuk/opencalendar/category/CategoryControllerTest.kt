@@ -11,9 +11,9 @@ import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.category.*
 import com.tomaszwnuk.opencalendar.domain.event.EventDto
 import com.tomaszwnuk.opencalendar.domain.event.EventService
+import com.tomaszwnuk.opencalendar.domain.event.RecurringPattern
 import com.tomaszwnuk.opencalendar.domain.note.NoteDto
 import com.tomaszwnuk.opencalendar.domain.note.NoteService
-import com.tomaszwnuk.opencalendar.domain.event.RecurringPattern
 import com.tomaszwnuk.opencalendar.domain.task.TaskDto
 import com.tomaszwnuk.opencalendar.domain.task.TaskService
 import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
@@ -28,6 +28,8 @@ import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.HttpStatus
@@ -114,7 +116,7 @@ internal class CategoryControllerTest {
         )
         _sampleCategoryDto = _sampleCategory.toDto()
         _objectMapper = ObjectMapper()
-        _pageable = org.springframework.data.domain.PageRequest.of(
+        _pageable = PageRequest.of(
             PAGEABLE_PAGE_NUMBER,
             PAGEABLE_PAGE_SIZE
         )
@@ -149,7 +151,7 @@ internal class CategoryControllerTest {
         val categories = listOf(_sampleCategory, _sampleCategory.copy(), _sampleCategory.copy())
         whenever(_categoryService.getAll()).thenReturn(categories.map { it.toDto() })
 
-        val response: ResponseEntity<org.springframework.data.domain.Page<CategoryDto>> =
+        val response: ResponseEntity<Page<CategoryDto>> =
             _controller.getAll(_pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -196,7 +198,7 @@ internal class CategoryControllerTest {
         )
         whenever(_eventService.getAllByCategoryId(id)).thenReturn(listOf(eventDto))
 
-        val response: ResponseEntity<org.springframework.data.domain.Page<EventDto>> =
+        val response: ResponseEntity<Page<EventDto>> =
             _controller.getEvents(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -223,7 +225,7 @@ internal class CategoryControllerTest {
         )
         whenever(_taskService.getAllByCategoryId(id)).thenReturn(listOf(taskDto))
 
-        val response: ResponseEntity<org.springframework.data.domain.Page<TaskDto>> =
+        val response: ResponseEntity<Page<TaskDto>> =
             _controller.getTasks(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -249,7 +251,7 @@ internal class CategoryControllerTest {
         )
         whenever(_noteService.getAllByCategoryId(id)).thenReturn(listOf(noteDto))
 
-        val response: ResponseEntity<org.springframework.data.domain.Page<NoteDto>> =
+        val response: ResponseEntity<Page<NoteDto>> =
             _controller.getNotes(id, _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)

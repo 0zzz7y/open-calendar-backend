@@ -9,6 +9,7 @@ import com.tomaszwnuk.opencalendar.TestConstants
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarController
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarDto
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarFilterDto
+import com.tomaszwnuk.opencalendar.domain.calendar.CalendarService
 import com.tomaszwnuk.opencalendar.domain.event.EventService
 import com.tomaszwnuk.opencalendar.domain.note.NoteService
 import com.tomaszwnuk.opencalendar.domain.task.TaskService
@@ -40,7 +41,7 @@ internal class CalendarControllerTest {
      * Mocked instance of `CalendarService` for simulating calendar-related operations.
      */
     @Mock
-    private lateinit var _calendarService: com.tomaszwnuk.opencalendar.domain.calendar.CalendarService
+    private lateinit var _calendarService: CalendarService
 
     /**
      * Mocked instance of `EventService` for simulating event-related operations.

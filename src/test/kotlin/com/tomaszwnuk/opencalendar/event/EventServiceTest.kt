@@ -9,7 +9,6 @@ import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.domain.category.Category
 import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
 import com.tomaszwnuk.opencalendar.domain.event.*
-import com.tomaszwnuk.opencalendar.domain.event.RecurringPattern
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
