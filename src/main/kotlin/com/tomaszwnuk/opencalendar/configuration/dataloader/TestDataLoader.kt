@@ -2,7 +2,7 @@
  * Copyright (c) Tomasz Wnuk
  */
 
-package com.tomaszwnuk.opencalendar.configuration.test
+package com.tomaszwnuk.opencalendar.configuration.dataloader
 
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository

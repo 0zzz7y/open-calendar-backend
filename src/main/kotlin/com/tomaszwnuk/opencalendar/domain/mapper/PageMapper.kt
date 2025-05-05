@@ -21,9 +21,9 @@ object PageMapper {
      * @return A Page object containing the paginated content.
      */
     fun <T> List<T>.toPage(pageable: Pageable): Page<T> {
-        val start = pageable.offset.toInt()
-        val end = (start + pageable.pageSize).coerceAtMost(this.size)
-        val content = if (start <= end) this.subList(start, end) else emptyList()
+        val start: Int = pageable.offset.toInt()
+        val end: Int = (start + pageable.pageSize).coerceAtMost(this.size)
+        val content: List<T> = if (start <= end) this.subList(start, end) else emptyList()
         return PageImpl(content, pageable, this.size.toLong())
     }
 
