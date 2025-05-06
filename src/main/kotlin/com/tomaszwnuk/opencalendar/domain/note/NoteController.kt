@@ -37,7 +37,7 @@ class NoteController(
      */
     @PostMapping
     fun create(@Valid @RequestBody(required = true) dto: NoteDto): ResponseEntity<NoteDto> {
-        val created: NoteDto = _noteService.create(dto)
+        val created: NoteDto = _noteService.create(dto = dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
@@ -57,7 +57,7 @@ class NoteController(
         ) pageable: Pageable
     ): ResponseEntity<Page<NoteDto>> {
         val notes: List<NoteDto> = _noteService.getAll()
-        return ResponseEntity.ok(notes.toPage(pageable))
+        return ResponseEntity.ok(notes.toPage(pageable = pageable))
     }
 
     /**
@@ -69,7 +69,7 @@ class NoteController(
      */
     @GetMapping("/{id}")
     fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<NoteDto> {
-        val note: NoteDto = _noteService.getById(id)
+        val note: NoteDto = _noteService.getById(id = id)
         return ResponseEntity.ok(note)
     }
 
@@ -98,8 +98,8 @@ class NoteController(
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val notes: List<NoteDto> = _noteService.filter(filter)
-        return ResponseEntity.ok(notes.toPage(pageable))
+        val notes: List<NoteDto> = _noteService.filter(filter = filter)
+        return ResponseEntity.ok(notes.toPage(pageable = pageable))
     }
 
     /**
@@ -115,7 +115,7 @@ class NoteController(
         @PathVariable(name = "id", required = true) id: UUID,
         @Valid @RequestBody(required = true) dto: NoteDto
     ): ResponseEntity<NoteDto> {
-        val updated: NoteDto = _noteService.update(id, dto)
+        val updated: NoteDto = _noteService.update(id = id, dto = dto)
         return ResponseEntity.ok(updated)
     }
 
@@ -128,7 +128,7 @@ class NoteController(
      */
     @DeleteMapping("/{id}")
     fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
-        _noteService.delete(id)
+        _noteService.delete(id = id)
         return ResponseEntity.noContent().build()
     }
 

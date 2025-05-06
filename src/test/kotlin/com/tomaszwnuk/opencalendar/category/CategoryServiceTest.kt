@@ -76,13 +76,13 @@ internal class CategoryServiceTest {
     fun `should throw error when creating category with duplicate title`() {
         val dto = CategoryDto(title = "Duplicate Title", color = "#00FF00")
 
-        whenever(_repository.existsByTitle("Duplicate Title")).thenReturn(true)
+        whenever(_repository.existsByTitle(title = "Duplicate Title")).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
-            _service.create(dto)
+            _service.create(dto = dto)
         }
 
-        verify(_repository).existsByTitle("Duplicate Title")
+        verify(_repository).existsByTitle(title = "Duplicate Title")
         verify(_repository, never()).save(any<Category>())
     }
 
@@ -117,7 +117,7 @@ internal class CategoryServiceTest {
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(category))
 
-        val result = _service.getById(id)
+        val result = _service.getById(id = id)
 
         assertEquals(id, result.id)
         assertEquals("Team", result.title)
@@ -137,7 +137,7 @@ internal class CategoryServiceTest {
         whenever(_repository.findById(id)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.getById(id)
+            _service.getById(id = id)
         }
 
         verify(_repository).findById(id)
@@ -152,15 +152,15 @@ internal class CategoryServiceTest {
         val filter = CategoryFilterDto(title = "Filter", color = "#00FF00")
         val matching = Category(id = UUID.randomUUID(), title = "Filter", color = "#00FF00")
 
-        whenever(_repository.filter("Filter", "#00FF00")).thenReturn(listOf(matching))
+        whenever(_repository.filter(title = "Filter", color = "#00FF00")).thenReturn(listOf(matching))
 
-        val result = _service.filter(filter)
+        val result = _service.filter(filter = filter)
 
         assertEquals(1, result.size)
         assertEquals("Filter", result[0].title)
         assertEquals("#00FF00", result[0].color)
 
-        verify(_repository).filter("Filter", "#00FF00")
+        verify(_repository).filter(title = "Filter", color = "#00FF00")
     }
 
     /**
@@ -176,7 +176,7 @@ internal class CategoryServiceTest {
         whenever(_repository.findById(id)).thenReturn(Optional.of(existing))
         whenever(_repository.save(any<Category>())).thenAnswer { it.getArgument<Category>(0) }
 
-        val result = _service.update(id, dto)
+        val result = _service.update(id = id, dto = dto)
 
         assertEquals("Old", result.title)
         assertEquals("#FF0000", result.color)
@@ -200,13 +200,13 @@ internal class CategoryServiceTest {
         whenever(_repository.existsByTitle("New")).thenReturn(false)
         whenever(_repository.save(any<Category>())).thenAnswer { it.getArgument<Category>(0) }
 
-        val result = _service.update(id, dto)
+        val result = _service.update(id = id, dto = dto)
 
         assertEquals("New", result.title)
         assertEquals("#FF0000", result.color)
 
         verify(_repository).findById(id)
-        verify(_repository).existsByTitle("New")
+        verify(_repository).existsByTitle(title = "New")
         verify(_repository).save(argThat { title == "New" && color == "#FF0000" })
     }
 
@@ -221,14 +221,14 @@ internal class CategoryServiceTest {
         val dto = CategoryDto(id = id, title = "Duplicate", color = "#FF0000")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existing))
-        whenever(_repository.existsByTitle("Duplicate")).thenReturn(true)
+        whenever(_repository.existsByTitle(title = "Duplicate")).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
-            _service.update(id, dto)
+            _service.update(id = id, dto = dto)
         }
 
         verify(_repository).findById(id)
-        verify(_repository).existsByTitle("Duplicate")
+        verify(_repository).existsByTitle(title = "Duplicate")
         verify(_repository, never()).save(any<Category>())
     }
 
@@ -244,7 +244,7 @@ internal class CategoryServiceTest {
         whenever(_repository.findById(id)).thenReturn(Optional.of(existing))
         doNothing().whenever(_repository).delete(existing)
 
-        _service.delete(id)
+        _service.delete(id = id)
 
         verify(_repository).findById(id)
         verify(_repository).delete(existing)
@@ -261,7 +261,7 @@ internal class CategoryServiceTest {
         whenever(_repository.findById(id)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.delete(id)
+            _service.delete(id = id)
         }
 
         verify(_repository).findById(id)

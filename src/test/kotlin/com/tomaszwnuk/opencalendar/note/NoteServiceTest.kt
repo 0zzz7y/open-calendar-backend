@@ -84,16 +84,16 @@ internal class NoteServiceTest {
             calendarId = sampleCalendar.id,
             categoryId = sampleCategory.id
         )
-        val savedId = UUID.randomUUID()
+        val savedId: UUID = UUID.randomUUID()
 
         whenever(_calendarRepository.findById(sampleCalendar.id)).thenReturn(Optional.of(sampleCalendar))
         whenever(_categoryRepository.findById(sampleCategory.id)).thenReturn(Optional.of(sampleCategory))
         whenever(_noteRepository.save(any<Note>())).thenAnswer { invocation ->
-            val arg = invocation.getArgument<Note>(0)
+            val arg: Note = invocation.getArgument(0)
             arg.copy(id = savedId)
         }
 
-        val result = _service.create(dto)
+        val result = _service.create(dto = dto)
 
         assertNotNull(result.id)
         assertEquals(savedId, result.id)
@@ -122,7 +122,7 @@ internal class NoteServiceTest {
         whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.create(dto)
+            _service.create(dto = dto)
         }
 
         verify(_calendarRepository).findById(dto.calendarId)
@@ -145,7 +145,7 @@ internal class NoteServiceTest {
         )
         whenever(_noteRepository.findById(id)).thenReturn(Optional.of(note))
 
-        val result = _service.getById(id)
+        val result = _service.getById(id = id)
 
         assertEquals(id, result.id)
         assertEquals("Memo", result.title)
@@ -164,7 +164,7 @@ internal class NoteServiceTest {
         whenever(_noteRepository.findById(id)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.getById(id)
+            _service.getById(id = id)
         }
 
         verify(_noteRepository).findById(id)
@@ -184,15 +184,15 @@ internal class NoteServiceTest {
             title = "Planning Notes", description = "Sprint planning details",
             calendar = sampleCalendar
         )
-        whenever(_noteRepository.findAllByCalendarId(sampleCalendar.id)).thenReturn(listOf(note1, note2))
+        whenever(_noteRepository.findAllByCalendarId(calendarId = sampleCalendar.id)).thenReturn(listOf(note1, note2))
 
-        val result = _service.getAllByCalendarId(sampleCalendar.id)
+        val result = _service.getAllByCalendarId(calendarId = sampleCalendar.id)
 
         assertEquals(2, result.size)
         assertTrue(result.any { it.title == "Standup Notes" })
         assertTrue(result.any { it.title == "Planning Notes" })
 
-        verify(_noteRepository).findAllByCalendarId(sampleCalendar.id)
+        verify(_noteRepository).findAllByCalendarId(calendarId = sampleCalendar.id)
     }
 
     /**
@@ -206,14 +206,14 @@ internal class NoteServiceTest {
             calendar = sampleCalendar,
             category = sampleCategory
         )
-        whenever(_noteRepository.findAllByCategoryId(sampleCategory.id)).thenReturn(listOf(note))
+        whenever(_noteRepository.findAllByCategoryId(categoryId = sampleCategory.id)).thenReturn(listOf(note))
 
-        val result = _service.getAllByCategoryId(sampleCategory.id)
+        val result = _service.getAllByCategoryId(categoryId = sampleCategory.id)
 
         assertEquals(1, result.size)
         assertEquals("Announcement", result[0].title)
 
-        verify(_noteRepository).findAllByCategoryId(sampleCategory.id)
+        verify(_noteRepository).findAllByCategoryId(categoryId = sampleCategory.id)
     }
 
     /**
@@ -222,15 +222,15 @@ internal class NoteServiceTest {
      */
     @Test
     fun `should return all notes`() {
-        val n1 = Note(
-            title = "Note One", description = "Desc one",
+        val note01 = Note(
+            title = "Note One", description = "Description one",
             calendar = sampleCalendar
         )
-        val n2 = Note(
-            title = "Note Two", description = "Desc two",
+        val note02 = Note(
+            title = "Note Two", description = "Description two",
             calendar = sampleCalendar
         )
-        whenever(_noteRepository.findAll()).thenReturn(listOf(n1, n2))
+        whenever(_noteRepository.findAll()).thenReturn(listOf(note01, note02))
 
         val result = _service.getAll()
 
@@ -255,14 +255,21 @@ internal class NoteServiceTest {
             title = "Standup Notes", description = "Morning updates",
             calendar = sampleCalendar
         )
-        whenever(_noteRepository.filter("Standup", null, null, null)).thenReturn(listOf(standupNote))
+        whenever(
+            _noteRepository.filter(
+                title = "Standup",
+                description = null,
+                calendarId = null,
+                categoryId = null
+            )
+        ).thenReturn(listOf(standupNote))
 
-        val result = _service.filter(filter)
+        val result = _service.filter(filter = filter)
 
         assertEquals(1, result.size)
         assertEquals("Standup Notes", result[0].title)
 
-        verify(_noteRepository).filter("Standup", null, null, null)
+        verify(_noteRepository).filter(title = "Standup", description = null, calendarId = null, categoryId = null)
     }
 
     /**
@@ -285,7 +292,7 @@ internal class NoteServiceTest {
         whenever(_categoryRepository.findById(dto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
         whenever(_noteRepository.save(any<Note>())).thenAnswer { it.getArgument<Note>(0) }
 
-        val result = _service.update(id, dto)
+        val result = _service.update(id = id, dto = dto)
 
         assertEquals("Final Draft", result.title)
         assertEquals("Updated draft", result.description)
@@ -310,7 +317,7 @@ internal class NoteServiceTest {
         whenever(_noteRepository.findById(id)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.update(id, dto)
+            _service.update(id = id, dto = dto)
         }
 
         verify(_noteRepository).findById(id)
@@ -331,7 +338,7 @@ internal class NoteServiceTest {
         whenever(_noteRepository.findById(id)).thenReturn(Optional.of(existing))
         doNothing().whenever(_noteRepository).delete(existing)
 
-        _service.delete(id)
+        _service.delete(id = id)
 
         verify(_noteRepository).findById(id)
         verify(_noteRepository).delete(existing)
@@ -343,17 +350,17 @@ internal class NoteServiceTest {
      */
     @Test
     fun `should delete all notes by calendar id`() {
-        val calId = sampleCalendar.id
+        val calendarId = sampleCalendar.id
         val noteA = Note(
-            title = "Note A", description = "Desc A", calendar = sampleCalendar
+            title = "Title", description = "Description", calendar = sampleCalendar
         )
         val noteB = noteA.copy(id = UUID.randomUUID())
-        whenever(_noteRepository.findAllByCalendarId(calId)).thenReturn(listOf(noteA, noteB))
+        whenever(_noteRepository.findAllByCalendarId(calendarId = calendarId)).thenReturn(listOf(noteA, noteB))
         doNothing().whenever(_noteRepository).deleteAll(listOf(noteA, noteB))
 
-        _service.deleteByCalendarId(calId)
+        _service.deleteByCalendarId(calendarId = calendarId)
 
-        verify(_noteRepository).findAllByCalendarId(calId)
+        verify(_noteRepository).findAllByCalendarId(calendarId = calendarId)
         verify(_noteRepository).deleteAll(listOf(noteA, noteB))
     }
 
@@ -363,20 +370,20 @@ internal class NoteServiceTest {
      */
     @Test
     fun `should clear category for all notes by category id`() {
-        val catId = sampleCategory.id
-        val note1 = Note(
-            title = "Cat Note 1", description = "Desc1",
+        val categoryId = sampleCategory.id
+        val note01 = Note(
+            title = "Note", description = "Description",
             calendar = sampleCalendar, category = sampleCategory
         )
-        val note2 = note1.copy(id = UUID.randomUUID())
-        whenever(_noteRepository.findAllByCategoryId(catId)).thenReturn(listOf(note1, note2))
+        val note02 = note01.copy(id = UUID.randomUUID())
+        whenever(_noteRepository.findAllByCategoryId(categoryId = categoryId)).thenReturn(listOf(note01, note02))
         whenever(_noteRepository.save(any<Note>())).thenAnswer { it.getArgument<Note>(0) }
 
-        _service.deleteCategoryByCategoryId(catId)
+        _service.removeCategoryByCategoryId(categoryId = categoryId)
 
-        verify(_noteRepository).findAllByCategoryId(catId)
-        verify(_noteRepository).save(argThat { id == note1.id && category == null })
-        verify(_noteRepository).save(argThat { id == note2.id && category == null })
+        verify(_noteRepository).findAllByCategoryId(categoryId = categoryId)
+        verify(_noteRepository).save(argThat { id == note01.id && category == null })
+        verify(_noteRepository).save(argThat { id == note02.id && category == null })
     }
 
 }

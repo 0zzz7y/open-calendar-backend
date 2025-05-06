@@ -79,9 +79,9 @@ internal class TaskControllerTest {
      */
     @Test
     fun `should create task with status code 201 Created`() {
-        whenever(_taskService.create(eq(_sampleDto))).thenReturn(_sampleDto)
+        whenever(_taskService.create(dto = eq(_sampleDto))).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<TaskDto> = _controller.create(_sampleDto)
+        val response: ResponseEntity<TaskDto> = _controller.create(dto = _sampleDto)
 
         assert(response.statusCode == HttpStatus.CREATED)
         assert(response.body == _sampleDto)
@@ -100,7 +100,7 @@ internal class TaskControllerTest {
         whenever(_taskService.getAll()).thenReturn(listOf(taskOne, taskTwo))
 
         val response: ResponseEntity<Page<TaskDto>> =
-            _controller.getAll(_pageable)
+            _controller.getAll(pageable = _pageable)
 
         assert(response.statusCode == HttpStatus.OK)
         assert(response.body?.totalElements == 2L)
@@ -115,13 +115,13 @@ internal class TaskControllerTest {
      */
     @Test
     fun `should return task by id with status code 200 OK`() {
-        whenever(_taskService.getById(_sampleId)).thenReturn(_sampleDto)
+        whenever(_taskService.getById(id = _sampleId)).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<TaskDto> = _controller.getById(_sampleId)
+        val response: ResponseEntity<TaskDto> = _controller.getById(id = _sampleId)
 
         assert(response.statusCode == HttpStatus.OK)
         assert(response.body == _sampleDto)
-        verify(_taskService).getById(_sampleId)
+        verify(_taskService).getById(id = _sampleId)
     }
 
     /**
@@ -155,9 +155,9 @@ internal class TaskControllerTest {
     @Test
     fun `should update task with status code 200 OK`() {
         val updatedDto = _sampleDto.copy(status = TaskStatus.IN_PROGRESS)
-        whenever(_taskService.update(_sampleId, _sampleDto)).thenReturn(updatedDto)
+        whenever(_taskService.update(id = _sampleId, dto = _sampleDto)).thenReturn(updatedDto)
 
-        val response: ResponseEntity<TaskDto> = _controller.update(_sampleId, _sampleDto)
+        val response: ResponseEntity<TaskDto> = _controller.update(id = _sampleId, dto = _sampleDto)
 
         assert(response.statusCode == HttpStatus.OK)
         assert(response.body == updatedDto)
@@ -170,12 +170,12 @@ internal class TaskControllerTest {
      */
     @Test
     fun `should delete task with status code 204 No Content`() {
-        doNothing().whenever(_taskService).delete(_sampleId)
+        doNothing().whenever(_taskService).delete(id = _sampleId)
 
-        val response: ResponseEntity<Void> = _controller.delete(_sampleId)
+        val response: ResponseEntity<Void> = _controller.delete(id = _sampleId)
 
         assert(response.statusCode == HttpStatus.NO_CONTENT)
-        verify(_taskService).delete(_sampleId)
+        verify(_taskService).delete(id = _sampleId)
     }
 
 }

@@ -39,7 +39,7 @@ class EventController(
      */
     @PostMapping
     fun create(@Valid @RequestBody(required = true) dto: EventDto): ResponseEntity<EventDto> {
-        val created: EventDto = _eventService.create(dto)
+        val created: EventDto = _eventService.create(dto = dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
@@ -59,7 +59,7 @@ class EventController(
         ) pageable: Pageable
     ): ResponseEntity<Page<EventDto>> {
         val events: List<EventDto> = _eventService.getAll()
-        return ResponseEntity.ok(events.toPage(pageable))
+        return ResponseEntity.ok(events.toPage(pageable = pageable))
     }
 
     /**
@@ -71,7 +71,7 @@ class EventController(
      */
     @GetMapping("/{id}")
     fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<EventDto> {
-        val event: EventDto = _eventService.getById(id)
+        val event: EventDto = _eventService.getById(id = id)
         return ResponseEntity.ok(event)
     }
 
@@ -111,12 +111,12 @@ class EventController(
             description = description,
             dateFrom = dateFrom?.let { LocalDateTime.parse(it) },
             dateTo = dateTo?.let { LocalDateTime.parse(it) },
-            recurringPattern = recurringPattern?.let { RecurringPattern.valueOf(it) },
+            recurringPattern = recurringPattern?.let { RecurringPattern.valueOf(value = it) },
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val events: List<EventDto> = _eventService.filter(filter)
-        return ResponseEntity.ok(events.toPage(pageable))
+        val events: List<EventDto> = _eventService.filter(filter = filter)
+        return ResponseEntity.ok(events.toPage(pageable = pageable))
     }
 
     /**
@@ -132,7 +132,7 @@ class EventController(
         @PathVariable(name = "id", required = true) id: UUID,
         @Valid @RequestBody(required = true) dto: EventDto
     ): ResponseEntity<EventDto> {
-        val updated: EventDto = _eventService.update(id, dto)
+        val updated: EventDto = _eventService.update(id = id, dto = dto)
         return ResponseEntity.ok(updated)
     }
 
@@ -145,7 +145,7 @@ class EventController(
      */
     @DeleteMapping("/{id}")
     fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
-        _eventService.delete(id)
+        _eventService.delete(id = id)
         return ResponseEntity.noContent().build()
     }
 

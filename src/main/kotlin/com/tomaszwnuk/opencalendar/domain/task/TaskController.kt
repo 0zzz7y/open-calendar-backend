@@ -35,7 +35,7 @@ class TaskController(private val _taskService: TaskService) {
      */
     @PostMapping
     fun create(@Valid @RequestBody(required = true) dto: TaskDto): ResponseEntity<TaskDto> {
-        val created: TaskDto = _taskService.create(dto)
+        val created: TaskDto = _taskService.create(dto = dto)
         return ResponseEntity.status(HttpStatus.CREATED).body(created)
     }
 
@@ -55,7 +55,7 @@ class TaskController(private val _taskService: TaskService) {
         ) pageable: Pageable
     ): ResponseEntity<Page<TaskDto>> {
         val tasks: List<TaskDto> = _taskService.getAll()
-        return ResponseEntity.ok(tasks.toPage(pageable))
+        return ResponseEntity.ok(tasks.toPage(pageable = pageable))
     }
 
     /**
@@ -67,7 +67,7 @@ class TaskController(private val _taskService: TaskService) {
      */
     @GetMapping("/{id}")
     fun getById(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<TaskDto> {
-        val task: TaskDto = _taskService.getById(id)
+        val task: TaskDto = _taskService.getById(id = id)
         return ResponseEntity.ok(task)
     }
 
@@ -99,8 +99,8 @@ class TaskController(private val _taskService: TaskService) {
             calendarId = calendarId,
             categoryId = categoryId
         )
-        val tasks: List<TaskDto> = _taskService.filter(filter)
-        return ResponseEntity.ok(tasks.toPage(pageable))
+        val tasks: List<TaskDto> = _taskService.filter(filter = filter)
+        return ResponseEntity.ok(tasks.toPage(pageable = pageable))
     }
 
     /**
@@ -116,7 +116,7 @@ class TaskController(private val _taskService: TaskService) {
         @PathVariable(name = "id", required = true) id: UUID,
         @Valid @RequestBody(required = true) dto: TaskDto
     ): ResponseEntity<TaskDto> {
-        val updated: TaskDto = _taskService.update(id, dto)
+        val updated: TaskDto = _taskService.update(id = id, dto = dto)
         return ResponseEntity.ok(updated)
     }
 
@@ -129,7 +129,7 @@ class TaskController(private val _taskService: TaskService) {
      */
     @DeleteMapping("/{id}")
     fun delete(@PathVariable(name = "id", required = true) id: UUID): ResponseEntity<Void> {
-        _taskService.delete(id)
+        _taskService.delete(id = id)
         return ResponseEntity.noContent().build()
     }
 

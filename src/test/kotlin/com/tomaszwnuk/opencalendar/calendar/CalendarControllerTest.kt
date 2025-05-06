@@ -99,14 +99,14 @@ internal class CalendarControllerTest {
         val dto = CalendarDto(id = null, title = "Calendar", emoji = "🟢")
         val created = dto.copy(id = UUID.randomUUID())
 
-        whenever(_calendarService.create(dto)).thenReturn(created)
+        whenever(_calendarService.create(dto = dto)).thenReturn(created)
 
         _mockMvc.perform(
             post("/calendars")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(_objectMapper.writeValueAsString(dto))
         )
-            .andExpect(status().`is`(201))
+            .andExpect(status().isCreated)
             .andExpect(content().json(_objectMapper.writeValueAsString(created)))
     }
 
@@ -139,7 +139,7 @@ internal class CalendarControllerTest {
     fun `should return calendar by id with status code 200 OK`() {
         val id = UUID.randomUUID()
         val dto = CalendarDto(id = id, title = "Team Calendar", emoji = "🟢")
-        whenever(_calendarService.getById(id)).thenReturn(dto)
+        whenever(_calendarService.getById(id = id)).thenReturn(dto)
 
         _mockMvc.perform(get("/calendars/$id"))
             .andExpect(status().isOk)
@@ -153,7 +153,7 @@ internal class CalendarControllerTest {
     @Test
     fun `should return list of filtered calendars with status code 200 OK`() {
         val dto = CalendarDto(id = UUID.randomUUID(), title = "Project Calendar", emoji = "🟢")
-        whenever(_calendarService.filter(any<CalendarFilterDto>())).thenReturn(listOf(dto))
+        whenever(_calendarService.filter(filter = any<CalendarFilterDto>())).thenReturn(listOf(dto))
 
         _mockMvc.perform(
             get("/calendars/filter")
@@ -174,7 +174,7 @@ internal class CalendarControllerTest {
     fun `should update calendar with status code 200 OK`() {
         val id = UUID.randomUUID()
         val dto = CalendarDto(id = id, title = "Updated Calendar", emoji = "🔴")
-        whenever(_calendarService.update(id, dto)).thenReturn(dto)
+        whenever(_calendarService.update(id = id, dto = dto)).thenReturn(dto)
 
         _mockMvc.perform(
             put("/calendars/$id")
@@ -192,9 +192,9 @@ internal class CalendarControllerTest {
     @Test
     fun `should delete calendar with status code 204 No Content`() {
         val id = UUID.randomUUID()
-        doNothing().whenever(_eventService).deleteAllByCalendarId(id)
-        doNothing().whenever(_taskService).deleteAllByCalendarId(id)
-        doNothing().whenever(_noteService).deleteByCalendarId(id)
+        doNothing().whenever(_eventService).deleteAllByCalendarId(calendarId = id)
+        doNothing().whenever(_taskService).deleteAllByCalendarId(calendarId = id)
+        doNothing().whenever(_noteService).deleteByCalendarId(calendarId = id)
         doNothing().whenever(_calendarService).delete(id)
 
         _mockMvc.perform(delete("/calendars/$id"))

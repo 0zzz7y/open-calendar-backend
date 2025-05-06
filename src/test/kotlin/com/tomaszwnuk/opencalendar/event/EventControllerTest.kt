@@ -91,7 +91,7 @@ internal class EventControllerTest {
     fun `should create event with status code 201 Created`() {
         whenever(_eventService.create(eq(_sampleDto))).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<EventDto> = _controller.create(_sampleDto)
+        val response: ResponseEntity<EventDto> = _controller.create(dto = _sampleDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
         assertEquals(_sampleDto, response.body)
@@ -109,7 +109,7 @@ internal class EventControllerTest {
         whenever(_eventService.getAll()).thenReturn(listOf(dto1, dto2))
 
         val response: ResponseEntity<Page<EventDto>> =
-            _controller.getAll(_pageable)
+            _controller.getAll(pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(2L, response.body?.totalElements)
@@ -124,13 +124,13 @@ internal class EventControllerTest {
      */
     @Test
     fun `should return event by id with status code 200 OK`() {
-        whenever(_eventService.getById(_sampleId)).thenReturn(_sampleDto)
+        whenever(_eventService.getById(id = _sampleId)).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<EventDto> = _controller.getById(_sampleId)
+        val response: ResponseEntity<EventDto> = _controller.getById(id = _sampleId)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(_sampleDto, response.body)
-        verify(_eventService).getById(_sampleId)
+        verify(_eventService).getById(id = _sampleId)
     }
 
     /**
@@ -146,7 +146,7 @@ internal class EventControllerTest {
         val catId = _sampleDto.categoryId
         val filteredDto = _sampleDto.copy(id = UUID.randomUUID(), title = "Strategy Session")
 
-        whenever(_eventService.filter(any<EventFilterDto>())).thenReturn(listOf(filteredDto))
+        whenever(_eventService.filter(filter = any<EventFilterDto>())).thenReturn(listOf(filteredDto))
 
         val response: ResponseEntity<Page<EventDto>> = _controller.filter(
             title = "Strategy",
@@ -162,7 +162,7 @@ internal class EventControllerTest {
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(1L, response.body?.totalElements)
         assertEquals("Strategy Session", response.body?.content?.first()?.title)
-        verify(_eventService).filter(any<EventFilterDto>())
+        verify(_eventService).filter(filter = any<EventFilterDto>())
     }
 
     /**
@@ -172,13 +172,13 @@ internal class EventControllerTest {
     @Test
     fun `should update event with status code 200 OK`() {
         val updatedDto = _sampleDto.copy(title = "Planning Review")
-        whenever(_eventService.update(_sampleId, _sampleDto)).thenReturn(updatedDto)
+        whenever(_eventService.update(id = _sampleId, dto = _sampleDto)).thenReturn(updatedDto)
 
-        val response: ResponseEntity<EventDto> = _controller.update(_sampleId, _sampleDto)
+        val response: ResponseEntity<EventDto> = _controller.update(id = _sampleId, dto = _sampleDto)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(updatedDto, response.body)
-        verify(_eventService).update(_sampleId, _sampleDto)
+        verify(_eventService).update(id = _sampleId, dto = _sampleDto)
     }
 
     /**
@@ -187,12 +187,12 @@ internal class EventControllerTest {
      */
     @Test
     fun `should delete event with status code 204 No Content`() {
-        doNothing().whenever(_eventService).delete(_sampleId)
+        doNothing().whenever(_eventService).delete(id = _sampleId)
 
-        val response: ResponseEntity<Void> = _controller.delete(_sampleId)
+        val response: ResponseEntity<Void> = _controller.delete(id = _sampleId)
 
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
-        verify(_eventService).delete(_sampleId)
+        verify(_eventService).delete(id = _sampleId)
     }
 
 }

@@ -152,7 +152,7 @@ internal class CategoryControllerTest {
         whenever(_categoryService.getAll()).thenReturn(categories.map { it.toDto() })
 
         val response: ResponseEntity<Page<CategoryDto>> =
-            _controller.getAll(_pageable)
+            _controller.getAll(pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(categories.size.toLong(), response.body?.totalElements)
@@ -168,9 +168,9 @@ internal class CategoryControllerTest {
     @Test
     fun `should return category by id with status code 200 OK`() {
         val id = _sampleCategory.id
-        whenever(_categoryService.getById(id)).thenReturn(_sampleCategoryDto)
+        whenever(_categoryService.getById(id = id)).thenReturn(_sampleCategoryDto)
 
-        val response: ResponseEntity<CategoryDto> = _controller.getById(id)
+        val response: ResponseEntity<CategoryDto> = _controller.getById(id = id)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(_sampleCategoryDto, response.body)
@@ -196,16 +196,16 @@ internal class CategoryControllerTest {
             recurringPattern = RecurringPattern.NONE,
             calendarId = calendar.id
         )
-        whenever(_eventService.getAllByCategoryId(id)).thenReturn(listOf(eventDto))
+        whenever(_eventService.getAllByCategoryId(categoryId = id)).thenReturn(listOf(eventDto))
 
         val response: ResponseEntity<Page<EventDto>> =
-            _controller.getEvents(id, _pageable)
+            _controller.getEvents(id = id, pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(1, response.body?.totalElements)
         assertEquals(eventDto.title, response.body?.content?.first()?.title)
 
-        verify(_eventService).getAllByCategoryId(id)
+        verify(_eventService).getAllByCategoryId(categoryId = id)
     }
 
     /**
@@ -223,16 +223,16 @@ internal class CategoryControllerTest {
             status = TaskStatus.TODO,
             calendarId = calendar.id
         )
-        whenever(_taskService.getAllByCategoryId(id)).thenReturn(listOf(taskDto))
+        whenever(_taskService.getAllByCategoryId(categoryId = id)).thenReturn(listOf(taskDto))
 
         val response: ResponseEntity<Page<TaskDto>> =
-            _controller.getTasks(id, _pageable)
+            _controller.getTasks(id = id, pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(1, response.body?.totalElements)
         assertEquals(taskDto.title, response.body?.content?.first()?.title)
 
-        verify(_taskService).getAllByCategoryId(id)
+        verify(_taskService).getAllByCategoryId(categoryId = id)
     }
 
     /**
@@ -317,15 +317,15 @@ internal class CategoryControllerTest {
     fun `should update category with status code 200 OK`() {
         val dto = _sampleCategory.toDto()
         val updatedDto = dto.copy(title = "Work")
-        whenever(_categoryService.update(_sampleCategory.id, dto)).thenReturn(updatedDto)
+        whenever(_categoryService.update(id = _sampleCategory.id, dto)).thenReturn(updatedDto)
 
         val response: ResponseEntity<CategoryDto> =
-            _controller.update(_sampleCategory.id, dto)
+            _controller.update(id = _sampleCategory.id, dto)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(updatedDto, response.body)
 
-        verify(_categoryService).update(_sampleCategory.id, dto)
+        verify(_categoryService).update(id = _sampleCategory.id, dto)
     }
 
     /**
@@ -334,14 +334,14 @@ internal class CategoryControllerTest {
      */
     @Test
     fun `should delete category with status code 204 No Content`() {
-        doNothing().whenever(_categoryService).delete(_sampleCategory.id)
+        doNothing().whenever(_categoryService).delete(id = _sampleCategory.id)
 
         val response: ResponseEntity<Void> =
-            _controller.delete(_sampleCategory.id)
+            _controller.delete(id = _sampleCategory.id)
 
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
 
-        verify(_categoryService).delete(_sampleCategory.id)
+        verify(_categoryService).delete(id = _sampleCategory.id)
     }
 
 }

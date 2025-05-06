@@ -52,7 +52,7 @@ class EventService(
         ]
     )
     fun create(dto: EventDto): EventDto {
-        info(this, "Creating $dto")
+        info(source = this, message = "Creating $dto")
         _timer = System.currentTimeMillis()
 
         val calendar: Calendar = _calendarRepository.findOrThrow(id = dto.calendarId)
@@ -69,7 +69,7 @@ class EventService(
 
         val created: Event = _eventRepository.save(event)
 
-        info(this, "Created $created in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Created $created in ${System.currentTimeMillis() - _timer} ms")
         return created.toDto()
     }
 
@@ -83,12 +83,12 @@ class EventService(
      */
     @Cacheable(cacheNames = ["eventById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): EventDto {
-        info(this, "Fetching event with id $id")
+        info(source = this, message = "Fetching event with id $id")
         _timer = System.currentTimeMillis()
 
-        val event: Event = _eventRepository.findOrThrow(id)
+        val event: Event = _eventRepository.findOrThrow(id = id)
 
-        info(this, "Found $event in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $event in ${System.currentTimeMillis() - _timer} ms")
         return event.toDto()
     }
 
@@ -100,12 +100,12 @@ class EventService(
      */
     @Cacheable(cacheNames = ["allEvents"], condition = "#result != null")
     fun getAll(): List<EventDto> {
-        info(this, "Fetching all events")
+        info(source = this, message = "Fetching all events")
         _timer = System.currentTimeMillis()
 
         val events: List<Event> = _eventRepository.findAll()
 
-        info(this, "Found $events in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $events in ${System.currentTimeMillis() - _timer} ms")
         return events.map { it.toDto() }
     }
 
@@ -119,12 +119,12 @@ class EventService(
      */
     @Cacheable(cacheNames = ["calendarEvents"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<EventDto> {
-        info(this, "Fetching all events for calendar with id $calendarId")
+        info(source = this, message = "Fetching all events for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
 
-        val events: List<Event> = _eventRepository.findAllByCalendarId(calendarId)
+        val events: List<Event> = _eventRepository.findAllByCalendarId(calendarId = calendarId)
 
-        info(this, "Found $events in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $events in ${System.currentTimeMillis() - _timer} ms")
         return events.map { it.toDto() }
     }
 
@@ -138,12 +138,12 @@ class EventService(
      */
     @Cacheable(cacheNames = ["categoryEvents"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<EventDto> {
-        info(this, "Fetching all events for category with id $categoryId")
+        info(source = this, message = "Fetching all events for category with id $categoryId")
         _timer = System.currentTimeMillis()
 
-        val events: List<Event> = _eventRepository.findAllByCategoryId(categoryId)
+        val events: List<Event> = _eventRepository.findAllByCategoryId(categoryId = categoryId)
 
-        info(this, "Found $events in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $events in ${System.currentTimeMillis() - _timer} ms")
         return events.map { it.toDto() }
     }
 
@@ -155,7 +155,7 @@ class EventService(
      * @return A list of filtered events as DTOs.
      */
     fun filter(filter: EventFilterDto): List<EventDto> {
-        info(this, "Filtering events with $filter")
+        info(source = this, message = "Filtering events with $filter")
         _timer = System.currentTimeMillis()
 
         val filtered: List<Event> = _eventRepository.filter(
@@ -168,7 +168,7 @@ class EventService(
             categoryId = filter.categoryId
         )
 
-        info(this, "Found $filtered in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $filtered in ${System.currentTimeMillis() - _timer} ms")
         return filtered.map { it.toDto() }
     }
 
@@ -190,7 +190,7 @@ class EventService(
         ]
     )
     fun update(id: UUID, dto: EventDto): EventDto {
-        info(this, "Updating $dto")
+        info(source = this, message = "Updating $dto")
         _timer = System.currentTimeMillis()
 
         val existing: Event = _eventRepository.findOrThrow(id = id)
@@ -208,7 +208,7 @@ class EventService(
 
         val saved: Event = _eventRepository.save(updated)
 
-        info(this, "Updated $saved in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Updated $saved in ${System.currentTimeMillis() - _timer} ms")
         return saved.toDto()
     }
 
@@ -227,13 +227,13 @@ class EventService(
         ]
     )
     fun delete(id: UUID) {
-        info(this, "Deleting event with id $id.")
+        info(source = this, message = "Deleting event with id $id.")
         _timer = System.currentTimeMillis()
 
-        val existing: Event = _eventRepository.findOrThrow(id)
+        val existing: Event = _eventRepository.findOrThrow(id = id)
 
         _eventRepository.delete(existing)
-        info(this, "Deleted event $existing in \${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Deleted event $existing in \${System.currentTimeMillis() - _timer} ms")
     }
 
     /**
@@ -251,13 +251,16 @@ class EventService(
         ]
     )
     fun deleteAllByCalendarId(calendarId: UUID) {
-        info(this, "Deleting all events for calendar with id $calendarId.")
+        info(source = this, message = "Deleting all events for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
 
-        val events: List<Event> = _eventRepository.findAllByCalendarId(calendarId)
+        val events: List<Event> = _eventRepository.findAllByCalendarId(calendarId = calendarId)
         _eventRepository.deleteAll(events)
 
-        info(this, "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
+        info(
+            source = this,
+            message = "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms"
+        )
     }
 
     /**
@@ -274,8 +277,8 @@ class EventService(
             CacheEvict(cacheNames = ["categoryEvents"], allEntries = true)
         ]
     )
-    fun deleteAllByCategoryId(categoryId: UUID) {
-        info(this, "Deleting all events for category with id $categoryId.")
+    fun removeCategoryByCategoryId(categoryId: UUID) {
+        info(source = this, message = "Deleting all events for category with id $categoryId.")
         _timer = System.currentTimeMillis()
 
         val events: List<Event> = _eventRepository.findAllByCategoryId(categoryId = categoryId)
@@ -284,7 +287,10 @@ class EventService(
             _eventRepository.save(withoutCategory)
         }
 
-        info(this, "Deleted all events for category with id $categoryId in ${System.currentTimeMillis() - _timer} ms")
+        info(
+            source = this,
+            message = "Deleted all events for category with id $categoryId in ${System.currentTimeMillis() - _timer} ms"
+        )
     }
 
 }

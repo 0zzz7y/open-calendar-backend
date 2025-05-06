@@ -268,7 +268,7 @@ class TaskService(
             CacheEvict(cacheNames = ["categoryTasks"], allEntries = true)
         ]
     )
-    fun deleteAllCategoryByCategoryId(categoryId: UUID) {
+    fun removeCategoryByCategoryId(categoryId: UUID) {
         info(this, "Updating all tasks for category with id $categoryId.")
         _timer = System.currentTimeMillis()
 

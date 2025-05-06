@@ -90,11 +90,11 @@ internal class TaskServiceTest {
         whenever(_calendarRepository.findById(sampleCalendar.id)).thenReturn(Optional.of(sampleCalendar))
         whenever(_categoryRepository.findById(sampleCategory.id)).thenReturn(Optional.of(sampleCategory))
         whenever(_taskRepository.save(any<Task>())).thenAnswer { invocation ->
-            val arg = invocation.getArgument<Task>(0)
+            val arg: Task = invocation.getArgument(0)
             arg.copy(id = savedId)
         }
 
-        val result = _service.create(dto)
+        val result = _service.create(dto = dto)
 
         assertNotNull(result.id)
         assertEquals(savedId, result.id)
@@ -123,7 +123,7 @@ internal class TaskServiceTest {
         )
         whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.empty())
 
-        assertThrows<NoSuchElementException> { _service.create(dto) }
+        assertThrows<NoSuchElementException> { _service.create(dto = dto) }
 
         verify(_calendarRepository).findById(dto.calendarId)
         verify(_taskRepository, never()).save(any<Task>())
@@ -146,7 +146,7 @@ internal class TaskServiceTest {
         )
         whenever(_taskRepository.findById(id)).thenReturn(Optional.of(task))
 
-        val result = _service.getById(id)
+        val result = _service.getById(id = id)
 
         assertEquals(id, result.id)
         assertEquals("Sprint Planning", result.title)
@@ -164,7 +164,7 @@ internal class TaskServiceTest {
         val id = UUID.randomUUID()
         whenever(_taskRepository.findById(id)).thenReturn(Optional.empty())
 
-        assertThrows<NoSuchElementException> { _service.getById(id) }
+        assertThrows<NoSuchElementException> { _service.getById(id = id) }
         verify(_taskRepository).findById(id)
     }
 
@@ -201,19 +201,19 @@ internal class TaskServiceTest {
      */
     @Test
     fun `should return tasks by calendar id`() {
-        val id = sampleCalendar.id
+        val calendarId = sampleCalendar.id
         val teamSync = Task(
             title = "Team Sync",
             description = "Weekly team stand-up",
             status = TaskStatus.TODO,
             calendar = sampleCalendar
         )
-        whenever(_taskRepository.findAllByCalendarId(id)).thenReturn(listOf(teamSync))
+        whenever(_taskRepository.findAllByCalendarId(calendarId = calendarId)).thenReturn(listOf(teamSync))
 
-        val result = _service.getAllByCalendarId(id)
+        val result = _service.getAllByCalendarId(calendarId = calendarId)
         assertEquals(1, result.size)
         assertEquals("Team Sync", result[0].title)
-        verify(_taskRepository).findAllByCalendarId(id)
+        verify(_taskRepository).findAllByCalendarId(calendarId = calendarId)
     }
 
     /**
@@ -222,7 +222,7 @@ internal class TaskServiceTest {
      */
     @Test
     fun `should return tasks by category id`() {
-        val id = sampleCategory.id
+        val categoryId = sampleCategory.id
         val securityAudit = Task(
             title = "Security Audit",
             description = "Review security protocols",
@@ -230,12 +230,12 @@ internal class TaskServiceTest {
             calendar = sampleCalendar,
             category = sampleCategory
         )
-        whenever(_taskRepository.findAllByCategoryId(id)).thenReturn(listOf(securityAudit))
+        whenever(_taskRepository.findAllByCategoryId(categoryId = categoryId)).thenReturn(listOf(securityAudit))
 
-        val result = _service.getAllByCategoryId(id)
+        val result = _service.getAllByCategoryId(categoryId = categoryId)
         assertEquals(1, result.size)
         assertEquals("Security Audit", result[0].title)
-        verify(_taskRepository).findAllByCategoryId(id)
+        verify(_taskRepository).findAllByCategoryId(categoryId = categoryId)
     }
 
     /**
@@ -257,13 +257,26 @@ internal class TaskServiceTest {
             status = TaskStatus.DONE,
             calendar = sampleCalendar
         )
-        whenever(_taskRepository.filter("Release", null, TaskStatus.DONE, null, null))
-            .thenReturn(listOf(releaseTask))
+        whenever(
+            _taskRepository.filter(
+                title = "Release",
+                description = null,
+                status = TaskStatus.DONE,
+                calendarId = null,
+                categoryId = null
+            )
+        ).thenReturn(listOf(releaseTask))
 
-        val result = _service.filter(filter)
+        val result = _service.filter(filter = filter)
         assertEquals(1, result.size)
         assertEquals("Release v2.0", result[0].title)
-        verify(_taskRepository).filter("Release", null, TaskStatus.DONE, null, null)
+        verify(_taskRepository).filter(
+            title = "Release",
+            description = null,
+            status = TaskStatus.DONE,
+            calendarId = null,
+            categoryId = null
+        )
     }
 
     /**
@@ -287,7 +300,7 @@ internal class TaskServiceTest {
         whenever(_categoryRepository.findById(dto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
         whenever(_taskRepository.save(any<Task>())).thenAnswer { it.getArgument<Task>(0) }
 
-        val result = _service.update(id, dto)
+        val result = _service.update(id = id, dto = dto)
         assertEquals(TaskStatus.IN_PROGRESS, result.status)
         verify(_taskRepository).findById(id)
         verify(_taskRepository).save(argThat { status == TaskStatus.IN_PROGRESS })
@@ -310,7 +323,7 @@ internal class TaskServiceTest {
         )
         whenever(_taskRepository.findById(id)).thenReturn(Optional.empty())
 
-        assertThrows<NoSuchElementException> { _service.update(id, dto) }
+        assertThrows<NoSuchElementException> { _service.update(id = id, dto = dto) }
         verify(_taskRepository).findById(id)
     }
 
@@ -341,7 +354,7 @@ internal class TaskServiceTest {
      */
     @Test
     fun `should delete all tasks by calendar id`() {
-        val calId = sampleCalendar.id
+        val calendarId = sampleCalendar.id
         val databaseCleanup = Task(
             title = "Database Cleanup",
             description = "Remove outdated records",
@@ -353,11 +366,16 @@ internal class TaskServiceTest {
             title = "Log Archiving",
             description = "Archive system logs"
         )
-        whenever(_taskRepository.findAllByCalendarId(calId)).thenReturn(listOf(databaseCleanup, logArchiving))
+        whenever(_taskRepository.findAllByCalendarId(calendarId = calendarId)).thenReturn(
+            listOf(
+                databaseCleanup,
+                logArchiving
+            )
+        )
         doNothing().whenever(_taskRepository).deleteAll(listOf(databaseCleanup, logArchiving))
 
-        _service.deleteAllByCalendarId(calId)
-        verify(_taskRepository).findAllByCalendarId(calId)
+        _service.deleteAllByCalendarId(calendarId = calendarId)
+        verify(_taskRepository).findAllByCalendarId(calendarId = calendarId)
         verify(_taskRepository).deleteAll(listOf(databaseCleanup, logArchiving))
     }
 
@@ -367,7 +385,7 @@ internal class TaskServiceTest {
      */
     @Test
     fun `should clear category for all tasks by category id`() {
-        val catId = sampleCategory.id
+        val categoryId = sampleCategory.id
         val auditTask = Task(
             title = "Security Audit",
             description = "Review security compliance",
@@ -376,11 +394,16 @@ internal class TaskServiceTest {
             category = sampleCategory
         )
         val complianceFollowUp = auditTask.copy(id = UUID.randomUUID())
-        whenever(_taskRepository.findAllByCategoryId(catId)).thenReturn(listOf(auditTask, complianceFollowUp))
+        whenever(_taskRepository.findAllByCategoryId(categoryId = categoryId)).thenReturn(
+            listOf(
+                auditTask,
+                complianceFollowUp
+            )
+        )
         whenever(_taskRepository.save(any<Task>())).thenAnswer { it.getArgument<Task>(0) }
 
-        _service.deleteAllCategoryByCategoryId(catId)
-        verify(_taskRepository).findAllByCategoryId(catId)
+        _service.removeCategoryByCategoryId(categoryId = categoryId)
+        verify(_taskRepository).findAllByCategoryId(categoryId = categoryId)
         verify(_taskRepository).save(argThat { id == auditTask.id && category == null })
         verify(_taskRepository).save(argThat { id == complianceFollowUp.id && category == null })
     }

@@ -81,13 +81,13 @@ internal class NoteControllerTest {
      */
     @Test
     fun `should create note with status code 201 Created`() {
-        whenever(_noteService.create(eq(_sampleDto))).thenReturn(_sampleDto)
+        whenever(_noteService.create(dto = eq(_sampleDto))).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<NoteDto> = _controller.create(_sampleDto)
+        val response: ResponseEntity<NoteDto> = _controller.create(dto = _sampleDto)
 
         assert(response.statusCode == HttpStatus.CREATED)
         assert(response.body == _sampleDto)
-        verify(_noteService).create(eq(_sampleDto))
+        verify(_noteService).create(dto = eq(_sampleDto))
     }
 
     /**
@@ -101,7 +101,7 @@ internal class NoteControllerTest {
         whenever(_noteService.getAll()).thenReturn(listOf(note1, note2))
 
         val response: ResponseEntity<Page<NoteDto>> =
-            _controller.getAll(_pageable)
+            _controller.getAll(pageable = _pageable)
 
         assert(response.statusCode == HttpStatus.OK)
         assert(response.body?.totalElements == 2L)
@@ -155,13 +155,13 @@ internal class NoteControllerTest {
     @Test
     fun `should update note with status code 200 OK`() {
         val updated = _sampleDto.copy(title = "Sprint Retrospective")
-        whenever(_noteService.update(_sampleId, _sampleDto)).thenReturn(updated)
+        whenever(_noteService.update(id = _sampleId, dto = _sampleDto)).thenReturn(updated)
 
-        val response: ResponseEntity<NoteDto> = _controller.update(_sampleId, _sampleDto)
+        val response: ResponseEntity<NoteDto> = _controller.update(id = _sampleId, dto = _sampleDto)
 
         assert(response.statusCode == HttpStatus.OK)
         assert(response.body == updated)
-        verify(_noteService).update(_sampleId, _sampleDto)
+        verify(_noteService).update(id = _sampleId, dto = _sampleDto)
     }
 
     /**
@@ -170,12 +170,12 @@ internal class NoteControllerTest {
      */
     @Test
     fun `should delete note with status code 204 No Content`() {
-        doNothing().whenever(_noteService).delete(_sampleId)
+        doNothing().whenever(_noteService).delete(id = _sampleId)
 
-        val response: ResponseEntity<Void> = _controller.delete(_sampleId)
+        val response: ResponseEntity<Void> = _controller.delete(id = _sampleId)
 
         assert(response.statusCode == HttpStatus.NO_CONTENT)
-        verify(_noteService).delete(_sampleId)
+        verify(_noteService).delete(id = _sampleId)
     }
 
 }

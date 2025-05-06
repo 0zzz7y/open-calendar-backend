@@ -43,12 +43,12 @@ class CalendarService(
         ]
     )
     fun create(dto: CalendarDto): CalendarDto {
-        info(this, "Creating $dto")
+        info(source = this, message = "Creating $dto")
         _timer = System.currentTimeMillis()
 
         _calendarRepository.assertNameDoesNotExist(
             name = dto.title,
-            existsByName = { _calendarRepository.existsByTitle(it) }
+            existsByName = { _calendarRepository.existsByTitle(title = it) }
         )
 
         val calendar = Calendar(
@@ -57,7 +57,7 @@ class CalendarService(
         )
         val created: Calendar = _calendarRepository.save(calendar)
 
-        info(this, "Created $created in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Created $created in ${System.currentTimeMillis() - _timer} ms")
         return created.toDto()
     }
 
@@ -69,12 +69,12 @@ class CalendarService(
      */
     @Cacheable(cacheNames = ["allCalendars"], condition = "#result != null")
     fun getAll(): List<CalendarDto> {
-        info(this, "Fetching all calendars")
+        info(source = this, message = "Fetching all calendars")
         _timer = System.currentTimeMillis()
 
         val calendars: List<Calendar> = _calendarRepository.findAll()
 
-        info(this, "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
         return calendars.map { it.toDto() }
     }
 
@@ -88,12 +88,12 @@ class CalendarService(
      */
     @Cacheable(cacheNames = ["calendarById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): CalendarDto {
-        info(this, "Fetching calendar with id $id")
+        info(source = this, message = "Fetching calendar with id $id")
         _timer = System.currentTimeMillis()
 
         val calendar: Calendar = _calendarRepository.findOrThrow(id)
 
-        info(this, "Found $calendar in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $calendar in ${System.currentTimeMillis() - _timer} ms")
         return calendar.toDto()
     }
 
@@ -105,7 +105,7 @@ class CalendarService(
      * @return A list of calendars matching the filter as DTOs.
      */
     fun filter(filter: CalendarFilterDto): List<CalendarDto> {
-        info(this, "Filtering calendars with $filter")
+        info(source = this, message = "Filtering calendars with $filter")
         _timer = System.currentTimeMillis()
 
         val calendars: List<Calendar> = _calendarRepository.filter(
@@ -113,7 +113,7 @@ class CalendarService(
             emoji = filter.emoji
         )
 
-        info(this, "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
         return calendars.map { it.toDto() }
     }
 
@@ -133,11 +133,11 @@ class CalendarService(
         ]
     )
     fun update(id: UUID, dto: CalendarDto): CalendarDto {
-        info(this, "Updating $dto")
+        info(source = this, message = "Updating $dto")
         _timer = System.currentTimeMillis()
 
         val existing: Calendar = _calendarRepository.findOrThrow(id = id)
-        val isNameChanged: Boolean = !(dto.title.equals(existing.title, ignoreCase = true))
+        val isNameChanged: Boolean = !(dto.title.equals(other = existing.title, ignoreCase = true))
         if (isNameChanged) {
             _calendarRepository.assertNameDoesNotExist(
                 name = dto.title,
@@ -151,7 +151,7 @@ class CalendarService(
         )
         val updated: Calendar = _calendarRepository.save(changed)
 
-        info(this, "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
         return updated.toDto()
     }
 
@@ -168,13 +168,13 @@ class CalendarService(
         ]
     )
     fun delete(id: UUID) {
-        info(this, "Deleting calendar with id $id.")
+        info(source = this, message = "Deleting calendar with id $id.")
         _timer = System.currentTimeMillis()
 
         val existing: Calendar = _calendarRepository.findOrThrow(id = id)
         _calendarRepository.delete(existing)
 
-        info(this, "Deleted calendar $existing in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Deleted calendar $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
 }

@@ -30,5 +30,5 @@ class Application
  * @param args Command-line arguments passed to the application.
  */
 fun main(args: Array<String>) {
-    runApplication<Application>(*args)
+    runApplication<Application>(args = args)
 }

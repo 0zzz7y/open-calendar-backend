@@ -58,7 +58,7 @@ internal class CalendarServiceTest {
             Calendar(id = savedId, title = arg.title, emoji = arg.emoji)
         }
 
-        val result = _service.create(dto)
+        val result = _service.create(dto = dto)
 
         assertNotNull(result.id)
         assertEquals(savedId, result.id)
@@ -77,13 +77,13 @@ internal class CalendarServiceTest {
     fun `should throw error when creating calendar with duplicate title`() {
         val dto = CalendarDto(id = null, title = "Duplicate Title", emoji = "🟢")
 
-        whenever(_repository.existsByTitle("Duplicate Title")).thenReturn(true)
+        whenever(_repository.existsByTitle(title = "Duplicate Title")).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
-            _service.create(dto)
+            _service.create(dto = dto)
         }
 
-        verify(_repository).existsByTitle("Duplicate Title")
+        verify(_repository).existsByTitle(title = "Duplicate Title")
         verify(_repository, never()).save(any<Calendar>())
     }
 
@@ -118,7 +118,7 @@ internal class CalendarServiceTest {
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(calendar))
 
-        val result = _service.getById(id)
+        val result = _service.getById(id = id)
 
         assertEquals(id, result.id)
         assertEquals("Team Calendar", result.title)
@@ -138,7 +138,7 @@ internal class CalendarServiceTest {
         whenever(_repository.findById(id)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.getById(id)
+            _service.getById(id = id)
         }
 
         verify(_repository).findById(id)
@@ -153,9 +153,9 @@ internal class CalendarServiceTest {
         val filter = CalendarFilterDto(title = "Project Calendar", emoji = "🟢")
         val matching = Calendar(id = UUID.randomUUID(), title = "Project Calendar", emoji = "🟢")
 
-        whenever(_repository.filter("Project Calendar", "🟢")).thenReturn(listOf(matching))
+        whenever(_repository.filter(title = "Project Calendar", emoji = "🟢")).thenReturn(listOf(matching))
 
-        val result = _service.filter(filter)
+        val result = _service.filter(filter = filter)
 
         assertEquals(1, result.size)
         assertEquals("Project Calendar", result[0].title)
@@ -177,7 +177,7 @@ internal class CalendarServiceTest {
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
         whenever(_repository.save(any<Calendar>())).thenAnswer { it.getArgument<Calendar>(0) }
 
-        val result = _service.update(id, dto)
+        val result = _service.update(id = id, dto = dto)
 
         assertEquals("Old Title", result.title)
         assertEquals("🔴", result.emoji)
@@ -207,7 +207,7 @@ internal class CalendarServiceTest {
         assertEquals("🔴", result.emoji)
 
         verify(_repository).findById(id)
-        verify(_repository).existsByTitle("New Title")
+        verify(_repository).existsByTitle(title = "New Title")
         verify(_repository).save(argThat { title == "New Title" && emoji == "🔴" })
     }
 
@@ -222,14 +222,14 @@ internal class CalendarServiceTest {
         val dto = CalendarDto(id = id, title = "Duplicate Title", emoji = "🔴")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
-        whenever(_repository.existsByTitle("Duplicate Title")).thenReturn(true)
+        whenever(_repository.existsByTitle(title = "Duplicate Title")).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
             _service.update(id, dto)
         }
 
         verify(_repository).findById(id)
-        verify(_repository).existsByTitle("Duplicate Title")
+        verify(_repository).existsByTitle(title = "Duplicate Title")
         verify(_repository, never()).save(any<Calendar>())
     }
 
@@ -245,7 +245,7 @@ internal class CalendarServiceTest {
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
         doNothing().whenever(_repository).delete(existingCalendar)
 
-        _service.delete(id)
+        _service.delete(id = id)
 
         verify(_repository).findById(id)
         verify(_repository).delete(existingCalendar)
@@ -262,7 +262,7 @@ internal class CalendarServiceTest {
         whenever(_repository.findById(id)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.delete(id)
+            _service.delete(id = id)
         }
 
         verify(_repository).findById(id)

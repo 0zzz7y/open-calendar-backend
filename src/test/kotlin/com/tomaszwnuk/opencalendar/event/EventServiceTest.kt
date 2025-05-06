@@ -102,7 +102,7 @@ internal class EventServiceTest {
             arg.copy(id = savedId)
         }
 
-        val result = _service.create(dto)
+        val result = _service.create(dto = dto)
 
         assertNotNull(result.id)
         assertEquals(savedId, result.id)
@@ -133,7 +133,7 @@ internal class EventServiceTest {
         whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.create(dto)
+            _service.create(dto = dto)
         }
 
         verify(_calendarRepository).findById(dto.calendarId)
@@ -159,7 +159,7 @@ internal class EventServiceTest {
         )
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(event))
 
-        val result = _service.getById(id)
+        val result = _service.getById(id = id)
 
         assertEquals(id, result.id)
         assertEquals("Client Call", result.title)
@@ -177,7 +177,7 @@ internal class EventServiceTest {
         whenever(_eventRepository.findById(id)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.getById(id)
+            _service.getById(id = id)
         }
 
         verify(_eventRepository).findById(id)
@@ -228,14 +228,14 @@ internal class EventServiceTest {
             endDate = now.plusHours(3),
             calendar = sampleCalendar
         )
-        whenever(_eventRepository.findAllByCalendarId(id)).thenReturn(listOf(workshop))
+        whenever(_eventRepository.findAllByCalendarId(calendarId = id)).thenReturn(listOf(workshop))
 
-        val result = _service.getAllByCalendarId(id)
+        val result = _service.getAllByCalendarId(calendarId = id)
 
         assertEquals(1, result.size)
         assertEquals("Workshop", result[0].title)
 
-        verify(_eventRepository).findAllByCalendarId(id)
+        verify(_eventRepository).findAllByCalendarId(calendarId = id)
     }
 
     /**
@@ -253,14 +253,14 @@ internal class EventServiceTest {
             calendar = sampleCalendar,
             category = sampleCategory
         )
-        whenever(_eventRepository.findAllByCategoryId(id)).thenReturn(listOf(training))
+        whenever(_eventRepository.findAllByCategoryId(categoryId = id)).thenReturn(listOf(training))
 
-        val result = _service.getAllByCategoryId(id)
+        val result = _service.getAllByCategoryId(categoryId = id)
 
         assertEquals(1, result.size)
         assertEquals("Training Session", result[0].title)
 
-        verify(_eventRepository).findAllByCategoryId(id)
+        verify(_eventRepository).findAllByCategoryId(categoryId = id)
     }
 
     /**
@@ -287,16 +287,30 @@ internal class EventServiceTest {
         )
         whenever(
             _eventRepository.filter(
-                "Strategy Meeting", null, null, null, null, null, null
+                title = "Strategy Meeting",
+                description = null,
+                dateFrom = null,
+                dateTo = null,
+                recurringPattern = null,
+                calendarId = null,
+                categoryId = null
             )
         ).thenReturn(listOf(strategyEvent))
 
-        val result = _service.filter(filter)
+        val result = _service.filter(filter = filter)
 
         assertEquals(1, result.size)
         assertEquals("Strategy Meeting", result[0].title)
 
-        verify(_eventRepository).filter("Strategy Meeting", null, null, null, null, null, null)
+        verify(_eventRepository).filter(
+            title = "Strategy Meeting",
+            description = null,
+            dateFrom = null,
+            dateTo = null,
+            recurringPattern = null,
+            calendarId = null,
+            categoryId = null
+        )
     }
 
     /**
@@ -322,7 +336,7 @@ internal class EventServiceTest {
         whenever(_categoryRepository.findById(dto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
         whenever(_eventRepository.save(any<Event>())).thenAnswer { it.getArgument<Event>(0) }
 
-        val result = _service.update(id, dto)
+        val result = _service.update(id = id, dto = dto)
 
         assertEquals("Planning Review", result.title)
         verify(_eventRepository).findById(id)
@@ -347,7 +361,7 @@ internal class EventServiceTest {
         whenever(_eventRepository.findById(id)).thenReturn(Optional.empty())
 
         assertThrows<NoSuchElementException> {
-            _service.update(id, dto)
+            _service.update(id = id, dto = dto)
         }
 
         verify(_eventRepository).findById(id)
@@ -370,7 +384,7 @@ internal class EventServiceTest {
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(deadlineEvent))
         doNothing().whenever(_eventRepository).delete(deadlineEvent)
 
-        _service.delete(id)
+        _service.delete(id = id)
 
         verify(_eventRepository).findById(id)
         verify(_eventRepository).delete(deadlineEvent)
@@ -382,7 +396,7 @@ internal class EventServiceTest {
      */
     @Test
     fun `should delete all events by calendar id`() {
-        val calId = sampleCalendar.id
+        val calendarId = sampleCalendar.id
         val planning = Event(
             title = "Sprint Planning",
             description = "Plan next sprint",
@@ -391,12 +405,17 @@ internal class EventServiceTest {
             calendar = sampleCalendar
         )
         val planningFollowUp = planning.copy(id = UUID.randomUUID())
-        whenever(_eventRepository.findAllByCalendarId(calId)).thenReturn(listOf(planning, planningFollowUp))
+        whenever(_eventRepository.findAllByCalendarId(calendarId = calendarId)).thenReturn(
+            listOf(
+                planning,
+                planningFollowUp
+            )
+        )
         doNothing().whenever(_eventRepository).deleteAll(listOf(planning, planningFollowUp))
 
-        _service.deleteAllByCalendarId(calId)
+        _service.deleteAllByCalendarId(calendarId = calendarId)
 
-        verify(_eventRepository).findAllByCalendarId(calId)
+        verify(_eventRepository).findAllByCalendarId(calendarId = calendarId)
         verify(_eventRepository).deleteAll(listOf(planning, planningFollowUp))
     }
 
@@ -406,7 +425,7 @@ internal class EventServiceTest {
      */
     @Test
     fun `should delete all events by category id`() {
-        val catId = sampleCategory.id
+        val categoryId = sampleCategory.id
         val budgetReview = Event(
             title = "Budget Review",
             description = "Review quarterly budget",
@@ -416,12 +435,17 @@ internal class EventServiceTest {
             category = sampleCategory
         )
         val budgetFollowUp = budgetReview.copy(id = UUID.randomUUID())
-        whenever(_eventRepository.findAllByCategoryId(catId)).thenReturn(listOf(budgetReview, budgetFollowUp))
+        whenever(_eventRepository.findAllByCategoryId(categoryId = categoryId)).thenReturn(
+            listOf(
+                budgetReview,
+                budgetFollowUp
+            )
+        )
         whenever(_eventRepository.save(any<Event>())).thenAnswer { it.getArgument<Event>(0) }
 
-        _service.deleteAllByCategoryId(catId)
+        _service.removeCategoryByCategoryId(categoryId = categoryId)
 
-        verify(_eventRepository).findAllByCategoryId(catId)
+        verify(_eventRepository).findAllByCategoryId(categoryId = categoryId)
         verify(_eventRepository).save(argThat { id == budgetReview.id && category == null })
         verify(_eventRepository).save(argThat { id == budgetFollowUp.id && category == null })
     }

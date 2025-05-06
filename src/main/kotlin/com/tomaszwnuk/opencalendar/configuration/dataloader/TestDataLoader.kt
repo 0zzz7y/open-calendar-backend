@@ -56,7 +56,7 @@ class TestDataLoader(
      */
     override fun run(vararg arguments: String?) {
         if (_calendarRepository.count() > 0) {
-            info(this, "Test data already loaded. Skipping...")
+            info(source = this, message = "Test data already loaded. Skipping...")
             return
         }
         _timer = System.currentTimeMillis()
@@ -68,7 +68,7 @@ class TestDataLoader(
         createTasks(calendars, categories)
         createEvents(calendars, categories)
 
-        info(this, "Test data loaded in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Test data loaded in ${System.currentTimeMillis() - _timer} ms")
     }
 
     /**
@@ -88,7 +88,7 @@ class TestDataLoader(
         )
         val calendars: Map<String, Calendar> = mapOf("first" to first)
 
-        info(this, "Calendars created in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Calendars created in ${System.currentTimeMillis() - _timer} ms")
         return calendars
     }
 
@@ -124,7 +124,7 @@ class TestDataLoader(
             "university" to university
         )
 
-        info(this, "Categories created in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Categories created in ${System.currentTimeMillis() - _timer} ms")
         return categories
     }
 
@@ -240,7 +240,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.YEARLY
         )
 
-        info(this, "Events created in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Events created in ${System.currentTimeMillis() - _timer} ms")
         _eventRepository.saveAll(
             listOf(
                 work01,
@@ -289,7 +289,7 @@ class TestDataLoader(
             category = categories["university"],
         )
 
-        info(this, "Tasks created in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Tasks created in ${System.currentTimeMillis() - _timer} ms")
         _taskRepository.saveAll(listOf(walkTheDog, buyGroceries, studyForExam))
     }
 
@@ -309,7 +309,7 @@ class TestDataLoader(
             category = categories["personal"]
         )
 
-        info(this, "Notes created in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Notes created in ${System.currentTimeMillis() - _timer} ms")
         _noteRepository.save(shoppingList)
     }
 

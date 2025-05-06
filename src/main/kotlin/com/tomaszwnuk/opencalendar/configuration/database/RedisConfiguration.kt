@@ -71,7 +71,7 @@ class RedisConfiguration(
         return try {
             val redisSerializer = GenericJackson2JsonRedisSerializer(_objectMapper)
             val configuration = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(30))
+                .entryTtl(Duration.ofMinutes(REDIS_CACHE_TTL_IN_MINUTES))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(redisSerializer))
 
             redisConnectionFactory.connection.ping()
@@ -79,11 +79,21 @@ class RedisConfiguration(
             RedisCacheManager.builder(redisConnectionFactory)
                 .cacheDefaults(configuration)
                 .build()
-                .also { info(this, "Redis cache manager initialized successfully.") }
+                .also { info(source = this, message = "Redis cache manager initialized successfully.") }
         } catch (exception: Exception) {
-            info(this, "Redis cache manager is not available. Falling back to in-memory cache")
+            info(source = this, message = "Redis cache manager is not available. Falling back to in-memory cache")
             ConcurrentMapCacheManager()
         }
+    }
+
+    companion object {
+
+        /**
+         * The time-to-live (TTL) for Redis cache entries, in minutes.
+         * This value determines how long cached entries will be retained before expiring.
+         */
+        private const val REDIS_CACHE_TTL_IN_MINUTES: Long = 30L
+
     }
 
 }
