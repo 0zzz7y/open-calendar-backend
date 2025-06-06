@@ -23,16 +23,6 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
-/**
- * Component responsible for loading test data into the database.
- * This class is executed on application startup for specific profiles.
- *
- * @property _calendarRepository Repository for managing `Calendar` entities.
- * @property _categoryRepository Repository for managing `Category` entities.
- * @property _eventRepository Repository for managing `Event` entities.
- * @property _taskRepository Repository for managing `Task` entities.
- * @property _noteRepository Repository for managing `Note` entities.
- */
 @Suppress("unused")
 @Profile("production", "development", "test")
 @Component
@@ -44,16 +34,8 @@ class TestDataLoader(
     private val _noteRepository: NoteRepository
 ) : CommandLineRunner {
 
-    /**
-     * Timer used for logging execution time of operations.
-     */
     private var _timer: Long = System.currentTimeMillis()
 
-    /**
-     * Executes the test data loading process.
-     *
-     * @param arguments Command-line arguments passed to the application.
-     */
     override fun run(vararg arguments: String?) {
         if (_calendarRepository.count() > 0) {
             info(source = this, message = "Test data already loaded. Skipping...")
@@ -71,18 +53,13 @@ class TestDataLoader(
         info(source = this, message = "Test data loaded in ${System.currentTimeMillis() - _timer} ms")
     }
 
-    /**
-     * Creates and saves sample `Calendar` entities.
-     *
-     * @return A map of calendar identifiers to `Calendar` entities.
-     */
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
 
         val first: Calendar = _calendarRepository.save(
             Calendar(
                 id = UUID.randomUUID(),
-                title = "#1",
+                name = "#1",
                 emoji = "\uD83D\uDCA5"
             )
         )
@@ -92,29 +69,24 @@ class TestDataLoader(
         return calendars
     }
 
-    /**
-     * Creates and saves sample `Category` entities.
-     *
-     * @return A map of category identifiers to `Category` entities.
-     */
     private fun createCategories(): Map<String, Category> {
         _timer = System.currentTimeMillis()
 
         val personal: Category = _categoryRepository.save(
             Category(
-                title = "Personal",
+                name = "Personal",
                 color = "#EFEF39"
             )
         )
         val work: Category = _categoryRepository.save(
             Category(
-                title = "Work",
+                name = "Work",
                 color = "#48DD52"
             )
         )
         val university: Category = _categoryRepository.save(
             Category(
-                title = "University",
+                name = "University",
                 color = "#E8475D"
             )
         )
@@ -128,18 +100,12 @@ class TestDataLoader(
         return categories
     }
 
-    /**
-     * Creates and saves sample `Event` entities.
-     *
-     * @param calendars A map of calendar identifiers to `Calendar` entities.
-     * @param categories A map of category identifiers to `Category` entities.
-     */
     private fun createEvents(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
         val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
 
         val work01 = Event(
-            title = "Work",
+            name = "Work",
             description = "Working in the office.",
             startDate = now.withHour(8).withMinute(0),
             endDate = now.withHour(12).withMinute(0),
@@ -148,7 +114,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.DAILY
         )
         val work02 = Event(
-            title = "Daily Meeting",
+            name = "Daily Meeting",
             description = "Team meeting.",
             startDate = now.withHour(10).withMinute(0),
             endDate = now.withHour(10).withMinute(30),
@@ -158,7 +124,7 @@ class TestDataLoader(
         )
 
         val classes01 = Event(
-            title = "University classes",
+            name = "University classes",
             description = "University classes - 01.",
             startDate = now.plusDays(1).withHour(16).withMinute(0),
             endDate = now.plusDays(1).withHour(18).withMinute(0),
@@ -167,7 +133,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val classes02 = Event(
-            title = "University classes",
+            name = "University classes",
             description = "University classes - 02.",
             startDate = now.plusDays(2).withHour(13).withMinute(0),
             endDate = now.plusDays(2).withHour(18).withMinute(0),
@@ -176,7 +142,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val classes03 = Event(
-            title = "University classes",
+            name = "University classes",
             description = "University classes - 03.",
             startDate = now.plusDays(3).withHour(12).withMinute(0),
             endDate = now.plusDays(3).withHour(15).withMinute(0),
@@ -185,7 +151,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val classes04 = Event(
-            title = "University classes",
+            name = "University classes",
             description = "University classes - 04.",
             startDate = now.plusDays(4).withHour(12).withMinute(0),
             endDate = now.plusDays(4).withHour(14).withMinute(0),
@@ -195,7 +161,7 @@ class TestDataLoader(
         )
 
         val workout01 = Event(
-            title = "Gym",
+            name = "Gym",
             description = "Workout at the gym - 01.",
             startDate = now.plusDays(1).withHour(18).withMinute(0),
             endDate = now.plusDays(1).withHour(20).withMinute(0),
@@ -204,7 +170,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val workout02 = Event(
-            title = "Gym",
+            name = "Gym",
             description = "Workout at the gym - 03.",
             startDate = now.plusDays(2).withHour(18).withMinute(0),
             endDate = now.plusDays(2).withHour(20).withMinute(0),
@@ -213,7 +179,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val workout03 = Event(
-            title = "Gym",
+            name = "Gym",
             description = "Workout at the gym - 03.",
             startDate = now.plusDays(4).withHour(18).withMinute(0),
             endDate = now.plusDays(4).withHour(20).withMinute(0),
@@ -222,7 +188,7 @@ class TestDataLoader(
             recurringPattern = RecurringPattern.WEEKLY
         )
         val workout04 = Event(
-            title = "Gym",
+            name = "Gym",
             description = "Workout at the gym - 04.",
             startDate = now.plusDays(5).withHour(18).withMinute(0),
             endDate = now.plusDays(5).withHour(20).withMinute(0),
@@ -232,7 +198,7 @@ class TestDataLoader(
         )
 
         val birthdayParty = Event(
-            title = "Birthday Party",
+            name = "Birthday Party",
             description = "Friend's birthday celebration.",
             startDate = now.plusDays(10).withHour(16).withMinute(0),
             endDate = now.plusDays(10).withHour(23).withMinute(59),
@@ -258,31 +224,25 @@ class TestDataLoader(
         )
     }
 
-    /**
-     * Creates and saves sample `Task` entities.
-     *
-     * @param calendars A map of calendar identifiers to `Calendar` entities.
-     * @param categories A map of category identifiers to `Category` entities.
-     */
     private fun createTasks(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
 
         val walkTheDog = Task(
-            title = "Walk the Dog",
+            name = "Walk the Dog",
             description = null,
             status = TaskStatus.TODO,
             calendar = calendars["first"]!!,
             category = categories["personal"],
         )
         val buyGroceries = Task(
-            title = "Buy Groceries",
+            name = "Buy Groceries",
             description = null,
             status = TaskStatus.TODO,
             calendar = calendars["first"]!!,
             category = categories["personal"],
         )
         val studyForExam = Task(
-            title = "Study for Exam",
+            name = "Study for Exam",
             description = null,
             status = TaskStatus.IN_PROGRESS,
             calendar = calendars["first"]!!,
@@ -293,17 +253,11 @@ class TestDataLoader(
         _taskRepository.saveAll(listOf(walkTheDog, buyGroceries, studyForExam))
     }
 
-    /**
-     * Creates and saves sample `Note` entities.
-     *
-     * @param calendars A map of calendar identifiers to `Calendar` entities.
-     * @param categories A map of category identifiers to `Category` entities.
-     */
     private fun createNotes(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
 
         val shoppingList = Note(
-            title = "Groceries",
+            name = "Groceries",
             description = "- Milk,\n -Eggs,\n -Bread",
             calendar = calendars["first"]!!,
             category = categories["personal"]

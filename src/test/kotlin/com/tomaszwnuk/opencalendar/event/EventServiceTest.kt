@@ -20,72 +20,39 @@ import org.mockito.kotlin.*
 import java.time.LocalDateTime
 import java.util.*
 
-/**
- * Unit tests for the `EventService` class.
- * Verifies the behavior of the service methods using mocked dependencies.
- */
 @ExtendWith(MockitoExtension::class)
 internal class EventServiceTest {
 
-    /**
-     * Mocked instance of `EventRepository` for simulating event-related database operations.
-     */
     @Mock
     private lateinit var _eventRepository: EventRepository
 
-    /**
-     * Mocked instance of `CalendarRepository` for simulating calendar-related database operations.
-     */
     @Mock
     private lateinit var _calendarRepository: CalendarRepository
 
-    /**
-     * Mocked instance of `CategoryRepository` for simulating category-related database operations.
-     */
     @Mock
     private lateinit var _categoryRepository: CategoryRepository
 
-    /**
-     * Instance of `EventService` under test.
-     */
     private lateinit var _service: EventService
 
-    /**
-     * Sample `Calendar` instance used in tests.
-     */
     private val sampleCalendar = Calendar(
-        id = UUID.randomUUID(), title = "Work Calendar", emoji = "🟢"
+        id = UUID.randomUUID(), name = "Work Calendar", emoji = "🟢"
     )
 
-    /**
-     * Sample `Category` instance used in tests.
-     */
     private val sampleCategory = Category(
-        id = UUID.randomUUID(), title = "Business", color = "#FF0000"
+        id = UUID.randomUUID(), name = "Business", color = "#FF0000"
     )
 
-    /**
-     * Current timestamp used for creating sample data.
-     */
     private val now: LocalDateTime = LocalDateTime.now()
 
-    /**
-     * Sets up the test environment before each test.
-     * Initializes the `EventService` with mocked repositories.
-     */
     @BeforeEach
     fun setUp() {
         _service = EventService(_eventRepository, _calendarRepository, _categoryRepository)
     }
 
-    /**
-     * Tests the creation of an event.
-     * Verifies that the service returns the created event with a generated ID.
-     */
     @Test
     fun `should return created event`() {
         val dto = EventDto(
-            title = "Team Meeting",
+            name = "Team Meeting",
             description = "Quarterly strategy discussion",
             startDate = now,
             endDate = now.plusHours(1),
@@ -106,23 +73,19 @@ internal class EventServiceTest {
 
         assertNotNull(result.id)
         assertEquals(savedId, result.id)
-        assertEquals("Team Meeting", result.title)
+        assertEquals("Team Meeting", result.name)
         assertEquals(sampleCalendar.id, result.calendarId)
         assertEquals(sampleCategory.id, result.categoryId)
 
         verify(_calendarRepository).findById(sampleCalendar.id)
         verify(_categoryRepository).findById(sampleCategory.id)
-        verify(_eventRepository).save(argThat { title == "Team Meeting" && calendar.id == sampleCalendar.id })
+        verify(_eventRepository).save(argThat { name == "Team Meeting" && calendar.id == sampleCalendar.id })
     }
 
-    /**
-     * Tests the creation of an event with a missing calendar.
-     * Verifies that the service throws a `NoSuchElementException`.
-     */
     @Test
     fun `should throw error when creating event with missing calendar`() {
         val dto = EventDto(
-            title = "Product Launch",
+            name = "Product Launch",
             description = null,
             startDate = now,
             endDate = now.plusHours(2),
@@ -140,16 +103,12 @@ internal class EventServiceTest {
         verify(_eventRepository, never()).save(any<Event>())
     }
 
-    /**
-     * Tests retrieving an event by its ID.
-     * Verifies that the service returns the correct event.
-     */
     @Test
     fun `should return event by id`() {
         val id = UUID.randomUUID()
         val event = Event(
             id = id,
-            title = "Client Call",
+            name = "Client Call",
             description = "Discuss contract",
             startDate = now,
             endDate = now.plusHours(1),
@@ -162,15 +121,11 @@ internal class EventServiceTest {
         val result = _service.getById(id = id)
 
         assertEquals(id, result.id)
-        assertEquals("Client Call", result.title)
+        assertEquals("Client Call", result.name)
 
         verify(_eventRepository).findById(id)
     }
 
-    /**
-     * Tests retrieving an event by a non-existent ID.
-     * Verifies that the service throws a `NoSuchElementException`.
-     */
     @Test
     fun `should throw error when event id not found`() {
         val id = UUID.randomUUID()
@@ -183,21 +138,17 @@ internal class EventServiceTest {
         verify(_eventRepository).findById(id)
     }
 
-    /**
-     * Tests retrieving all events.
-     * Verifies that the service returns a list of all events.
-     */
     @Test
     fun `should return all events`() {
         val launchEvent = Event(
-            title = "Product Launch",
+            name = "Product Launch",
             description = "Launch new product",
             startDate = now,
             endDate = now.plusHours(2),
             calendar = sampleCalendar
         )
         val reviewEvent = Event(
-            title = "Retrospective",
+            name = "Retrospective",
             description = "Team retrospective",
             startDate = now,
             endDate = now.plusHours(1),
@@ -208,21 +159,17 @@ internal class EventServiceTest {
         val result = _service.getAll()
 
         assertEquals(2, result.size)
-        assertTrue(result.any { it.title == "Product Launch" })
-        assertTrue(result.any { it.title == "Retrospective" })
+        assertTrue(result.any { it.name == "Product Launch" })
+        assertTrue(result.any { it.name == "Retrospective" })
 
         verify(_eventRepository).findAll()
     }
 
-    /**
-     * Tests retrieving events by calendar ID.
-     * Verifies that the service returns a list of events associated with the specified calendar.
-     */
     @Test
     fun `should return events by calendar id`() {
         val id = sampleCalendar.id
         val workshop = Event(
-            title = "Workshop",
+            name = "Workshop",
             description = "Skills workshop",
             startDate = now,
             endDate = now.plusHours(3),
@@ -233,20 +180,16 @@ internal class EventServiceTest {
         val result = _service.getAllByCalendarId(calendarId = id)
 
         assertEquals(1, result.size)
-        assertEquals("Workshop", result[0].title)
+        assertEquals("Workshop", result[0].name)
 
         verify(_eventRepository).findAllByCalendarId(calendarId = id)
     }
 
-    /**
-     * Tests retrieving events by category ID.
-     * Verifies that the service returns a list of events associated with the specified category.
-     */
     @Test
     fun `should return events by category id`() {
         val id = sampleCategory.id
         val training = Event(
-            title = "Training Session",
+            name = "Training Session",
             description = "Employee training",
             startDate = now,
             endDate = now.plusHours(2),
@@ -258,19 +201,15 @@ internal class EventServiceTest {
         val result = _service.getAllByCategoryId(categoryId = id)
 
         assertEquals(1, result.size)
-        assertEquals("Training Session", result[0].title)
+        assertEquals("Training Session", result[0].name)
 
         verify(_eventRepository).findAllByCategoryId(categoryId = id)
     }
 
-    /**
-     * Tests filtering events based on criteria.
-     * Verifies that the service returns a list of matching events.
-     */
     @Test
     fun `should return filtered events`() {
         val filter = EventFilterDto(
-            title = "Strategy Meeting",
+            name = "Strategy Meeting",
             description = null,
             dateFrom = null,
             dateTo = null,
@@ -279,7 +218,7 @@ internal class EventServiceTest {
             categoryId = null
         )
         val strategyEvent = Event(
-            title = "Strategy Meeting",
+            name = "Strategy Meeting",
             description = "Planning for Q3",
             startDate = now,
             endDate = now.plusHours(1),
@@ -287,7 +226,7 @@ internal class EventServiceTest {
         )
         whenever(
             _eventRepository.filter(
-                title = "Strategy Meeting",
+                name = "Strategy Meeting",
                 description = null,
                 dateFrom = null,
                 dateTo = null,
@@ -300,10 +239,10 @@ internal class EventServiceTest {
         val result = _service.filter(filter = filter)
 
         assertEquals(1, result.size)
-        assertEquals("Strategy Meeting", result[0].title)
+        assertEquals("Strategy Meeting", result[0].name)
 
         verify(_eventRepository).filter(
-            title = "Strategy Meeting",
+            name = "Strategy Meeting",
             description = null,
             dateFrom = null,
             dateTo = null,
@@ -313,16 +252,12 @@ internal class EventServiceTest {
         )
     }
 
-    /**
-     * Tests updating an event.
-     * Verifies that the service updates the event and returns the updated entity.
-     */
     @Test
     fun `should return updated event`() {
         val id = UUID.randomUUID()
         val existing = Event(
             id = id,
-            title = "Planning Session",
+            name = "Planning Session",
             description = "Initial planning",
             startDate = now,
             endDate = now.plusHours(1),
@@ -330,7 +265,7 @@ internal class EventServiceTest {
             calendar = sampleCalendar,
             category = sampleCategory
         )
-        val dto = existing.toDto().copy(title = "Planning Review")
+        val dto = existing.toDto().copy(name = "Planning Review")
         whenever(_eventRepository.findById(id)).thenReturn(Optional.of(existing))
         whenever(_calendarRepository.findById(dto.calendarId)).thenReturn(Optional.of(sampleCalendar))
         whenever(_categoryRepository.findById(dto.categoryId!!)).thenReturn(Optional.of(sampleCategory))
@@ -338,21 +273,17 @@ internal class EventServiceTest {
 
         val result = _service.update(id = id, dto = dto)
 
-        assertEquals("Planning Review", result.title)
+        assertEquals("Planning Review", result.name)
         verify(_eventRepository).findById(id)
-        verify(_eventRepository).save(argThat { title == "Planning Review" })
+        verify(_eventRepository).save(argThat { name == "Planning Review" })
     }
 
-    /**
-     * Tests updating a non-existent event.
-     * Verifies that the service throws a `NoSuchElementException`.
-     */
     @Test
     fun `should throw error when updating non existing event`() {
         val id = UUID.randomUUID()
         val dto = EventDto(
             id = null,
-            title = "Resume Meeting",
+            name = "Resume Meeting",
             startDate = now,
             endDate = now.plusHours(1),
             recurringPattern = RecurringPattern.NONE,
@@ -367,15 +298,11 @@ internal class EventServiceTest {
         verify(_eventRepository).findById(id)
     }
 
-    /**
-     * Tests deleting an event that exists.
-     * Verifies that the service deletes the event.
-     */
     @Test
     fun `should delete event when exists`() {
         val id = UUID.randomUUID()
         val deadlineEvent = Event(
-            title = "Project Deadline",
+            name = "Project Deadline",
             description = "Submit final report",
             startDate = now,
             endDate = now.plusHours(1),
@@ -390,15 +317,11 @@ internal class EventServiceTest {
         verify(_eventRepository).delete(deadlineEvent)
     }
 
-    /**
-     * Tests deleting all events by calendar ID.
-     * Verifies that the service deletes all events associated with the specified calendar.
-     */
     @Test
     fun `should delete all events by calendar id`() {
         val calendarId = sampleCalendar.id
         val planning = Event(
-            title = "Sprint Planning",
+            name = "Sprint Planning",
             description = "Plan next sprint",
             startDate = now,
             endDate = now.plusHours(2),
@@ -419,15 +342,11 @@ internal class EventServiceTest {
         verify(_eventRepository).deleteAll(listOf(planning, planningFollowUp))
     }
 
-    /**
-     * Tests deleting all events by category ID.
-     * Verifies that the service removes the category association from all events in the specified category.
-     */
     @Test
     fun `should delete all events by category id`() {
         val categoryId = sampleCategory.id
         val budgetReview = Event(
-            title = "Budget Review",
+            name = "Budget Review",
             description = "Review quarterly budget",
             startDate = now,
             endDate = now.plusHours(1),
