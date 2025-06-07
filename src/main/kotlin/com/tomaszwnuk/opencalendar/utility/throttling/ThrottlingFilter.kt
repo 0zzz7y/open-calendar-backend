@@ -45,13 +45,6 @@ class ThrottlingFilter : Filter {
         return Bucket.builder().addLimit(limit).build()
     }
 
-    /**
-     * Retrieves the client IP address from the request.
-     * Checks the "X-Forwarded-For" header first, falling back to the remote address if not present.
-     *
-     * @param request The HTTP servlet request.
-     * @return The client IP address as a string.
-     */
     private fun getClientIp(request: HttpServletRequest): String {
         return request.getHeader("X-Forwarded-For") ?: request.remoteAddr
     }
