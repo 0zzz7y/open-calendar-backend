@@ -51,13 +51,6 @@ class NoteService(
         return created.toDto()
     }
 
-    /**
-     * Retrieves a note by its unique identifier and caches the result.
-     *
-     * @param id The UUID of the note to retrieve.
-     *
-     * @return The retrieved note as a DTO.
-     */
     @Cacheable(cacheNames = ["noteById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): NoteDto {
         info(source = this, message = "Fetching note with id $id")
@@ -69,13 +62,6 @@ class NoteService(
         return note.toDto()
     }
 
-    /**
-     * Retrieves all notes associated with a specific calendar and caches the result.
-     *
-     * @param calendarId The UUID of the calendar.
-     *
-     * @return A list of notes as DTOs.
-     */
     @Cacheable(cacheNames = ["calendarNotes"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<NoteDto> {
         info(source = this, message = "Fetching all notes for calendar with id $calendarId")
@@ -87,13 +73,6 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
-    /**
-     * Retrieves all notes associated with a specific category and caches the result.
-     *
-     * @param categoryId The UUID of the category.
-     *
-     * @return A list of notes as DTOs.
-     */
     @Cacheable(cacheNames = ["categoryNotes"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<NoteDto> {
         info(source = this, message = "Fetching all notes for category with id $categoryId")
