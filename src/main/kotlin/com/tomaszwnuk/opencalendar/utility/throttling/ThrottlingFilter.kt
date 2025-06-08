@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.utility.throttling
 
 import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstraints.MAXIMUM_REQUESTS_PER_MINUTE

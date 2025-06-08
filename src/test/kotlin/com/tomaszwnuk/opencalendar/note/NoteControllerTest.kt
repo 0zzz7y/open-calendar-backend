@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.note
 
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER

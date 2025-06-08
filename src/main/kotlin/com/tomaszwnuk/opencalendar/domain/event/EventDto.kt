@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.domain.event
 
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.DESCRIPTION_MAXIMUM_LENGTH

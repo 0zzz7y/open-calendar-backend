@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar
 
 import org.springframework.boot.autoconfigure.SpringBootApplication

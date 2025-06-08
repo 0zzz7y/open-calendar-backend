@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.configuration.throttling
 
 import com.tomaszwnuk.opencalendar.utility.throttling.ThrottlingFilter

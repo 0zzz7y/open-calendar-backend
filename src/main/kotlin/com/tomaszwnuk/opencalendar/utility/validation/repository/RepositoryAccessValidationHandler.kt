@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.utility.validation.repository
 
 import com.tomaszwnuk.opencalendar.utility.logger.logger

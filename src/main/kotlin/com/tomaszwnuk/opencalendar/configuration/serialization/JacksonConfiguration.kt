@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.configuration.serialization
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect

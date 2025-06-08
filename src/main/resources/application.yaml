@@ -1,6 +1,6 @@
 app:
   name: OpenCalendar Application
-  description: Application for supporting daily routine - calendar, events, tasks, and notes.
+  description: Application for supporting daily routine.
   version: 1.0.0
 
 spring:

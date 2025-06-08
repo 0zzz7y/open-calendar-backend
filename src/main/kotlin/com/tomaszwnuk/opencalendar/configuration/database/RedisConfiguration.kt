@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.configuration.database
 
 import com.fasterxml.jackson.databind.ObjectMapper

@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.domain.task
 
 import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage

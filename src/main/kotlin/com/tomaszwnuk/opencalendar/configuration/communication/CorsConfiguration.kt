@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.configuration.communication
 
 import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstants

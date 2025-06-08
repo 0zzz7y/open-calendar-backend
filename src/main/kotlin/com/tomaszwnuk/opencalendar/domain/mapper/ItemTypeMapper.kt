@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.domain.mapper
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule

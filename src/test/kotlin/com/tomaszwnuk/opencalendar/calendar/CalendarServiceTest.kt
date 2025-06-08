@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.calendar
 
 import com.tomaszwnuk.opencalendar.domain.calendar.*

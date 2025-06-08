@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 @file:Suppress("unused")
 
 package com.tomaszwnuk.opencalendar.utility.logger

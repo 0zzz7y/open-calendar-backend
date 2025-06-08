@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Tomasz Wnuk
- */
-
 package com.tomaszwnuk.opencalendar.domain.record
 
 import com.tomaszwnuk.opencalendar.domain.entity.EntityDto
