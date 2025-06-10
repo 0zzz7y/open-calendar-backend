@@ -1,11 +1,13 @@
+# ───────────────────────── Build Artifacts ─────────────────────────
 .gradle
 build/
 out/
-.idea/
 
+# ───────────────────────── Java Specific ─────────────────────────
 *.iml
 *.log
 *.jar
 
-.DS_Store
-Thumbs.db
+# ───────────────────────── IDE Specific ─────────────────────────
+.vscode/
+.idea/
