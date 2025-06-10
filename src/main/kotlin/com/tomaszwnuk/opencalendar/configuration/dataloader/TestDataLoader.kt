@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Suppress("unused")
-@Profile("production", "development", "test")
+@Profile("development", "test")
 @Component
 class TestDataLoader(
     private val _calendarRepository: CalendarRepository,
