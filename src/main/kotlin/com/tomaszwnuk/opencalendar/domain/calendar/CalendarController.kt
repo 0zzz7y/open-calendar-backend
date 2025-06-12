@@ -1,5 +1,6 @@
 package com.tomaszwnuk.opencalendar.domain.calendar
 
+import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstants
 import com.tomaszwnuk.opencalendar.domain.event.EventDto
 import com.tomaszwnuk.opencalendar.domain.event.EventService
 import com.tomaszwnuk.opencalendar.domain.mapper.ItemTypeMapper.toMapWithType
@@ -20,7 +21,7 @@ import java.util.*
 
 @Suppress("unused")
 @RestController
-@RequestMapping("/calendars")
+@RequestMapping("/${CommunicationConstants.API}/${CommunicationConstants.API_VERSION}/calendars")
 class CalendarController(
     private val _calendarService: CalendarService,
     private val _eventService: EventService,

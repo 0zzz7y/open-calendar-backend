@@ -1,15 +1,17 @@
 spring:
   datasource:
-    url: jdbc:sqlite:database/production.sqlite
-    driver-class-name: org.sqlite.JDBC
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
-    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
 
   sql:
     init:
       mode: always
-      platform: sqlite
+      schema-locations: classpath:schema.sql

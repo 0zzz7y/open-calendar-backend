@@ -4,9 +4,6 @@ app:
   version: 1.0.0
 
 spring:
-  profiles:
-    active: production
-
   cache:
     redis:
       host: ${SPRING_CACHE_HOST:localhost}

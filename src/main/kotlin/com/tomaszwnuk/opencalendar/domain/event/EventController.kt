@@ -1,5 +1,6 @@
 package com.tomaszwnuk.opencalendar.domain.event
 
+import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstants
 import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -15,7 +16,7 @@ import java.util.*
 
 @Suppress("unused")
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/${CommunicationConstants.API}/${CommunicationConstants.API_VERSION}/events")
 class EventController(
     private val _eventService: EventService
 ) {

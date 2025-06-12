@@ -1,5 +1,6 @@
 package com.tomaszwnuk.opencalendar.domain.task
 
+import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstants
 import com.tomaszwnuk.opencalendar.domain.mapper.PageMapper.toPage
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -13,7 +14,7 @@ import java.util.*
 
 @Suppress("unused")
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping("/${CommunicationConstants.API}/${CommunicationConstants.API_VERSION}/tasks")
 class TaskController(private val _taskService: TaskService) {
 
     @PostMapping

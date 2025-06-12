@@ -41,7 +41,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     implementation("com.h2database:h2")
-    implementation("org.xerial:sqlite-jdbc:_")
+    implementation("org.postgresql:postgresql:_")
     implementation("org.hibernate.orm:hibernate-community-dialects:_")
 
     implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:_")
