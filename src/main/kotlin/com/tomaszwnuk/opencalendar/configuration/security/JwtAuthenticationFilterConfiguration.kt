@@ -29,7 +29,7 @@ class JwtAuthenticationFilterConfiguration(
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
             authorizeHttpRequests {
-                authorize("/auth/**", permitAll)
+                authorize("/api/v1/authentication/**", permitAll)
                 authorize(anyRequest, authenticated)
             }
             addFilterBefore<UsernamePasswordAuthenticationFilter>(_jwtAuthenticationFilter)

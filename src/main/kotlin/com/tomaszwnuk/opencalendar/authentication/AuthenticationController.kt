@@ -28,4 +28,5 @@ class AuthenticationController(
         val token: String = _authenticationService.login(request)
         return ResponseEntity.ok(AuthenticationResponse(token))
     }
+
 }
