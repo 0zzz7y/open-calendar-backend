@@ -1,6 +1,5 @@
 package com.tomaszwnuk.opencalendar.domain.event
 
-import com.tomaszwnuk.opencalendar.common.date.LocalDateTimeConverter
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.category.Category
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DATE
@@ -26,11 +25,9 @@ data class Event(
     @Column(columnDefinition = COLUMN_DEFINITION_DESCRIPTION, nullable = true)
     override val description: String? = null,
 
-    @Convert(converter = LocalDateTimeConverter::class)
     @Column(columnDefinition = COLUMN_DEFINITION_DATE, nullable = false)
     override val startDate: LocalDateTime,
 
-    @Convert(converter = LocalDateTimeConverter::class)
     @Column(columnDefinition = COLUMN_DEFINITION_DATE, nullable = false)
     override val endDate: LocalDateTime,
 

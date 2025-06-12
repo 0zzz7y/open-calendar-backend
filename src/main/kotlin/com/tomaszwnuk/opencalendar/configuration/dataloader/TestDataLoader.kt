@@ -12,6 +12,8 @@ import com.tomaszwnuk.opencalendar.domain.note.NoteRepository
 import com.tomaszwnuk.opencalendar.domain.task.Task
 import com.tomaszwnuk.opencalendar.domain.task.TaskRepository
 import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
+import com.tomaszwnuk.opencalendar.domain.user.User
+import com.tomaszwnuk.opencalendar.domain.user.UserRepository
 import com.tomaszwnuk.opencalendar.utility.logger.info
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
@@ -27,10 +29,13 @@ class TestDataLoader(
     private val _categoryRepository: CategoryRepository,
     private val _eventRepository: EventRepository,
     private val _taskRepository: TaskRepository,
-    private val _noteRepository: NoteRepository
+    private val _noteRepository: NoteRepository,
+    private val _userRepository: UserRepository
 ) : CommandLineRunner {
 
     private var _timer: Long = System.currentTimeMillis()
+
+    private lateinit var _user: User
 
     override fun run(vararg arguments: String?) {
         if (_calendarRepository.count() > 0) {
@@ -39,6 +44,7 @@ class TestDataLoader(
         }
         _timer = System.currentTimeMillis()
 
+        createUsers()
         val calendars: Map<String, Calendar> = createCalendars()
         val categories: Map<String, Category> = createCategories()
 
@@ -49,6 +55,18 @@ class TestDataLoader(
         info(source = this, message = "Test data loaded in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    private fun createUsers() {
+        _timer = System.currentTimeMillis()
+
+        _user = User(
+            id = UUID.randomUUID(),
+            username = "test",
+            email = "user@email.com",
+            password = "password"
+        )
+        _userRepository.save(_user)
+    }
+
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
 
@@ -56,7 +74,8 @@ class TestDataLoader(
             Calendar(
                 id = UUID.randomUUID(),
                 name = "#1",
-                emoji = "\uD83D\uDCA5"
+                emoji = "\uD83D\uDCA5",
+                _user.id
             )
         )
         val calendars: Map<String, Calendar> = mapOf("first" to first)
@@ -71,19 +90,22 @@ class TestDataLoader(
         val personal: Category = _categoryRepository.save(
             Category(
                 name = "Personal",
-                color = "#EFEF39"
+                color = "#EFEF39",
+                userId = _user.id
             )
         )
         val work: Category = _categoryRepository.save(
             Category(
                 name = "Work",
-                color = "#48DD52"
+                color = "#48DD52",
+                userId = _user.id
             )
         )
         val university: Category = _categoryRepository.save(
             Category(
                 name = "University",
-                color = "#E8475D"
+                color = "#E8475D",
+                userId = _user.id
             )
         )
         val categories: Map<String, Category> = mapOf(

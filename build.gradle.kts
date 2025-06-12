@@ -26,26 +26,40 @@ plugins {
 }
 
 dependencies {
+    // Kotlin
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-rest")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.security:spring-security-config")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
+    // OpenAPI
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:_")
 
+    // Serialization
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
+    // Database
     implementation("com.h2database:h2")
     implementation("org.postgresql:postgresql:_")
     implementation("org.hibernate.orm:hibernate-community-dialects:_")
 
+    // JWT
+    implementation("io.jsonwebtoken:jjwt-api:_")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:_")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:_")
+
+    // Throttling
     implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:_")
 
+    // Testing
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.mockito:mockito-core:_")

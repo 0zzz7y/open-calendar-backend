@@ -1,6 +1,5 @@
 package com.tomaszwnuk.opencalendar.configuration.throttling
 
-import com.tomaszwnuk.opencalendar.utility.throttling.ThrottlingFilter
 import org.springframework.boot.web.servlet.FilterRegistrationBean
 import org.springframework.context.annotation.Configuration
 

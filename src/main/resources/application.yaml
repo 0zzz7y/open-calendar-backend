@@ -10,6 +10,9 @@ spring:
       port: ${SPRING_CACHE_PORT:6379}
       time-to-live: 300000
 
+jwt:
+  secret: eyJhbGciOiJIUzI1NiJ9.eyJJc3N1ZXIiOiJPcGVuQ2FsZW5kYXIiLCJleHAiOjE3ODEyNjg5NTcsImlhdCI6MTc0OTczMjk1N30.Qj-8YHQaD7YCqUxOHWcPCetKJEmNIqpxcsAGOqdTTho
+
 logging:
   level:
     org.springframework.web: DEBUG

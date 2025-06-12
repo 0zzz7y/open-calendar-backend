@@ -7,18 +7,24 @@ import java.util.*
 
 interface CategoryRepository : JpaRepository<Category, UUID> {
 
-    fun existsByName(name: String): Boolean
+    fun existsByNameAndUserId(name: String, userId: UUID): Boolean
+
+    fun findAllByUserId(userId: UUID): List<Category>
+
+    fun findByIdAndUserId(id: UUID, userId: UUID): Optional<Category>
 
     @Query(
         """
     SELECT c from Category c
-    WHERE (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT("%", :name, "%")))
+    WHERE (c.userId = :userId)
+      AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT("%", :name, "%")))
       AND (:color IS NULL OR c.color = :color)
     """
     )
     fun filter(
         @Param("name") name: String?,
         @Param("color") color: String?,
+        @Param("userId") userId: UUID
     ): List<Category>
 
 }

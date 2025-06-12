@@ -4,8 +4,8 @@ import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
 import com.tomaszwnuk.opencalendar.domain.calendar.CalendarRepository
 import com.tomaszwnuk.opencalendar.domain.category.Category
 import com.tomaszwnuk.opencalendar.domain.category.CategoryRepository
+import com.tomaszwnuk.opencalendar.domain.user.UserService
 import com.tomaszwnuk.opencalendar.utility.logger.info
-import com.tomaszwnuk.opencalendar.utility.validation.repository.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
@@ -16,7 +16,8 @@ import java.util.*
 class TaskService(
     private val _taskRepository: TaskRepository,
     private val _calendarRepository: CalendarRepository,
-    private val _categoryRepository: CategoryRepository
+    private val _categoryRepository: CategoryRepository,
+    private val _userService: UserService
 ) {
 
     private var _timer: Long = 0
@@ -32,8 +33,16 @@ class TaskService(
         info(this, "Creating $dto")
         _timer = System.currentTimeMillis()
 
-        val calendar: Calendar = dto.calendarId.let { _calendarRepository.findOrThrow(id = it) }
-        val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
+        val userId: UUID = _userService.getCurrentUserId()
+        val calendar: Calendar = _calendarRepository.findByIdAndUserId(
+            id = dto.calendarId,
+            userId = userId
+        ).orElseThrow { NoSuchElementException("Calendar with id ${dto.calendarId} not found for user $userId") }
+        val category: Category? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
+                NoSuchElementException("Category with id $it not found for user $userId")
+            }
+        }
         val task = Task(
             name = dto.name,
             description = dto.description,
@@ -53,7 +62,9 @@ class TaskService(
         info(this, "Fetching task with id $id")
         _timer = System.currentTimeMillis()
 
-        val task: Task = _taskRepository.findOrThrow(id)
+        val userId: UUID = _userService.getCurrentUserId()
+        val task: Task = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+            .orElseThrow { NoSuchElementException("Task with id $id not found for user $userId") }
 
         info(this, "Found $task in ${System.currentTimeMillis() - _timer} ms")
         return task.toDto()
@@ -64,7 +75,8 @@ class TaskService(
         info(this, "Fetching all tasks")
         _timer = System.currentTimeMillis()
 
-        val tasks: List<Task> = _taskRepository.findAll()
+        val userId: UUID = _userService.getCurrentUserId()
+        val tasks: List<Task> = _taskRepository.findAllByCalendarUserId(userId = userId)
 
         info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks.map { it.toDto() }
@@ -75,7 +87,8 @@ class TaskService(
         info(this, "Fetching all tasks for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
 
-        val tasks: List<Task> = _taskRepository.findAllByCalendarId(calendarId)
+        val userId: UUID = _userService.getCurrentUserId()
+        val tasks: List<Task> = _taskRepository.findAllByCalendarIdAndCalendarUserId(calendarId = calendarId, userId = userId)
 
         info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks.map { it.toDto() }
@@ -86,7 +99,8 @@ class TaskService(
         info(this, "Fetching all tasks for category with id $categoryId")
         _timer = System.currentTimeMillis()
 
-        val tasks: List<Task> = _taskRepository.findAllByCategoryId(categoryId)
+        val userId: UUID = _userService.getCurrentUserId()
+        val tasks: List<Task> = _taskRepository.findAllByCategoryIdAndCalendarUserId(categoryId = categoryId, userId = userId)
 
         info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks.map { it.toDto() }
@@ -96,7 +110,9 @@ class TaskService(
         info(this, "Filtering tasks with $filter")
         _timer = System.currentTimeMillis()
 
+        val userId: UUID = _userService.getCurrentUserId()
         val filteredTasks: List<Task> = _taskRepository.filter(
+            userId = userId,
             name = filter.name,
             description = filter.description,
             status = filter.status,
@@ -120,9 +136,19 @@ class TaskService(
         info(this, "Updating $dto")
         _timer = System.currentTimeMillis()
 
-        val existing: Task = _taskRepository.findOrThrow(id = id)
-        val calendar: Calendar = dto.calendarId.let { _calendarRepository.findOrThrow(id = it) }
-        val category: Category? = dto.categoryId?.let { _categoryRepository.findOrThrow(id = it) }
+        val userId: UUID = _userService.getCurrentUserId()
+        val existing: Task = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+            .orElseThrow { NoSuchElementException("Task with id $id not found for user $userId") }
+        val calendar: Calendar = dto.calendarId.let {
+            _calendarRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
+                NoSuchElementException("Calendar with id $it not found for user $userId")
+            }
+        }
+        val category: Category? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
+                NoSuchElementException("Category with id $it not found for user $userId")
+            }
+        }
         val changed: Task = existing.copy(
             name = dto.name,
             description = dto.description,
@@ -149,7 +175,9 @@ class TaskService(
         info(this, "Deleting task with id $id.")
         _timer = System.currentTimeMillis()
 
-        val task: Task = _taskRepository.findOrThrow(id = id)
+        val userId: UUID = _userService.getCurrentUserId()
+        val task: Task = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+            .orElseThrow { NoSuchElementException("Task with id $id not found for user $userId") }
 
         _taskRepository.delete(task)
         info(this, "Deleted task $task in ${System.currentTimeMillis() - _timer} ms")
@@ -167,7 +195,11 @@ class TaskService(
         info(this, "Deleting all tasks for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
 
-        val tasks: List<Task> = _taskRepository.findAllByCalendarId(calendarId = calendarId)
+        val userId: UUID = _userService.getCurrentUserId()
+        val tasks: List<Task> = _taskRepository.findAllByCalendarIdAndCalendarUserId(
+            calendarId = calendarId,
+            userId = userId
+        )
 
         _taskRepository.deleteAll(tasks)
         info(this, "Deleted all tasks for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
@@ -185,7 +217,11 @@ class TaskService(
         info(this, "Updating all tasks for category with id $categoryId.")
         _timer = System.currentTimeMillis()
 
-        val tasks: List<Task> = _taskRepository.findAllByCategoryId(categoryId)
+        val userId: UUID = _userService.getCurrentUserId()
+        val tasks: List<Task> = _taskRepository.findAllByCategoryIdAndCalendarUserId(
+            categoryId = categoryId,
+            userId = userId
+        )
         tasks.forEach { task ->
             val withoutCategory = task.copy(category = null)
             _taskRepository.save(withoutCategory)

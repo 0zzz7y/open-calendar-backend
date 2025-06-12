@@ -3,10 +3,7 @@ package com.tomaszwnuk.opencalendar.domain.calendar
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_EMOJI
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_NAME
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.util.*
 
 @Entity
@@ -21,7 +18,10 @@ data class Calendar(
     val name: String,
 
     @Column(columnDefinition = COLUMN_DEFINITION_EMOJI, unique = false, nullable = false)
-    val emoji: String
+    val emoji: String,
+
+    @JoinColumn(name = "user_id", unique = false, nullable = false)
+    val userId: UUID
 
 ) : com.tomaszwnuk.opencalendar.domain.entity.Entity() {
 

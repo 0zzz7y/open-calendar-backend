@@ -5,7 +5,10 @@ import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITI
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_NAME
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.util.*
 
@@ -21,7 +24,10 @@ data class Category(
     val name: String,
 
     @Column(columnDefinition = COLUMN_DEFINITION_COLOR, nullable = false)
-    val color: String = CategoryColorHelper.DEFAULT_COLOR
+    val color: String = CategoryColorHelper.DEFAULT_COLOR,
+
+    @JoinColumn(name = "user_id", unique = false, nullable = false)
+    val userId: UUID
 
 ) : com.tomaszwnuk.opencalendar.domain.entity.Entity() {
 

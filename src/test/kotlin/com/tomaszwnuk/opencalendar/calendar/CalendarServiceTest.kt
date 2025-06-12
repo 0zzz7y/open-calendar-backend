@@ -30,7 +30,7 @@ internal class CalendarServiceTest {
         val dto = CalendarDto(id = null, name = "Calendar", emoji = "🟢")
         val savedId = UUID.randomUUID()
 
-        whenever(_repository.existsByName("Calendar")).thenReturn(false)
+        whenever(_repository.existsByNameAndUserId("Calendar")).thenReturn(false)
         whenever(_repository.save(any<Calendar>())).thenAnswer { invocation ->
             val arg = invocation.getArgument<Calendar>(0)
             Calendar(id = savedId, name = arg.name, emoji = arg.emoji)
@@ -43,7 +43,7 @@ internal class CalendarServiceTest {
         assertEquals("Calendar", result.name)
         assertEquals("🟢", result.emoji)
 
-        verify(_repository).existsByName("Calendar")
+        verify(_repository).existsByNameAndUserId("Calendar")
         verify(_repository).save(argThat { name == "Calendar" && emoji == "🟢" })
     }
 
@@ -51,13 +51,13 @@ internal class CalendarServiceTest {
     fun `should throw error when creating calendar with duplicate title`() {
         val dto = CalendarDto(id = null, name = "Duplicate Title", emoji = "🟢")
 
-        whenever(_repository.existsByName(name = "Duplicate Title")).thenReturn(true)
+        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title")).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
             _service.create(dto = dto)
         }
 
-        verify(_repository).existsByName(name = "Duplicate Title")
+        verify(_repository).existsByNameAndUserId(name = "Duplicate Title")
         verify(_repository, never()).save(any<Calendar>())
     }
 
@@ -137,7 +137,7 @@ internal class CalendarServiceTest {
         assertEquals("🔴", result.emoji)
 
         verify(_repository).findById(id)
-        verify(_repository, never()).existsByName(any())
+        verify(_repository, never()).existsByNameAndUserId(any())
         verify(_repository).save(argThat { emoji == "🔴" })
     }
 
@@ -148,7 +148,7 @@ internal class CalendarServiceTest {
         val dto = CalendarDto(id = id, name = "New Title", emoji = "🔴")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
-        whenever(_repository.existsByName("New Title")).thenReturn(false)
+        whenever(_repository.existsByNameAndUserId("New Title")).thenReturn(false)
         whenever(_repository.save(any<Calendar>())).thenAnswer { it.getArgument<Calendar>(0) }
 
         val result = _service.update(id, dto)
@@ -157,7 +157,7 @@ internal class CalendarServiceTest {
         assertEquals("🔴", result.emoji)
 
         verify(_repository).findById(id)
-        verify(_repository).existsByName(name = "New Title")
+        verify(_repository).existsByNameAndUserId(name = "New Title")
         verify(_repository).save(argThat { name == "New Title" && emoji == "🔴" })
     }
 
@@ -168,14 +168,14 @@ internal class CalendarServiceTest {
         val dto = CalendarDto(id = id, name = "Duplicate Title", emoji = "🔴")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
-        whenever(_repository.existsByName(name = "Duplicate Title")).thenReturn(true)
+        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title")).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
             _service.update(id, dto)
         }
 
         verify(_repository).findById(id)
-        verify(_repository).existsByName(name = "Duplicate Title")
+        verify(_repository).existsByNameAndUserId(name = "Duplicate Title")
         verify(_repository, never()).save(any<Calendar>())
     }
 

@@ -1,6 +1,6 @@
-package com.tomaszwnuk.opencalendar.utility.throttling
+package com.tomaszwnuk.opencalendar.configuration.throttling
 
-import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstraints.MAXIMUM_REQUESTS_PER_MINUTE
+import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstraints
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill
@@ -35,8 +35,8 @@ class ThrottlingFilter : Filter {
 
     private fun createBucket(): Bucket {
         val limit: Bandwidth = Bandwidth.classic(
-            MAXIMUM_REQUESTS_PER_MINUTE,
-            Refill.greedy(MAXIMUM_REQUESTS_PER_MINUTE, Duration.ofMinutes(1))
+            CommunicationConstraints.MAXIMUM_REQUESTS_PER_MINUTE,
+            Refill.greedy(CommunicationConstraints.MAXIMUM_REQUESTS_PER_MINUTE, Duration.ofMinutes(1))
         )
         return Bucket.builder().addLimit(limit).build()
     }

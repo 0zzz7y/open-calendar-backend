@@ -1,5 +1,6 @@
-package com.tomaszwnuk.opencalendar.utility.validation.rest.controller
+package com.tomaszwnuk.opencalendar.utility.validation
 
+import jakarta.validation.ConstraintViolationException
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -13,6 +14,23 @@ class RestControllerValidationHandler {
     fun handleValidation(exception: MethodArgumentNotValidException): ResponseEntity<Map<String, Any>> {
         val errors: Map<String, String> = exception.bindingResult.fieldErrors.associate {
             it.field to (it.defaultMessage ?: "Invalid value")
+        }
+
+        val response: ResponseEntity<Map<String, Any>> = ResponseEntity.badRequest().body(
+            mapOf(
+                "status" to "error",
+                "message" to "Validation failed",
+                "errors" to errors
+            )
+        )
+
+        return response
+    }
+
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleConstraintViolations(ex: ConstraintViolationException): ResponseEntity<Map<String, Any>> {
+        val errors: Map<String, String> = ex.constraintViolations.associate {
+            it.propertyPath.toString() to (it.message ?: "Invalid value")
         }
 
         val response: ResponseEntity<Map<String, Any>> = ResponseEntity.badRequest().body(

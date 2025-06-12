@@ -1,20 +1,40 @@
--- Table: calendar
+-- User table
+CREATE TABLE IF NOT EXISTS _user (
+    id UUID PRIMARY KEY NOT NULL,
+    username TEXT NOT NULL UNIQUE,
+    email TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL
+);
+
+-- Calendar table
 CREATE TABLE IF NOT EXISTS calendar (
-    id UUID PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    emoji TEXT NOT NULL
+    id UUID PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    emoji TEXT NOT NULL,
+    user_id UUID NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    UNIQUE (user_id, name),
+    FOREIGN KEY (user_id) REFERENCES _user(id) ON DELETE CASCADE
 );
 
--- Table: category
+-- Category table
 CREATE TABLE IF NOT EXISTS category (
-    id UUID PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE,
-    color TEXT NOT NULL
+    id UUID PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    color TEXT NOT NULL,
+    user_id UUID NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    UNIQUE (user_id, name),
+    FOREIGN KEY (user_id) REFERENCES _user(id) ON DELETE CASCADE
 );
 
--- Table: event
+-- Event table
 CREATE TABLE IF NOT EXISTS event (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
     start_date TIMESTAMP NOT NULL,
@@ -22,29 +42,35 @@ CREATE TABLE IF NOT EXISTS event (
     recurring_pattern TEXT NOT NULL,
     calendar_id UUID NOT NULL,
     category_id UUID,
-    CONSTRAINT fk_event_calendar FOREIGN KEY (calendar_id) REFERENCES calendar(id) ON DELETE CASCADE,
-    CONSTRAINT fk_event_category FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (calendar_id) REFERENCES calendar(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
 );
 
--- Table: task
+-- Task table
 CREATE TABLE IF NOT EXISTS task (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
     status TEXT NOT NULL,
     calendar_id UUID NOT NULL,
     category_id UUID,
-    CONSTRAINT fk_task_calendar FOREIGN KEY (calendar_id) REFERENCES calendar(id) ON DELETE CASCADE,
-    CONSTRAINT fk_task_category FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (calendar_id) REFERENCES calendar(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
 );
 
--- Table: note
+-- Note table
 CREATE TABLE IF NOT EXISTS note (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY NOT NULL,
     name TEXT,
     description TEXT NOT NULL,
     calendar_id UUID NOT NULL,
     category_id UUID,
-    CONSTRAINT fk_note_calendar FOREIGN KEY (calendar_id) REFERENCES calendar(id) ON DELETE CASCADE,
-    CONSTRAINT fk_note_category FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (calendar_id) REFERENCES calendar(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE SET NULL
 );

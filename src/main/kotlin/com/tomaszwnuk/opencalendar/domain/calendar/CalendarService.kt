@@ -1,8 +1,7 @@
 package com.tomaszwnuk.opencalendar.domain.calendar
 
+import com.tomaszwnuk.opencalendar.domain.user.UserService
 import com.tomaszwnuk.opencalendar.utility.logger.info
-import com.tomaszwnuk.opencalendar.utility.validation.repository.assertNameDoesNotExist
-import com.tomaszwnuk.opencalendar.utility.validation.repository.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
@@ -11,7 +10,8 @@ import java.util.*
 
 @Service
 class CalendarService(
-    private val _calendarRepository: CalendarRepository
+    private val _calendarRepository: CalendarRepository,
+    private val _userService: UserService
 ) {
 
     private var _timer: Long = 0
@@ -25,14 +25,17 @@ class CalendarService(
         info(source = this, message = "Creating $dto")
         _timer = System.currentTimeMillis()
 
-        _calendarRepository.assertNameDoesNotExist(
+        val userId: UUID = _userService.getCurrentUserId()
+        val existsByName: Boolean = _calendarRepository.existsByNameAndUserId(
             name = dto.name,
-            existsByName = { _calendarRepository.existsByName(name = it) }
+            userId = _userService.getCurrentUserId()
         )
+        if (existsByName) throw IllegalArgumentException("Calendar with name '${dto.name}' already exists for user $userId")
 
         val calendar = Calendar(
             name = dto.name,
-            emoji = dto.emoji
+            emoji = dto.emoji,
+            userId = userId
         )
         val created: Calendar = _calendarRepository.save(calendar)
 
@@ -45,7 +48,8 @@ class CalendarService(
         info(source = this, message = "Fetching all calendars")
         _timer = System.currentTimeMillis()
 
-        val calendars: List<Calendar> = _calendarRepository.findAll()
+        val userId: UUID = _userService.getCurrentUserId()
+        val calendars: List<Calendar> = _calendarRepository.findAllByUserId(userId = userId)
 
         info(source = this, message = "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
         return calendars.map { it.toDto() }
@@ -56,7 +60,10 @@ class CalendarService(
         info(source = this, message = "Fetching calendar with id $id")
         _timer = System.currentTimeMillis()
 
-        val calendar: Calendar = _calendarRepository.findOrThrow(id)
+        val userId: UUID = _userService.getCurrentUserId()
+        val calendar: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId).orElseThrow {
+            NoSuchElementException("Calendar with id $id not found for user $userId")
+        }
 
         info(source = this, message = "Found $calendar in ${System.currentTimeMillis() - _timer} ms")
         return calendar.toDto()
@@ -66,9 +73,11 @@ class CalendarService(
         info(source = this, message = "Filtering calendars with $filter")
         _timer = System.currentTimeMillis()
 
+        val userId: UUID = _userService.getCurrentUserId()
         val calendars: List<Calendar> = _calendarRepository.filter(
             name = filter.name,
-            emoji = filter.emoji
+            emoji = filter.emoji,
+            userId = userId
         )
 
         info(source = this, message = "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
@@ -85,13 +94,18 @@ class CalendarService(
         info(source = this, message = "Updating $dto")
         _timer = System.currentTimeMillis()
 
-        val existing: Calendar = _calendarRepository.findOrThrow(id = id)
+        val userId: UUID = _userService.getCurrentUserId()
+        val existing: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId)
+            .orElseThrow { NoSuchElementException("Calendar with id $id not found for user $userId") }
         val isNameChanged: Boolean = !(dto.name.equals(other = existing.name, ignoreCase = true))
         if (isNameChanged) {
-            _calendarRepository.assertNameDoesNotExist(
+            val existsByName: Boolean = _calendarRepository.existsByNameAndUserId(
                 name = dto.name,
-                existsByName = { _calendarRepository.existsByName(it) }
+                userId = userId
             )
+            if (existsByName) {
+                throw IllegalArgumentException("Calendar with name '${dto.name}' already exists for user $userId")
+            }
         }
 
         val changed: Calendar = existing.copy(
@@ -114,7 +128,9 @@ class CalendarService(
         info(source = this, message = "Deleting calendar with id $id.")
         _timer = System.currentTimeMillis()
 
-        val existing: Calendar = _calendarRepository.findOrThrow(id = id)
+        val userId: UUID = _userService.getCurrentUserId()
+        val existing: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId)
+            .orElseThrow { NoSuchElementException("Calendar with id $id not found for user $userId") }
         _calendarRepository.delete(existing)
 
         info(source = this, message = "Deleted calendar $existing in ${System.currentTimeMillis() - _timer} ms")

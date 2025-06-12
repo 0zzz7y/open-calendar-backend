@@ -29,7 +29,7 @@ internal class CategoryServiceTest {
         val dto = CategoryDto(name = "Category", color = "#00FF00")
         val savedId = UUID.randomUUID()
 
-        whenever(_repository.existsByName("Category")).thenReturn(false)
+        whenever(_repository.existsByNameAndUserId("Category")).thenReturn(false)
         whenever(_repository.save(any<Category>())).thenAnswer { invocation ->
             val arg = invocation.getArgument<Category>(0)
             arg.copy(id = savedId)
@@ -42,7 +42,7 @@ internal class CategoryServiceTest {
         assertEquals("Category", result.name)
         assertEquals("#00FF00", result.color)
 
-        verify(_repository).existsByName("Category")
+        verify(_repository).existsByNameAndUserId("Category")
         verify(_repository).save(argThat { name == "Category" && color == "#00FF00" })
     }
 
@@ -50,13 +50,13 @@ internal class CategoryServiceTest {
     fun `should throw error when creating category with duplicate title`() {
         val dto = CategoryDto(name = "Duplicate Title", color = "#00FF00")
 
-        whenever(_repository.existsByName(name = "Duplicate Title")).thenReturn(true)
+        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title")).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
             _service.create(dto = dto)
         }
 
-        verify(_repository).existsByName(name = "Duplicate Title")
+        verify(_repository).existsByNameAndUserId(name = "Duplicate Title")
         verify(_repository, never()).save(any<Category>())
     }
 
@@ -136,7 +136,7 @@ internal class CategoryServiceTest {
         assertEquals("#FF0000", result.color)
 
         verify(_repository).findById(id)
-        verify(_repository, never()).existsByName(any<String>())
+        verify(_repository, never()).existsByNameAndUserId(any<String>())
         verify(_repository).save(argThat { color == "#FF0000" })
     }
 
@@ -147,7 +147,7 @@ internal class CategoryServiceTest {
         val dto = CategoryDto(id = id, name = "New", color = "#FF0000")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existing))
-        whenever(_repository.existsByName("New")).thenReturn(false)
+        whenever(_repository.existsByNameAndUserId("New")).thenReturn(false)
         whenever(_repository.save(any<Category>())).thenAnswer { it.getArgument<Category>(0) }
 
         val result = _service.update(id = id, dto = dto)
@@ -156,7 +156,7 @@ internal class CategoryServiceTest {
         assertEquals("#FF0000", result.color)
 
         verify(_repository).findById(id)
-        verify(_repository).existsByName(name = "New")
+        verify(_repository).existsByNameAndUserId(name = "New")
         verify(_repository).save(argThat { name == "New" && color == "#FF0000" })
     }
 
@@ -167,14 +167,14 @@ internal class CategoryServiceTest {
         val dto = CategoryDto(id = id, name = "Duplicate", color = "#FF0000")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existing))
-        whenever(_repository.existsByName(name = "Duplicate")).thenReturn(true)
+        whenever(_repository.existsByNameAndUserId(name = "Duplicate")).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
             _service.update(id = id, dto = dto)
         }
 
         verify(_repository).findById(id)
-        verify(_repository).existsByName(name = "Duplicate")
+        verify(_repository).existsByNameAndUserId(name = "Duplicate")
         verify(_repository, never()).save(any<Category>())
     }
 

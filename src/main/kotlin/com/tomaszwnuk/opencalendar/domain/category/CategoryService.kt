@@ -1,8 +1,7 @@
 package com.tomaszwnuk.opencalendar.domain.category
 
+import com.tomaszwnuk.opencalendar.domain.user.UserService
 import com.tomaszwnuk.opencalendar.utility.logger.info
-import com.tomaszwnuk.opencalendar.utility.validation.repository.assertNameDoesNotExist
-import com.tomaszwnuk.opencalendar.utility.validation.repository.findOrThrow
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cache.annotation.Caching
@@ -11,7 +10,8 @@ import java.util.*
 
 @Service
 class CategoryService(
-    private val _categoryRepository: CategoryRepository
+    private val _categoryRepository: CategoryRepository,
+    private val _userService: UserService
 ) {
 
     private var _timer: Long = 0
@@ -25,14 +25,20 @@ class CategoryService(
         info(source = this, "Creating $dto")
         _timer = System.currentTimeMillis()
 
-        _categoryRepository.assertNameDoesNotExist(
+        val userId: UUID = _userService.getCurrentUserId()
+        val existsByName: Boolean = _categoryRepository.existsByNameAndUserId(
             name = dto.name,
-            existsByName = { _categoryRepository.existsByName(name = it) }
+            userId = userId
         )
+
+        if (existsByName) {
+            throw IllegalArgumentException("Category with name '${dto.name}' already exists for user $userId")
+        }
 
         val category = Category(
             name = dto.name,
-            color = dto.color
+            color = dto.color,
+            userId = userId
         )
         val created: Category = _categoryRepository.save(category)
 
@@ -45,7 +51,8 @@ class CategoryService(
         info(source = this, "Fetching all categories")
         _timer = System.currentTimeMillis()
 
-        val categories: List<Category> = _categoryRepository.findAll()
+        val userId: UUID = _userService.getCurrentUserId()
+        val categories: List<Category> = _categoryRepository.findAllByUserId(userId = userId)
 
         info(source = this, message = "Found $categories in ${System.currentTimeMillis() - _timer} ms")
         return categories.map { it.toDto() }
@@ -56,19 +63,25 @@ class CategoryService(
         info(source = this, message = "Fetching category with id $id")
         _timer = System.currentTimeMillis()
 
-        val category: Category = _categoryRepository.findOrThrow(id = id)
+        val userId: UUID = _userService.getCurrentUserId()
+        val category: Optional<Category> = _categoryRepository.findByIdAndUserId(id = id, userId = userId)
+        if (category.isEmpty) {
+            throw NoSuchElementException("Category with id $id not found for user $userId")
+        }
 
         info(source = this, message = "Found $category in ${System.currentTimeMillis() - _timer} ms")
-        return category.toDto()
+        return category.get().toDto()
     }
 
     fun filter(filter: CategoryFilterDto): List<CategoryDto> {
         info(source = this, message = "Filtering categories with $filter")
         _timer = System.currentTimeMillis()
 
+        val userId: UUID = _userService.getCurrentUserId()
         val categories: List<Category> = _categoryRepository.filter(
             name = filter.name,
-            color = filter.color
+            color = filter.color,
+            userId = userId
         )
 
         info(source = this, message = "Found $categories in ${System.currentTimeMillis() - _timer} ms")
@@ -85,13 +98,19 @@ class CategoryService(
         info(source = this, message = "Updating $dto")
         _timer = System.currentTimeMillis()
 
-        val existing: Category = _categoryRepository.findOrThrow(id = id)
+        val userId: UUID = _userService.getCurrentUserId()
+        val existing: Category = _categoryRepository.findByIdAndUserId(id = id, userId = userId)
+            .orElseThrow { NoSuchElementException("Category with id $id not found for user $userId") }
+
         val isNameChanged: Boolean = !(dto.name.equals(other = existing.name, ignoreCase = true))
         if (isNameChanged) {
-            _categoryRepository.assertNameDoesNotExist(
+            val existsByName = _categoryRepository.existsByNameAndUserId(
                 name = dto.name,
-                existsByName = { _categoryRepository.existsByName(name = it) }
+                userId = userId
             )
+            if (existsByName) {
+                throw IllegalArgumentException("Category with name '${dto.name}' already exists for user $userId")
+            }
         }
 
         val changed: Category = existing.copy(
@@ -114,7 +133,9 @@ class CategoryService(
         info(source = this, message = "Deleting category with id $id.")
         _timer = System.currentTimeMillis()
 
-        val existing: Category = _categoryRepository.findOrThrow(id = id)
+        val userId: UUID = _userService.getCurrentUserId()
+        val existing: Category = _categoryRepository.findByIdAndUserId(id = id, userId = userId)
+            .orElseThrow { NoSuchElementException("Category with id $id not found for user $userId") }
         _categoryRepository.delete(existing)
 
         info(source = this, message = "Deleted category $existing in ${System.currentTimeMillis() - _timer} ms")
