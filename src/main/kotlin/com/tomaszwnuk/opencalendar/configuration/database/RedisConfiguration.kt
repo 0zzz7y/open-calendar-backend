@@ -21,6 +21,7 @@ import java.time.Duration
 @Configuration
 @EnableCaching
 class RedisConfiguration(
+
     @Qualifier("redisObjectMapper")
     private val _objectMapper: ObjectMapper
 ) {
@@ -55,7 +56,7 @@ class RedisConfiguration(
                 .build()
                 .also { info(source = this, message = "Redis cache manager initialized successfully.") }
         } catch (exception: Exception) {
-            info(source = this, message = "Redis cache manager is not available. Falling back to in-memory cache")
+            info(source = this, message = "Redis cache manager is not available. Falling back to in-memory cache.")
             ConcurrentMapCacheManager()
         }
     }

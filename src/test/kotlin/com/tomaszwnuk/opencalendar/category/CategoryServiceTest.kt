@@ -1,6 +1,7 @@
 package com.tomaszwnuk.opencalendar.category
 
 import com.tomaszwnuk.opencalendar.domain.category.*
+import com.tomaszwnuk.opencalendar.domain.user.UserService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -17,11 +18,14 @@ internal class CategoryServiceTest {
     @Mock
     private lateinit var _repository: CategoryRepository
 
+    @Mock
+    private lateinit var _userService: UserService
+
     private lateinit var _service: CategoryService
 
     @BeforeEach
     fun setUp() {
-        _service = CategoryService(_repository)
+        _service = CategoryService(_repository, _userService)
     }
 
     @Test
@@ -29,7 +33,9 @@ internal class CategoryServiceTest {
         val dto = CategoryDto(name = "Category", color = "#00FF00")
         val savedId = UUID.randomUUID()
 
-        whenever(_repository.existsByNameAndUserId("Category")).thenReturn(false)
+        whenever(_userService.getCurrentUserId()).thenReturn(UUID.randomUUID())
+        val userId = _userService.getCurrentUserId()
+        whenever(_repository.existsByNameAndUserId("Category", userId)).thenReturn(false)
         whenever(_repository.save(any<Category>())).thenAnswer { invocation ->
             val arg = invocation.getArgument<Category>(0)
             arg.copy(id = savedId)
@@ -42,7 +48,7 @@ internal class CategoryServiceTest {
         assertEquals("Category", result.name)
         assertEquals("#00FF00", result.color)
 
-        verify(_repository).existsByNameAndUserId("Category")
+        verify(_repository).existsByNameAndUserId("Category", userId)
         verify(_repository).save(argThat { name == "Category" && color == "#00FF00" })
     }
 
@@ -50,22 +56,26 @@ internal class CategoryServiceTest {
     fun `should throw error when creating category with duplicate title`() {
         val dto = CategoryDto(name = "Duplicate Title", color = "#00FF00")
 
-        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title")).thenReturn(true)
+        whenever(_userService.getCurrentUserId()).thenReturn(UUID.randomUUID())
+        val userId = _userService.getCurrentUserId()
+        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title", userId)).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
             _service.create(dto = dto)
         }
 
-        verify(_repository).existsByNameAndUserId(name = "Duplicate Title")
+        verify(_repository).existsByNameAndUserId(name = "Duplicate Title", userId)
         verify(_repository, never()).save(any<Category>())
     }
 
     @Test
     fun `should return all categories`() {
-        val cat1 = Category(id = UUID.randomUUID(), name = "Work", color = "#00FF00")
-        val cat2 = Category(id = UUID.randomUUID(), name = "Personal", color = "#0000FF")
+        whenever(_userService.getCurrentUserId()).thenReturn(UUID.randomUUID())
+        val userId = _userService.getCurrentUserId()
+        val cat1 = Category(id = UUID.randomUUID(), name = "Work", color = "#00FF00", userId = userId)
+        val cat2 = Category(id = UUID.randomUUID(), name = "Personal", color = "#0000FF", userId = userId)
 
-        whenever(_repository.findAll()).thenReturn(listOf(cat1, cat2))
+        whenever(_repository.findAllByUserId(userId)).thenReturn(listOf(cat1, cat2))
 
         val result = _service.getAll()
 

@@ -22,9 +22,9 @@ interface CategoryRepository : JpaRepository<Category, UUID> {
     """
     )
     fun filter(
+        @Param("userId") userId: UUID,
         @Param("name") name: String?,
-        @Param("color") color: String?,
-        @Param("userId") userId: UUID
+        @Param("color") color: String?
     ): List<Category>
 
 }

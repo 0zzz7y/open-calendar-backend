@@ -4,6 +4,7 @@ import com.tomaszwnuk.opencalendar.authentication.request.AuthenticationResponse
 import com.tomaszwnuk.opencalendar.authentication.request.LoginRequest
 import com.tomaszwnuk.opencalendar.authentication.request.RegisterRequest
 import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstants
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -18,14 +19,14 @@ class AuthenticationController(
 ) {
 
     @PostMapping("/register")
-    fun register(@RequestBody request: RegisterRequest): ResponseEntity<Unit> {
-        _authenticationService.register(request)
+    fun register(@Valid @RequestBody(required = true) request: RegisterRequest): ResponseEntity<Unit> {
+        _authenticationService.register(request = request)
         return ResponseEntity.ok().build()
     }
 
     @PostMapping("/login")
-    fun login(@RequestBody request: LoginRequest): ResponseEntity<AuthenticationResponse> {
-        val token: String = _authenticationService.login(request)
+    fun login(@Valid @RequestBody(required = true) request: LoginRequest): ResponseEntity<AuthenticationResponse> {
+        val token: String = _authenticationService.login(request = request)
         return ResponseEntity.ok(AuthenticationResponse(token))
     }
 

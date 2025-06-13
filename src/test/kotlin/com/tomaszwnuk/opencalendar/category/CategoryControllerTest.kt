@@ -13,6 +13,7 @@ import com.tomaszwnuk.opencalendar.domain.note.NoteService
 import com.tomaszwnuk.opencalendar.domain.task.TaskDto
 import com.tomaszwnuk.opencalendar.domain.task.TaskService
 import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
+import com.tomaszwnuk.opencalendar.domain.user.User
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -52,6 +53,9 @@ internal class CategoryControllerTest {
     @Mock
     private lateinit var _noteService: NoteService
 
+    @Mock
+    private lateinit var _userId: UUID
+
     @InjectMocks
     private lateinit var _controller: CategoryController
 
@@ -67,10 +71,12 @@ internal class CategoryControllerTest {
 
     @BeforeEach
     fun setUp() {
+        _userId = UUID.randomUUID()
         _sampleCategory = Category(
             id = UUID.randomUUID(),
             name = "Personal",
-            color = CategoryColorHelper.toHex(Color.GREEN)
+            color = CategoryColorHelper.toHex(Color.GREEN),
+            userId = _userId
         )
         _sampleCategoryDto = _sampleCategory.toDto()
         _objectMapper = ObjectMapper()
@@ -128,7 +134,7 @@ internal class CategoryControllerTest {
     fun `should return paginated list of category events with status code 200 OK`() {
         val id = _sampleCategory.id
         val now = LocalDateTime.now()
-        val calendar = Calendar(name = "Calendar", emoji = "📅")
+        val calendar = Calendar(name = "Calendar", emoji = "📅", userId = _userId)
         val eventDto = EventDto(
             id = UUID.randomUUID(),
             name = "Event",
@@ -153,7 +159,7 @@ internal class CategoryControllerTest {
     @Test
     fun `should return paginated list of category tasks with status code 200 OK`() {
         val id = _sampleCategory.id
-        val calendar = Calendar(id = UUID.randomUUID(), name = "Calendar", emoji = "📅")
+        val calendar = Calendar(id = UUID.randomUUID(), name = "Calendar", emoji = "📅", userId = _userId)
         val taskDto = TaskDto(
             id = UUID.randomUUID(),
             name = "Task",
@@ -176,7 +182,7 @@ internal class CategoryControllerTest {
     @Test
     fun `should return paginated list of category notes with status code 200 OK`() {
         val id = _sampleCategory.id
-        val calendar = Calendar(id = UUID.randomUUID(), name = "Calendar", emoji = "📅")
+        val calendar = Calendar(id = UUID.randomUUID(), name = "Calendar", emoji = "📅", userId = _userId)
         val noteDto = NoteDto(
             id = UUID.randomUUID(),
             name = "Note",
@@ -199,7 +205,7 @@ internal class CategoryControllerTest {
     fun `should return combined list of items with status code 200 OK`() {
         val id = _sampleCategory.id
         val now = LocalDateTime.now()
-        val calendar = Calendar(name = "Calendar", emoji = "📅")
+        val calendar = Calendar(name = "Calendar", emoji = "📅", userId = _userId)
         val eventDto = EventDto(
             id = UUID.randomUUID(),
             name = "Event",

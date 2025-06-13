@@ -1,5 +1,6 @@
 package com.tomaszwnuk.opencalendar.configuration.security
 
+import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstants
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -29,12 +30,18 @@ class JwtAuthenticationFilterConfiguration(
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
             authorizeHttpRequests {
-                authorize("/api/v1/authentication/**", permitAll)
+                authorize(AUTHENTICATION_URL_PATTERN, permitAll)
                 authorize(anyRequest, authenticated)
             }
             addFilterBefore<UsernamePasswordAuthenticationFilter>(_jwtAuthenticationFilter)
         }
         return http.build()
+    }
+
+    companion object {
+
+        const val AUTHENTICATION_URL_PATTERN: String = "/${CommunicationConstants.API}/${CommunicationConstants.API_VERSION}/authentication/**"
+
     }
 
 }

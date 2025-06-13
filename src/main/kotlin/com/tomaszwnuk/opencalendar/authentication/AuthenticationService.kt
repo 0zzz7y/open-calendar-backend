@@ -17,7 +17,11 @@ class AuthenticationService(
 
     fun register(request: RegisterRequest) {
         if (_userRepository.findByUsername(request.username) != null) {
-            throw IllegalArgumentException("User already exists")
+            throw IllegalArgumentException("User already exists.")
+        }
+
+        if (_userRepository.findByEmail(request.email) != null) {
+            throw IllegalArgumentException("Email already in use.")
         }
 
         val user = User(
@@ -31,12 +35,13 @@ class AuthenticationService(
 
     fun login(request: LoginRequest): String {
         val user = _userRepository.findByUsername(request.username)
-            ?: throw IllegalArgumentException("Invalid credentials")
+            ?: throw IllegalArgumentException("Invalid credentials.")
 
         if (!_passwordEncoder.matches(request.password, user.password)) {
-            throw IllegalArgumentException("Invalid credentials")
+            throw IllegalArgumentException("Invalid credentials.")
         }
 
         return _jwtService.generateToken(user.id)
     }
+
 }

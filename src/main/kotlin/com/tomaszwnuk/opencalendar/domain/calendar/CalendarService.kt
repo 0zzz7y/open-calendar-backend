@@ -95,14 +95,16 @@ class CalendarService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId)
-            .orElseThrow { NoSuchElementException("Calendar with id $id not found for user $userId") }
+        val existing: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId).orElseThrow {
+            NoSuchElementException("Calendar with id $id not found for user $userId")
+        }
         val isNameChanged: Boolean = !(dto.name.equals(other = existing.name, ignoreCase = true))
         if (isNameChanged) {
             val existsByName: Boolean = _calendarRepository.existsByNameAndUserId(
                 name = dto.name,
                 userId = userId
             )
+
             if (existsByName) {
                 throw IllegalArgumentException("Calendar with name '${dto.name}' already exists for user $userId")
             }
@@ -129,8 +131,9 @@ class CalendarService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId)
-            .orElseThrow { NoSuchElementException("Calendar with id $id not found for user $userId") }
+        val existing: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId).orElseThrow {
+            NoSuchElementException("Calendar with id $id not found for user $userId")
+        }
         _calendarRepository.delete(existing)
 
         info(source = this, message = "Deleted calendar $existing in ${System.currentTimeMillis() - _timer} ms")

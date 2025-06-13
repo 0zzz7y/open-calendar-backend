@@ -23,9 +23,9 @@ interface CalendarRepository : JpaRepository<Calendar, UUID> {
         nativeQuery = false
     )
     fun filter(
+        @Param("userId") userId: UUID,
         @Param("name") name: String?,
-        @Param("emoji") emoji: String?,
-        @Param("userId") userId: UUID
+        @Param("emoji") emoji: String?
     ): List<Calendar>
 
 }

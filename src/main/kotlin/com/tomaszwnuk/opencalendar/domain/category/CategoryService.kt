@@ -79,9 +79,9 @@ class CategoryService(
 
         val userId: UUID = _userService.getCurrentUserId()
         val categories: List<Category> = _categoryRepository.filter(
+            userId = userId,
             name = filter.name,
-            color = filter.color,
-            userId = userId
+            color = filter.color
         )
 
         info(source = this, message = "Found $categories in ${System.currentTimeMillis() - _timer} ms")
