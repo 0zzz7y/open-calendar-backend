@@ -17,6 +17,7 @@ import com.tomaszwnuk.opencalendar.domain.user.UserRepository
 import com.tomaszwnuk.opencalendar.utility.logger.info
 import org.springframework.boot.CommandLineRunner
 import org.springframework.context.annotation.Profile
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
@@ -61,8 +62,8 @@ class TestDataLoader(
         _user = User(
             id = UUID.randomUUID(),
             username = "test",
-            email = "user@email.com",
-            password = "password"
+            email = "test@email.com",
+            password = BCryptPasswordEncoder().encode("password")
         )
         _userRepository.save(_user)
     }

@@ -15,7 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 import java.util.*
 
 @Component
-class JwtAuthenticationFilter(
+class SecurityAuthenticationFilter(
     private val _jwtService: JwtService,
     private val _userRepository: UserRepository,
     private val _tokenBlacklist: TokenBlackList
