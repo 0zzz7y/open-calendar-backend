@@ -25,8 +25,6 @@ WORKDIR /app
 
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-RUN mkdir -p /app/database
-
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=production"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
