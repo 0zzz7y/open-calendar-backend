@@ -1,5 +1,6 @@
 package com.tomaszwnuk.opencalendar.security
 
+import com.tomaszwnuk.opencalendar.authentication.TokenBlackList
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
@@ -10,6 +11,7 @@ import java.util.UUID
 @Component
 class JwtService(
     @Value("\${jwt.secret}") private val _secret: String,
+    private val _blackList: TokenBlackList
 ) {
 
     private val _key = Keys.hmacShaKeyFor(_secret.toByteArray())
@@ -30,6 +32,10 @@ class JwtService(
         UUID.fromString(claims.subject)
     } catch (_: Exception) {
         null
+    }
+
+    fun invalidate(token: String) {
+        _blackList.invalidate(token)
     }
 
     companion object {

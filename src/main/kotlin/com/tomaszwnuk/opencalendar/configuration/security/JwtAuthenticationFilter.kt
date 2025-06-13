@@ -1,5 +1,6 @@
 package com.tomaszwnuk.opencalendar.configuration.security
 
+import com.tomaszwnuk.opencalendar.authentication.TokenBlackList
 import com.tomaszwnuk.opencalendar.domain.user.User
 import com.tomaszwnuk.opencalendar.domain.user.UserRepository
 import com.tomaszwnuk.opencalendar.security.JwtService
@@ -16,7 +17,8 @@ import java.util.*
 @Component
 class JwtAuthenticationFilter(
     private val _jwtService: JwtService,
-    private val _userRepository: UserRepository
+    private val _userRepository: UserRepository,
+    private val _tokenBlacklist: TokenBlackList
 ) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
@@ -28,9 +30,11 @@ class JwtAuthenticationFilter(
         if (!header.startsWith(HEADER_PREFIX)) return filterChain.doFilter(request, response)
 
         val token: String = header.removePrefix(HEADER_PREFIX).trim()
-        val userId: UUID = _jwtService.extractUserId(token) ?: return filterChain.doFilter(request, response)
+        if (_tokenBlacklist.isInvalid(token)) return filterChain.doFilter(request, response)
 
+        val userId: UUID = _jwtService.extractUserId(token) ?: return filterChain.doFilter(request, response)
         if (SecurityContextHolder.getContext().authentication != null) return filterChain.doFilter(request, response)
+
         val user: User = _userRepository.findById(userId).orElse(null) ?: return filterChain.doFilter(request, response)
 
         val authentication = UsernamePasswordAuthenticationToken(

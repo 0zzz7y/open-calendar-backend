@@ -5,6 +5,7 @@ import com.tomaszwnuk.opencalendar.authentication.request.RegisterRequest
 import com.tomaszwnuk.opencalendar.domain.user.User
 import com.tomaszwnuk.opencalendar.domain.user.UserRepository
 import com.tomaszwnuk.opencalendar.security.JwtService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service
 class AuthenticationService(
     private val _userRepository: UserRepository,
     private val _passwordEncoder: PasswordEncoder,
-    private val _jwtService: JwtService
+    private val _jwtService: JwtService,
 ) {
 
     fun register(request: RegisterRequest) {
@@ -42,6 +43,18 @@ class AuthenticationService(
         }
 
         return _jwtService.generateToken(user.id)
+    }
+
+    fun logout(request: HttpServletRequest) {
+        val header: String = request.getHeader("Authorization")
+            ?: throw IllegalArgumentException("Missing Authorization header.")
+
+        if (!header.startsWith("Bearer ")) {
+            throw IllegalArgumentException("Invalid Authorization header format.")
+        }
+
+        val token: String = header.removePrefix("Bearer ").trim()
+        _jwtService.invalidate(token)
     }
 
 }

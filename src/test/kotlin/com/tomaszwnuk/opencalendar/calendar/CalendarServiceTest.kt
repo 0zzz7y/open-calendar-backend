@@ -2,6 +2,7 @@ package com.tomaszwnuk.opencalendar.calendar
 
 import com.tomaszwnuk.opencalendar.domain.calendar.*
 import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
+import com.tomaszwnuk.opencalendar.domain.user.UserService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,11 +19,17 @@ internal class CalendarServiceTest {
     @Mock
     private lateinit var _repository: CalendarRepository
 
+    @Mock
+    private lateinit var _userService: UserService
+
     private lateinit var _service: CalendarService
+
+    private lateinit var _userId: UUID
 
     @BeforeEach
     fun setUp() {
-        _service = CalendarService(_repository)
+        _service = CalendarService(_repository, _userService)
+        _userId = UUID.randomUUID()
     }
 
     @Test
@@ -30,10 +37,10 @@ internal class CalendarServiceTest {
         val dto = CalendarDto(id = null, name = "Calendar", emoji = "🟢")
         val savedId = UUID.randomUUID()
 
-        whenever(_repository.existsByNameAndUserId("Calendar")).thenReturn(false)
+        whenever(_repository.existsByNameAndUserId("Calendar", _userId)).thenReturn(false)
         whenever(_repository.save(any<Calendar>())).thenAnswer { invocation ->
             val arg = invocation.getArgument<Calendar>(0)
-            Calendar(id = savedId, name = arg.name, emoji = arg.emoji)
+            Calendar(id = savedId, name = arg.name, emoji = arg.emoji, userId = _userId)
         }
 
         val result = _service.create(dto = dto)
@@ -43,28 +50,28 @@ internal class CalendarServiceTest {
         assertEquals("Calendar", result.name)
         assertEquals("🟢", result.emoji)
 
-        verify(_repository).existsByNameAndUserId("Calendar")
-        verify(_repository).save(argThat { name == "Calendar" && emoji == "🟢" })
+        verify(_repository).existsByNameAndUserId("Calendar", _userId)
+        verify(_repository).save(argThat { name == "Calendar" && emoji == "🟢" && userId == _userId })
     }
 
     @Test
     fun `should throw error when creating calendar with duplicate title`() {
         val dto = CalendarDto(id = null, name = "Duplicate Title", emoji = "🟢")
 
-        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title")).thenReturn(true)
+        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title", userId = _userId)).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
             _service.create(dto = dto)
         }
 
-        verify(_repository).existsByNameAndUserId(name = "Duplicate Title")
+        verify(_repository).existsByNameAndUserId(name = "Duplicate Title", userId = _userId)
         verify(_repository, never()).save(any<Calendar>())
     }
 
     @Test
     fun `should return all calendars`() {
-        val calendar1 = Calendar(id = UUID.randomUUID(), name = "Work Calendar", emoji = "🟢")
-        val calendar2 = Calendar(id = UUID.randomUUID(), name = "Personal Calendar", emoji = "🔵")
+        val calendar1 = Calendar(id = UUID.randomUUID(), name = "Work Calendar", emoji = "🟢", userId = _userId)
+        val calendar2 = Calendar(id = UUID.randomUUID(), name = "Personal Calendar", emoji = "🔵", userId = _userId)
 
         whenever(_repository.findAll()).thenReturn(listOf(calendar1, calendar2))
 
@@ -80,7 +87,7 @@ internal class CalendarServiceTest {
     @Test
     fun `should return calendar by id`() {
         val id = UUID.randomUUID()
-        val calendar = Calendar(id = id, name = "Team Calendar", emoji = "🟢")
+        val calendar = Calendar(id = id, name = "Team Calendar", emoji = "🟢", userId = _userId)
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(calendar))
 
@@ -109,9 +116,9 @@ internal class CalendarServiceTest {
     @Test
     fun `should return list of filtered calendars`() {
         val filter = CalendarFilterDto(name = "Project Calendar", emoji = "🟢")
-        val matching = Calendar(id = UUID.randomUUID(), name = "Project Calendar", emoji = "🟢")
+        val matching = Calendar(id = UUID.randomUUID(), name = "Project Calendar", emoji = "🟢", userId = _userId)
 
-        whenever(_repository.filter(name = "Project Calendar", emoji = "🟢")).thenReturn(listOf(matching))
+        whenever(_repository.filter(name = "Project Calendar", emoji = "🟢", userId = _userId)).thenReturn(listOf(matching))
 
         val result = _service.filter(filter = filter)
 
@@ -119,13 +126,13 @@ internal class CalendarServiceTest {
         assertEquals("Project Calendar", result[0].name)
         assertEquals("🟢", result[0].emoji)
 
-        verify(_repository).filter("Project Calendar", "🟢")
+        verify(_repository).filter(_userId, "Project Calendar", "🟢", )
     }
 
     @Test
     fun `should return updated calendar with old title`() {
         val id = UUID.randomUUID()
-        val existingCalendar = Calendar(id = id, name = "Old Title", emoji = "🟢")
+        val existingCalendar = Calendar(id = id, name = "Old Title", emoji = "🟢", userId = _userId)
         val dto = CalendarDto(id = id, name = "Old Title", emoji = "🔴")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
@@ -137,18 +144,18 @@ internal class CalendarServiceTest {
         assertEquals("🔴", result.emoji)
 
         verify(_repository).findById(id)
-        verify(_repository, never()).existsByNameAndUserId(any())
+        verify(_repository, never()).existsByNameAndUserId(any(), _userId)
         verify(_repository).save(argThat { emoji == "🔴" })
     }
 
     @Test
     fun `should return updated calendar with new title`() {
         val id = UUID.randomUUID()
-        val existingCalendar = Calendar(id = id, name = "Old Title", emoji = "🟢")
+        val existingCalendar = Calendar(id = id, name = "Old Title", emoji = "🟢", userId = _userId)
         val dto = CalendarDto(id = id, name = "New Title", emoji = "🔴")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
-        whenever(_repository.existsByNameAndUserId("New Title")).thenReturn(false)
+        whenever(_repository.existsByNameAndUserId("New Title", _userId)).thenReturn(false)
         whenever(_repository.save(any<Calendar>())).thenAnswer { it.getArgument<Calendar>(0) }
 
         val result = _service.update(id, dto)
@@ -157,32 +164,32 @@ internal class CalendarServiceTest {
         assertEquals("🔴", result.emoji)
 
         verify(_repository).findById(id)
-        verify(_repository).existsByNameAndUserId(name = "New Title")
+        verify(_repository).existsByNameAndUserId(name = "New Title", userId = _userId)
         verify(_repository).save(argThat { name == "New Title" && emoji == "🔴" })
     }
 
     @Test
     fun `should throw error when updating to duplicate title`() {
         val id = UUID.randomUUID()
-        val existingCalendar = Calendar(id = id, name = "Old Title", emoji = "🟢")
+        val existingCalendar = Calendar(id = id, name = "Old Title", emoji = "🟢", userId = _userId)
         val dto = CalendarDto(id = id, name = "Duplicate Title", emoji = "🔴")
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
-        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title")).thenReturn(true)
+        whenever(_repository.existsByNameAndUserId(name = "Duplicate Title", _userId)).thenReturn(true)
 
         assertThrows<IllegalArgumentException> {
             _service.update(id, dto)
         }
 
         verify(_repository).findById(id)
-        verify(_repository).existsByNameAndUserId(name = "Duplicate Title")
+        verify(_repository).existsByNameAndUserId(name = "Duplicate Title" , userId = _userId)
         verify(_repository, never()).save(any<Calendar>())
     }
 
     @Test
     fun `should delete calendar when exists`() {
         val id = UUID.randomUUID()
-        val existingCalendar = Calendar(id = id, name = "ToDelete Calendar", emoji = "🟢")
+        val existingCalendar = Calendar(id = id, name = "ToDelete Calendar", emoji = "🟢", userId = _userId)
 
         whenever(_repository.findById(id)).thenReturn(Optional.of(existingCalendar))
         doNothing().whenever(_repository).delete(existingCalendar)

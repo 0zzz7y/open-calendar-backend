@@ -13,7 +13,6 @@ import com.tomaszwnuk.opencalendar.domain.note.NoteService
 import com.tomaszwnuk.opencalendar.domain.task.TaskDto
 import com.tomaszwnuk.opencalendar.domain.task.TaskService
 import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
-import com.tomaszwnuk.opencalendar.domain.user.User
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -4,6 +4,7 @@ import com.tomaszwnuk.opencalendar.authentication.request.AuthenticationResponse
 import com.tomaszwnuk.opencalendar.authentication.request.LoginRequest
 import com.tomaszwnuk.opencalendar.authentication.request.RegisterRequest
 import com.tomaszwnuk.opencalendar.domain.communication.CommunicationConstants
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -28,6 +29,12 @@ class AuthenticationController(
     fun login(@Valid @RequestBody(required = true) request: LoginRequest): ResponseEntity<AuthenticationResponse> {
         val token: String = _authenticationService.login(request = request)
         return ResponseEntity.ok(AuthenticationResponse(token))
+    }
+
+    @PostMapping("/logout")
+    fun logout(request: HttpServletRequest): ResponseEntity<Unit> {
+        _authenticationService.logout(request)
+        return ResponseEntity.ok().build()
     }
 
 }
