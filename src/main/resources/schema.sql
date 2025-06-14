@@ -1,21 +1,3 @@
--- Task status type
-DO $$
-BEGIN
-  CREATE TYPE task_status AS ENUM ('TODO', 'IN_PROGRESS', 'DONE');
-EXCEPTION
-  WHEN duplicate_object THEN NULL;
-END
-$$;
-
--- Recurring pattern type
-DO $$
-BEGIN
-  CREATE TYPE recurring_pattern_type AS ENUM ('NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY');
-EXCEPTION
-  WHEN duplicate_object THEN NULL;
-END
-$$;
-
 -- User table
 CREATE TABLE IF NOT EXISTS _user (
     id UUID PRIMARY KEY NOT NULL,
@@ -57,7 +39,7 @@ CREATE TABLE IF NOT EXISTS event (
     description TEXT,
     start_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     end_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    recurring_pattern recurring_pattern_type NOT NULL,
+    recurring_pattern TEXT NOT NULL,
     calendar_id UUID NOT NULL,
     category_id UUID,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -71,7 +53,7 @@ CREATE TABLE IF NOT EXISTS task (
     id UUID PRIMARY KEY NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
-    status task_status NOT NULL,
+    status TEXT NOT NULL,
     calendar_id UUID NOT NULL,
     category_id UUID,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
