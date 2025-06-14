@@ -13,10 +13,18 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 
+/**
+ * The configuration for Jackson serialization and deserialization.
+ */
 @Suppress("unused")
 @Configuration
 class JacksonConfiguration {
 
+    /**
+     * Provides a primary object mapper.
+     *
+     * @return The configured object mapper instance
+     */
     @Bean
     @Primary
     fun objectMapper(): ObjectMapper {
@@ -26,6 +34,11 @@ class JacksonConfiguration {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }
 
+    /**
+     * Provides a specialized object mapper for Redis serialization.
+     *
+     * @return The configured object mapper instance for Redis
+     */
     @Suppress("deprecated")
     @Bean(name = ["redisObjectMapper"])
     @Qualifier("redisObjectMapper")

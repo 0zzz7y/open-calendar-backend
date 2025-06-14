@@ -1,6 +1,6 @@
 package com.tomaszwnuk.opencalendar.configuration.security
 
-import com.tomaszwnuk.opencalendar.authentication.TokenBlackList
+import com.tomaszwnuk.opencalendar.authentication.TokenBlackListService
 import com.tomaszwnuk.opencalendar.domain.user.User
 import com.tomaszwnuk.opencalendar.domain.user.UserRepository
 import com.tomaszwnuk.opencalendar.security.JwtService
@@ -14,47 +14,86 @@ import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 import java.util.*
 
+/**
+ * The security authentication filter.
+ */
 @Component
 class SecurityAuthenticationFilter(
+
+    /**
+     * The service for performing JWT operations.
+     */
     private val _jwtService: JwtService,
+
+    /**
+     * The repository for managing user data.
+     */
     private val _userRepository: UserRepository,
-    private val _tokenBlacklist: TokenBlackList
+
+    /**
+     * The service for performing operations on the token blacklist.
+     */
+    private val _tokenBlacklistService: TokenBlackListService
+
 ) : OncePerRequestFilter() {
 
+    /**
+     * Filters the incoming request to authenticate the user based on the JWT token.
+     *
+     * @param request The HTTP servlet request
+     * @param response The HTTP servlet response
+     * @param filterChain The filter chain to continue processing the request
+     */
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
+        // Header exists and is correct
         val header: String? = request.getHeader("Authorization")
-        if (header.isNullOrBlank() || !header.startsWith(HEADER_PREFIX)) {
+        val isHeaderCorrect: Boolean = (header != null && header.isNotBlank() && header.startsWith(HEADER_PREFIX))
+        if (!isHeaderCorrect) {
             return filterChain.doFilter(request, response)
         }
 
-        val token: String = header.removePrefix(HEADER_PREFIX).trim()
-        if (_tokenBlacklist.isInvalid(token)) {
+        // Token is valid and not blacklisted
+        val token: String = header?.removePrefix(HEADER_PREFIX)!!.trim()
+        val isTokenValid: Boolean = !(_tokenBlacklistService.isInvalid(token))
+        if (isTokenValid) {
             return filterChain.doFilter(request, response)
         }
 
+        // Extract user ID from token
         val userId: UUID? = _jwtService.extractUserId(token)
-        if (userId == null || SecurityContextHolder.getContext().authentication != null) {
+        val isUserIdValid: Boolean = (userId != null)
+        if (!isUserIdValid) {
             return filterChain.doFilter(request, response)
         }
 
-        val user: User? = _userRepository.findById(userId).orElse(null)
-        if (user == null) {
+        // Check if authentication is already valid
+        val isAuthenticationValid: Boolean = (SecurityContextHolder.getContext().authentication != null)
+        if (isAuthenticationValid) {
             return filterChain.doFilter(request, response)
         }
 
-        val authentication = UsernamePasswordAuthenticationToken(user, null, emptyList())
+        // Load user from repository
+        val user: Optional<User> = _userRepository.findById(userId!!)
+        if (!user.isPresent) {
+            return filterChain.doFilter(request, response)
+        }
+
+        // Authenticate user
+        val authentication = UsernamePasswordAuthenticationToken(user.get(), null, emptyList())
         authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
-
         SecurityContextHolder.getContext().authentication = authentication
         filterChain.doFilter(request, response)
     }
 
     companion object {
 
+        /**
+         * The prefix for the authorization header.
+         */
         const val HEADER_PREFIX: String = "Bearer "
 
     }

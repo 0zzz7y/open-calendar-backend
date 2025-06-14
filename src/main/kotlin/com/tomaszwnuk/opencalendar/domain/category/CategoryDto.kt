@@ -7,10 +7,19 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import java.util.*
 
+/**
+ * The category data transfer object.
+ */
 data class CategoryDto(
 
+    /**
+     * The unique identifier of the category.
+     */
     override val id: UUID? = null,
 
+    /**
+     * The name of the category.
+     */
     @field:NotBlank(message = "Name cannot be blank.")
     @field:Size(
         max = NAME_MAXIMUM_LENGTH,
@@ -18,6 +27,9 @@ data class CategoryDto(
     )
     val name: String,
 
+    /**
+     * The color of the category.
+     */
     @field:Size(min = COLOR_HEX_LENGTH, max = COLOR_HEX_LENGTH, message = "Color must be a valid hex color code.")
     val color: String = CategoryColorHelper.DEFAULT_COLOR
 

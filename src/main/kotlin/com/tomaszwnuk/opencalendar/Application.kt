@@ -12,6 +12,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing
 @EntityScan(basePackages = ["com.tomaszwnuk.opencalendar"])
 class Application
 
+/**
+ * The main entry point of the application.
+ *
+ * @param args Command line arguments passed to the application
+ */
 fun main(args: Array<String>) {
     runApplication<Application>(args = args)
 }

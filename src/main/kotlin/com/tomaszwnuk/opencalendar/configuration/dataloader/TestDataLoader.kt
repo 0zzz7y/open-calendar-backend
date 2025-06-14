@@ -22,22 +22,61 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ * The test data loader for populating the database with initial data.
+ */
 @Suppress("unused")
 @Profile("development", "test")
 @Component
 class TestDataLoader(
+
+    /**
+     * The repositories for managing calendar data.
+     */
     private val _calendarRepository: CalendarRepository,
+
+    /**
+     * The repositories for managing category data.
+     */
     private val _categoryRepository: CategoryRepository,
+
+    /**
+     * The repositories for managing event data.
+     */
     private val _eventRepository: EventRepository,
+
+    /**
+     * The repositories for managing task data.
+     */
     private val _taskRepository: TaskRepository,
+
+    /**
+     * The repositories for managing note data.
+     */
     private val _noteRepository: NoteRepository,
+
+    /**
+     * The repository for managing user data.
+     */
     private val _userRepository: UserRepository
+
 ) : CommandLineRunner {
 
+    /**
+     * The timer for measuring the time of operations.
+     */
     private var _timer: Long = System.currentTimeMillis()
 
+    /**
+     * The user for whom the test data is created.
+     */
     private lateinit var _user: User
 
+    /**
+     * Runs the data loader to populate the database with test data.
+     *
+     * @param arguments The command line arguments (not used)
+     */
     override fun run(vararg arguments: String?) {
         if (_calendarRepository.count() > 0) {
             info(source = this, message = "Test data already loaded. Skipping...")
@@ -56,6 +95,9 @@ class TestDataLoader(
         info(source = this, message = "Test data loaded in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Creates a test users for whom the data will be created.
+     */
     private fun createUsers() {
         _timer = System.currentTimeMillis()
 
@@ -66,8 +108,15 @@ class TestDataLoader(
             password = BCryptPasswordEncoder().encode("password")
         )
         _userRepository.save(_user)
+
+        info(source = this, message = "User created in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Creates test calendars.
+     *
+     * @return A map of created calendars
+     */
     private fun createCalendars(): Map<String, Calendar> {
         _timer = System.currentTimeMillis()
 
@@ -85,6 +134,11 @@ class TestDataLoader(
         return calendars
     }
 
+    /**
+     * Creates test categories.
+     *
+     * @return A map of created categories
+     */
     private fun createCategories(): Map<String, Category> {
         _timer = System.currentTimeMillis()
 
@@ -119,6 +173,12 @@ class TestDataLoader(
         return categories
     }
 
+    /**
+     * Creates test events.
+     *
+     * @param calendars A map of calendars to associate with the events
+     * @param categories A map of categories to associate with the events
+     */
     private fun createEvents(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
         val now: LocalDateTime = LocalDateTime.now().withSecond(0).withNano(0)
@@ -243,6 +303,12 @@ class TestDataLoader(
         )
     }
 
+    /**
+     * Creates test tasks.
+     *
+     * @param calendars A map of calendars to associate with the tasks
+     * @param categories A map of categories to associate with the tasks
+     */
     private fun createTasks(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
 
@@ -272,6 +338,12 @@ class TestDataLoader(
         _taskRepository.saveAll(listOf(walkTheDog, buyGroceries, studyForExam))
     }
 
+    /**
+     * Creates test notes.
+     *
+     * @param calendars A map of calendars to associate with the notes
+     * @param categories A map of categories to associate with the notes
+     */
     private fun createNotes(calendars: Map<String, Calendar>, categories: Map<String, Category>) {
         _timer = System.currentTimeMillis()
 

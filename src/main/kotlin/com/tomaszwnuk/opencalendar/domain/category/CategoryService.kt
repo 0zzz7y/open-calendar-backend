@@ -8,14 +8,38 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * The service for category operations.
+ */
 @Service
 class CategoryService(
+
+    /**
+     * The repository for managing category data.
+     */
     private val _categoryRepository: CategoryRepository,
+
+    /**
+     * The service for user operations.
+     */
     private val _userService: UserService
+
 ) {
 
+    /**
+     * The timer for measuring the duration of operations.
+     */
     private var _timer: Long = 0
 
+    /**
+     * Creates a new category.
+     *
+     * @param dto The data transfer object containing category details
+     *
+     * @return The created category as a data transfer object
+     *
+     * @throws IllegalArgumentException if a category with the same name already exists for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["allCategories"], allEntries = true)
@@ -46,6 +70,11 @@ class CategoryService(
         return created.toDto()
     }
 
+    /**
+     * Retrieves all categories for the current user.
+     *
+     * @return A list of all categories as data transfer objects
+     */
     @Cacheable(cacheNames = ["allCategories"], condition = "#result != null")
     fun getAll(): List<CategoryDto> {
         info(source = this, "Fetching all categories")
@@ -58,6 +87,15 @@ class CategoryService(
         return categories.map { it.toDto() }
     }
 
+    /**
+     * Retrieves a category by its unique identifier.
+     *
+     * @param id The unique identifier of the category
+     *
+     * @return The category as a data transfer object
+     *
+     * @throws NoSuchElementException if the category with the specified unique identifier does not exist for the user
+     */
     @Cacheable(cacheNames = ["categoryById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): CategoryDto {
         info(source = this, message = "Fetching category with id $id")
@@ -73,6 +111,13 @@ class CategoryService(
         return category.get().toDto()
     }
 
+    /**
+     * Filters categories based on the provided criteria.
+     *
+     * @param filter The filter criteria as a data transfer object
+     *
+     * @return A list of categories that match the filter criteria
+     */
     fun filter(filter: CategoryFilterDto): List<CategoryDto> {
         info(source = this, message = "Filtering categories with $filter")
         _timer = System.currentTimeMillis()
@@ -88,6 +133,17 @@ class CategoryService(
         return categories.map { it.toDto() }
     }
 
+    /**
+     * Updates an existing category.
+     *
+     * @param id The unique identifier of the category to update
+     * @param dto The data transfer object containing the updated details of the category
+     *
+     * @return The updated category as a data transfer object
+     *
+     * @throws NoSuchElementException if the category with the specified unique identifier is not found for the user
+     * @throws IllegalArgumentException if a category with the same name already exists for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["categoryById"], key = "#id"),
@@ -123,6 +179,13 @@ class CategoryService(
         return updated.toDto()
     }
 
+    /**
+     * Deletes a category by its unique identifier.
+     *
+     * @param id The unique identifier of the category to delete
+     *
+     * @throws NoSuchElementException if the category with the specified unique identifier is not found for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["categoryById"], key = "#id", condition = "#id != null"),

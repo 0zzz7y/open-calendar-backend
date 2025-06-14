@@ -12,16 +12,48 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * The service for note operations.
+ */
 @Service
 class NoteService(
+
+    /**
+     * The repository for managing note data.
+     */
     private val _noteRepository: NoteRepository,
+
+    /**
+     * The repository for managing calendar data.
+     */
     private val _calendarRepository: CalendarRepository,
+
+    /**
+     * The repository for managing category data.
+     */
     private val _categoryRepository: CategoryRepository,
+
+    /**
+     * The service for user operations.
+     */
     private val _userService: UserService
+
 ) {
 
+    /**
+     * The timer for measuring the duration of operations.
+     */
     private var _timer: Long = 0
 
+    /**
+     * Creates a new note.
+     *
+     * @param dto The data transfer object containing note details
+     *
+     * @return The created note as a data transfer object
+     *
+     * @throws NoSuchElementException if the calendar or category does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["allNotes"], allEntries = true),
@@ -38,9 +70,11 @@ class NoteService(
             id = dto.calendarId,
             userId = userId
         ).orElseThrow { NoSuchElementException("Calendar with id ${dto.calendarId} not found for user $userId") }
-        val category: Category? = dto.categoryId?.let { _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow{
-            NoSuchElementException("Category with id $it not found for user $userId")
-        } }
+        val category: Category? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
+                NoSuchElementException("Category with id $it not found for user $userId")
+            }
+        }
 
         val note = Note(
             name = dto.name,
@@ -55,6 +89,15 @@ class NoteService(
         return created.toDto()
     }
 
+    /**
+     * Retrieves a note by its unique identifier.
+     *
+     * @param id The unique identifier of the note
+     *
+     * @return The note as a data transfer object
+     *
+     * @throws NoSuchElementException if the note does not exist for the user
+     */
     @Cacheable(cacheNames = ["noteById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): NoteDto {
         info(source = this, message = "Fetching note with id $id")
@@ -68,6 +111,13 @@ class NoteService(
         return note.toDto()
     }
 
+    /**
+     * Retrieves all notes associated with a specific calendar.
+     *
+     * @param calendarId The unique identifier of the calendar
+     *
+     * @return A list of notes as data transfer objects
+     */
     @Cacheable(cacheNames = ["calendarNotes"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<NoteDto> {
         info(source = this, message = "Fetching all notes for calendar with id $calendarId")
@@ -83,6 +133,13 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all notes associated with a specific category.
+     *
+     * @param categoryId The unique identifier of the category
+     *
+     * @return A list of notes as data transfer objects
+     */
     @Cacheable(cacheNames = ["categoryNotes"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<NoteDto> {
         info(source = this, message = "Fetching all notes for category with id $categoryId")
@@ -98,6 +155,11 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all notes for the current user.
+     *
+     * @return A list of all notes as data transfer objects
+     */
     @Cacheable(cacheNames = ["allNotes"], condition = "#result != null")
     fun getAll(): List<NoteDto> {
         info(source = this, message = "Fetching all notes")
@@ -110,6 +172,13 @@ class NoteService(
         return notes.map { it.toDto() }
     }
 
+    /**
+     * Filters notes based on the provided criteria.
+     *
+     * @param filter The filter criteria as a data transfer object
+     *
+     * @return A list of notes that match the filter criteria
+     */
     fun filter(filter: NoteFilterDto): List<NoteDto> {
         info(source = this, message = "Filtering notes with $filter")
         _timer = System.currentTimeMillis()
@@ -127,6 +196,16 @@ class NoteService(
         return filtered.map { it.toDto() }
     }
 
+    /**
+     * Updates an existing note.
+     *
+     * @param id The unique identifier of the note to update
+     * @param dto The data transfer object containing the updated details of the note
+     *
+     * @return The updated note as a data transfer object
+     *
+     * @throws NoSuchElementException if the note, calendar, or category does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["noteById"], key = "#id"),
@@ -146,9 +225,11 @@ class NoteService(
             id = dto.calendarId,
             userId = userId
         ).orElseThrow { NoSuchElementException("Calendar with id ${dto.calendarId} not found for user $userId") }
-        val category: Category? = dto.categoryId?.let { _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-            NoSuchElementException("Category with id $it not found for user $userId")
-        } }
+        val category: Category? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
+                NoSuchElementException("Category with id $it not found for user $userId")
+            }
+        }
         val changed: Note = existing.copy(
             name = dto.name,
             description = dto.description,
@@ -162,6 +243,13 @@ class NoteService(
         return updated.toDto()
     }
 
+    /**
+     * Deletes a note by its unique identifier.
+     *
+     * @param id The unique identifier of the note to delete
+     *
+     * @throws NoSuchElementException if the note does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["noteById"], key = "#id"),
@@ -182,6 +270,13 @@ class NoteService(
         info(source = this, message = "Deleted note $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Deletes all notes associated with a specific calendar.
+     *
+     * @param calendarId The unique identifier of the calendar
+     *
+     * @throws NoSuchElementException if the calendar does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["noteById"], key = "#id", condition = "#id != null"),
@@ -207,6 +302,13 @@ class NoteService(
         )
     }
 
+    /**
+     * Removes the category from all notes associated with a specific category.
+     *
+     * @param categoryId The unique identifier of the category to remove
+     *
+     * @throws NoSuchElementException if the category does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["noteById"], key = "#id", condition = "#id != null"),

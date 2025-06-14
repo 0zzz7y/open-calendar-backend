@@ -5,12 +5,38 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import java.util.*
 
+/**
+ * The repository for managing calendars data.
+ */
 interface CalendarRepository : JpaRepository<Calendar, UUID> {
 
+    /**
+     * Checks if a calendar with the given name and user ID exists.
+     *
+     * @param name The name of the calendar
+     * @param userId The unique identifier of the user who owns the calendar
+     *
+     * @return true if a calendar with the given name and user ID exists, false otherwise
+     */
     fun existsByNameAndUserId(name: String, userId: UUID): Boolean
 
+    /**
+     * Finds all calendars that belong to a specific user.
+     *
+     * @param userId The unique identifier of the user who owns the calendars
+     *
+     * @return A list of calendars belonging to the specified user
+     */
     fun findAllByUserId(userId: UUID): List<Calendar>
 
+    /**
+     * Finds a calendar by its unique identifier and the user identifier of the calendar it belongs to.
+     *
+     * @param id The unique identifier of the calendar
+     * @param userId The unique identifier of the user who owns the calendar
+     *
+     * @return An optional containing the calendar if found, or empty if not found
+     */
     fun findByIdAndUserId(id: UUID, userId: UUID): Optional<Calendar>
 
     @Query(

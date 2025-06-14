@@ -6,8 +6,19 @@ import org.springframework.data.repository.query.Param
 import java.time.LocalDateTime
 import java.util.*
 
+/**
+ * The repository for managing events data.
+ */
 interface EventRepository : JpaRepository<Event, UUID> {
 
+    /**
+     * Finds an event by its unique identifier and the user identifier of the calendar it belongs to.
+     *
+     * @param id The unique identifier of the event
+     * @param userId The unique identifier of the user who owns the calendar
+     *
+     * @return An optional containing the event if found, or empty if not found
+     */
     @Query(
         """
     SELECT e FROM Event e
@@ -17,6 +28,13 @@ interface EventRepository : JpaRepository<Event, UUID> {
     )
     fun findByIdAndCalendarUserId(@Param("id") id: UUID, @Param("userId") userId: UUID): Optional<Event>
 
+    /**
+     * Finds all events that belong to a specific calendar user.
+     *
+     * @param userId The unique identifier of the user who owns the calendar
+     *
+     * @return A list of events belonging to the specified calendar user
+     */
     @Query(
         """
     SELECT e FROM Event e
@@ -25,6 +43,14 @@ interface EventRepository : JpaRepository<Event, UUID> {
     )
     fun findAllByCalendarUserId(@Param("userId") userId: UUID): List<Event>
 
+    /**
+     * Finds all events that belong to a specific calendar and the user who owns it.
+     *
+     * @param calendarId The unique identifier of the calendar
+     * @param userId The unique identifier of the user who owns the calendar
+     *
+     * @return A list of events belonging to the specified calendar and user
+     */
     @Query(
         """
     SELECT e FROM Event e
@@ -37,6 +63,14 @@ interface EventRepository : JpaRepository<Event, UUID> {
         @Param("userId") userId: UUID
     ): List<Event>
 
+    /**
+     * Finds all events that belong to a specific category and the user who owns the calendar.
+     *
+     * @param categoryId The unique identifier of the category
+     * @param userId The unique identifier of the user who owns the calendar
+     *
+     * @return A list of events belonging to the specified category and user
+     */
     @Query(
         """
     SELECT e FROM Event e
@@ -49,6 +83,20 @@ interface EventRepository : JpaRepository<Event, UUID> {
         @Param("userId") userId: UUID
     ): List<Event>
 
+    /**
+     * Filters events based on provided criteria.
+     *
+     * @param userId The unique identifier of the user who owns the calendar
+     * @param name The name of the event (optional)
+     * @param description The description of the event (optional)
+     * @param dateFrom The start date of the event (optional)
+     * @param dateTo The end date of the event (optional)
+     * @param recurringPattern The recurring pattern of the event (optional)
+     * @param calendarId The unique identifier of the calendar (optional)
+     * @param categoryId The unique identifier of the category (optional)
+     *
+     * @return A list of events that match the specified criteria
+     */
     @Query(
         """
     SELECT e FROM Event e

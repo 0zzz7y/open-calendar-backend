@@ -8,8 +8,14 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 
+/**
+ * The registration request.
+ */
 data class RegisterRequest(
 
+    /**
+     * The username of the user.
+     */
     @field:NotBlank(message = "Username cannot be blank.")
     @field:Size(
         max = USER_NAME_MAXIMUM_LENGTH,
@@ -17,6 +23,9 @@ data class RegisterRequest(
     )
     val username: String,
 
+    /**
+     * The email of the user.
+     */
     @field:NotBlank(message = "Email cannot be blank.")
     @field:Email(message = "Invalid email format.")
     @field:Size(
@@ -25,6 +34,9 @@ data class RegisterRequest(
     )
     val email: String,
 
+    /**
+     * The password of the user.
+     */
     @field:NotBlank(message = "Password cannot be blank.")
     @field:Size(
         min = USER_PASSWORD_MINIMUM_LENGTH,

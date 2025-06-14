@@ -8,14 +8,37 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * The service for calendar operations.
+ */
 @Service
 class CalendarService(
+
+    /**
+     * The repository for managing calendar data.
+     */
     private val _calendarRepository: CalendarRepository,
+
+    /**
+     * The service for user operations.
+     */
     private val _userService: UserService
 ) {
 
+    /**
+     * The timer for measuring the duration of operations.
+     */
     private var _timer: Long = 0
 
+    /**
+     * Creates a new calendar.
+     *
+     * @param dto The data transfer object containing calendar details
+     *
+     * @return The created calendar as a data transfer object
+     *
+     * @throws IllegalArgumentException if a calendar with the same name already exists for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["allCalendars"], allEntries = true)
@@ -43,6 +66,11 @@ class CalendarService(
         return created.toDto()
     }
 
+    /**
+     * Retrieves all calendars for the current user.
+     *
+     * @return A list of all calendars as data transfer objects
+     */
     @Cacheable(cacheNames = ["allCalendars"], condition = "#result != null")
     fun getAll(): List<CalendarDto> {
         info(source = this, message = "Fetching all calendars")
@@ -55,6 +83,15 @@ class CalendarService(
         return calendars.map { it.toDto() }
     }
 
+    /**
+     * Retrieves a calendar by its unique identifier.
+     *
+     * @param id The unique identifier of the calendar
+     *
+     * @return The calendar as a data transfer object
+     *
+     * @throws NoSuchElementException if the calendar with the specified ID is not found for the user
+     */
     @Cacheable(cacheNames = ["calendarById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): CalendarDto {
         info(source = this, message = "Fetching calendar with id $id")
@@ -69,21 +106,39 @@ class CalendarService(
         return calendar.toDto()
     }
 
+    /**
+     * Filters calendars based on the provided criteria.
+     *
+     * @param filter The filter criteria
+     *
+     * @return A list of calendars that match the filter criteria as data transfer objects
+     */
     fun filter(filter: CalendarFilterDto): List<CalendarDto> {
         info(source = this, message = "Filtering calendars with $filter")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
         val calendars: List<Calendar> = _calendarRepository.filter(
+            userId = userId,
             name = filter.name,
-            emoji = filter.emoji,
-            userId = userId
+            emoji = filter.emoji
         )
 
         info(source = this, message = "Found $calendars in ${System.currentTimeMillis() - _timer} ms")
         return calendars.map { it.toDto() }
     }
 
+    /**
+     * Updates an existing calendar.
+     *
+     * @param id The unique identifier of the calendar to update
+     * @param dto The data transfer object containing the updated details of the calendar
+     *
+     * @return The updated calendar as a data transfer object
+     *
+     * @throws NoSuchElementException if the calendar with the specified unique identifier is not found for the user
+     * @throws IllegalArgumentException if a calendar with the same name already exists for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["calendarById"], key = "#id"),
@@ -104,7 +159,6 @@ class CalendarService(
                 name = dto.name,
                 userId = userId
             )
-
             if (existsByName) {
                 throw IllegalArgumentException("Calendar with name '${dto.name}' already exists for user $userId")
             }
@@ -120,6 +174,13 @@ class CalendarService(
         return updated.toDto()
     }
 
+    /**
+     * Deletes a calendar by its unique identifier.
+     *
+     * @param id The unique identifier of the calendar to delete
+     *
+     * @throws NoSuchElementException if the calendar with the specified unique identifier is not found for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["calendarById"], key = "#id", condition = "#id != null"),

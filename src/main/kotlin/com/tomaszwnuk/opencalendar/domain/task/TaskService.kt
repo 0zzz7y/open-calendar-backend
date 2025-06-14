@@ -12,16 +12,48 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * The service for task operations.
+ */
 @Service
 class TaskService(
+
+    /**
+     * The repository for managing task data.
+     */
     private val _taskRepository: TaskRepository,
+
+    /**
+     * The repository for managing calendar data.
+     */
     private val _calendarRepository: CalendarRepository,
+
+    /**
+     * The repository for managing category data.
+     */
     private val _categoryRepository: CategoryRepository,
+
+    /**
+     * The service for user operations.
+     */
     private val _userService: UserService
+
 ) {
 
+    /**
+     * The timer for measuring the duration of operations.
+     */
     private var _timer: Long = 0
 
+    /**
+     * Creates a new task.
+     *
+     * @param dto The data transfer object containing task details
+     *
+     * @return The created task as a data transfer object
+     *
+     * @throws NoSuchElementException if the calendar or category with the specified IDs does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["allTasks"], allEntries = true),
@@ -57,6 +89,15 @@ class TaskService(
         return created.toDto()
     }
 
+    /**
+     * Retrieves a task by its unique identifier.
+     *
+     * @param id The unique identifier of the task
+     *
+     * @return The task as a data transfer object
+     *
+     * @throws NoSuchElementException if the task with the specified unique identifier does not exist for the user
+     */
     @Cacheable(cacheNames = ["taskById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): TaskDto {
         info(this, "Fetching task with id $id")
@@ -70,6 +111,11 @@ class TaskService(
         return task.toDto()
     }
 
+    /**
+     * Retrieves all tasks for the current user.
+     *
+     * @return A list of all tasks as data transfer objects
+     */
     @Cacheable(cacheNames = ["allTasks"], condition = "#result != null")
     fun getAll(): List<TaskDto> {
         info(this, "Fetching all tasks")
@@ -82,30 +128,53 @@ class TaskService(
         return tasks.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all tasks associated with a specific calendar.
+     *
+     * @param calendarId The unique identifier of the calendar
+     *
+     * @return A list of tasks associated with the specified calendar as data transfer objects
+     */
     @Cacheable(cacheNames = ["calendarTasks"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<TaskDto> {
         info(this, "Fetching all tasks for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val tasks: List<Task> = _taskRepository.findAllByCalendarIdAndCalendarUserId(calendarId = calendarId, userId = userId)
+        val tasks: List<Task> =
+            _taskRepository.findAllByCalendarIdAndCalendarUserId(calendarId = calendarId, userId = userId)
 
         info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all tasks associated with a specific category.
+     *
+     * @param categoryId The unique identifier of the category
+     *
+     * @return A list of tasks associated with the specified category as data transfer objects
+     */
     @Cacheable(cacheNames = ["categoryTasks"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<TaskDto> {
         info(this, "Fetching all tasks for category with id $categoryId")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val tasks: List<Task> = _taskRepository.findAllByCategoryIdAndCalendarUserId(categoryId = categoryId, userId = userId)
+        val tasks: List<Task> =
+            _taskRepository.findAllByCategoryIdAndCalendarUserId(categoryId = categoryId, userId = userId)
 
         info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks.map { it.toDto() }
     }
 
+    /**
+     * Filters tasks based on the provided criteria.
+     *
+     * @param filter The filter criteria as a data transfer object
+     *
+     * @return A list of tasks that match the filter criteria as data transfer objects
+     */
     fun filter(filter: TaskFilterDto): List<TaskDto> {
         info(this, "Filtering tasks with $filter")
         _timer = System.currentTimeMillis()
@@ -124,6 +193,16 @@ class TaskService(
         return filteredTasks.map { it.toDto() }
     }
 
+    /**
+     * Updates an existing task.
+     *
+     * @param id The unique identifier of the task to update
+     * @param dto The data transfer object containing updated task details
+     *
+     * @return The updated task as a data transfer object
+     *
+     * @throws NoSuchElementException if the task with the specified ID does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["taskById"], key = "#id"),
@@ -163,6 +242,13 @@ class TaskService(
         return updated.toDto()
     }
 
+    /**
+     * Deletes a task by its unique identifier.
+     *
+     * @param id The unique identifier of the task to delete
+     *
+     * @throws NoSuchElementException if the task with the specified ID does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["taskById"], key = "#id"),
@@ -183,6 +269,13 @@ class TaskService(
         info(this, "Deleted task $task in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Deletes all tasks associated with a specific calendar.
+     *
+     * @param calendarId The unique identifier of the calendar
+     *
+     * @throws NoSuchElementException if no tasks are found for the specified calendar
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["taskById"], key = "#id", condition = "#id != null"),
@@ -205,6 +298,13 @@ class TaskService(
         info(this, "Deleted all tasks for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Removes the category from all tasks associated with a specific category.
+     *
+     * @param categoryId The unique identifier of the category
+     *
+     * @throws NoSuchElementException if no tasks are found for the specified category
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["taskById"], key = "#id", condition = "#id != null"),

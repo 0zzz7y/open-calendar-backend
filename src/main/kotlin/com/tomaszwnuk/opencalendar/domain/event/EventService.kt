@@ -12,16 +12,48 @@ import org.springframework.cache.annotation.Caching
 import org.springframework.stereotype.Service
 import java.util.*
 
+/**
+ * The service for event operations.
+ */
 @Service
 class EventService(
+
+    /**
+     * The repository for managing event data.
+     */
     private val _eventRepository: EventRepository,
+
+    /**
+     * The repository for managing calendar data.
+     */
     private val _calendarRepository: CalendarRepository,
+
+    /**
+     * The repository for managing category data.
+     */
     private val _categoryRepository: CategoryRepository,
+
+    /**
+     * The service for user operations.
+     */
     private val _userService: UserService
+
 ) {
 
+    /**
+     * The timer for measuring the duration of operations.
+     */
     private var _timer: Long = 0
 
+    /**
+     * Creates a new event.
+     *
+     * @param dto The data transfer object containing event details
+     *
+     * @return The created event as a data transfer object
+     *
+     * @throws IllegalArgumentException if the calendar or category does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["allEvents"], allEntries = true),
@@ -34,11 +66,12 @@ class EventService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val calendar: Calendar = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId).orElseThrow {
-            IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
-        }
+        val calendar: Calendar =
+            _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId).orElseThrow {
+                IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
+            }
         val category: Category? = dto.categoryId?.let {
-            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow{
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
                 IllegalArgumentException("Category with id $it not found for user $userId")
             }
         }
@@ -58,6 +91,15 @@ class EventService(
         return created.toDto()
     }
 
+    /**
+     * Retrieves an event by its unique identifier.
+     *
+     * @param id The unique identifier of the event
+     *
+     * @return The event as a data transfer object
+     *
+     * @throws IllegalArgumentException if the event does not exist for the user
+     */
     @Cacheable(cacheNames = ["eventById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): EventDto {
         info(source = this, message = "Fetching event with id $id")
@@ -72,6 +114,11 @@ class EventService(
         return event.toDto()
     }
 
+    /**
+     * Retrieves all events for the current user.
+     *
+     * @return A list of all events as data transfer objects
+     */
     @Cacheable(cacheNames = ["allEvents"], condition = "#result != null")
     fun getAll(): List<EventDto> {
         info(source = this, message = "Fetching all events")
@@ -84,6 +131,13 @@ class EventService(
         return events.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all events associated with a specific calendar.
+     *
+     * @param calendarId The unique identifier of the calendar
+     *
+     * @return A list of events associated with the specified calendar as data transfer objects
+     */
     @Cacheable(cacheNames = ["calendarEvents"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<EventDto> {
         info(source = this, message = "Fetching all events for calendar with id $calendarId")
@@ -99,6 +153,13 @@ class EventService(
         return events.map { it.toDto() }
     }
 
+    /**
+     * Retrieves all events associated with a specific category.
+     *
+     * @param categoryId The unique identifier of the category
+     *
+     * @return A list of events associated with the specified category as data transfer objects
+     */
     @Cacheable(cacheNames = ["categoryEvents"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<EventDto> {
         info(source = this, message = "Fetching all events for category with id $categoryId")
@@ -114,6 +175,13 @@ class EventService(
         return events.map { it.toDto() }
     }
 
+    /**
+     * Filters events based on the provided criteria.
+     *
+     * @param filter The filter criteria as a data transfer object
+     *
+     * @return A list of events that match the filter criteria
+     */
     fun filter(filter: EventFilterDto): List<EventDto> {
         info(source = this, message = "Filtering events with $filter")
         _timer = System.currentTimeMillis()
@@ -134,6 +202,16 @@ class EventService(
         return filtered.map { it.toDto() }
     }
 
+    /**
+     * Updates an existing event.
+     *
+     * @param id The unique identifier of the event to update
+     * @param dto The data transfer object containing the updated details of the event
+     *
+     * @return The updated event as a data transfer object
+     *
+     * @throws IllegalArgumentException if the event, calendar, or category does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["eventById"], key = "#id"),
@@ -150,12 +228,15 @@ class EventService(
         val existing: Event = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId).orElseThrow {
             IllegalArgumentException("Event with id $id not found for user $userId")
         }
-        val calendar: Calendar = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId).orElseThrow {
-            IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
+        val calendar: Calendar =
+            _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId).orElseThrow {
+                IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
+            }
+        val category: Category? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
+                IllegalArgumentException("Category with id $it not found for user $userId")
+            }
         }
-        val category: Category? = dto.categoryId?.let { _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-            IllegalArgumentException("Category with id $it not found for user $userId")
-        } }
         val updated = existing.copy(
             name = dto.name,
             description = dto.description,
@@ -172,6 +253,13 @@ class EventService(
         return saved.toDto()
     }
 
+    /**
+     * Deletes an event by its unique identifier.
+     *
+     * @param id The unique identifier of the event to delete
+     *
+     * @throws IllegalArgumentException if the event does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["eventById"], key = "#id"),
@@ -193,6 +281,13 @@ class EventService(
         info(source = this, message = "Deleted event $existing in \${System.currentTimeMillis() - _timer} ms")
     }
 
+    /**
+     * Deletes all events associated with a specific calendar.
+     *
+     * @param calendarId The unique identifier of the calendar
+     *
+     * @throws IllegalArgumentException if the calendar does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["eventById"], key = "#id", condition = "#id != null"),
@@ -218,6 +313,13 @@ class EventService(
         )
     }
 
+    /**
+     * Removes the category from all events associated with a specific category.
+     *
+     * @param categoryId The unique identifier of the category
+     *
+     * @throws IllegalArgumentException if the category does not exist for the user
+     */
     @Caching(
         evict = [
             CacheEvict(cacheNames = ["eventById"], key = "#id", condition = "#id != null"),
