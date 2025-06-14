@@ -34,6 +34,14 @@ class SecurityConfiguration(
                 sessionCreationPolicy = SessionCreationPolicy.STATELESS
             }
             authorizeHttpRequests {
+                authorize("/", permitAll)
+                authorize(INDEX_HTML_URL, permitAll)
+                authorize(STATIC_RESOURCES_URL, permitAll)
+
+                authorize(SWAGGER_UI_URL, permitAll)
+                authorize(SWAGGER_UI_HTML_URL, permitAll)
+                authorize(API_DOCUMENTATION_URL, permitAll)
+
                 authorize(AUTHENTICATION_URL_PATTERN, permitAll)
                 authorize(anyRequest, authenticated)
             }
@@ -63,6 +71,15 @@ class SecurityConfiguration(
 
         const val AUTHENTICATION_URL_PATTERN: String = "/${CommunicationConstants.API}/${CommunicationConstants.API_VERSION}/authentication/**"
 
+        const val INDEX_HTML_URL: String = "/index.html"
+
+        const val STATIC_RESOURCES_URL: String = "/static/**"
+
+        const val SWAGGER_UI_URL: String = "/swagger-ui/**"
+
+        const val SWAGGER_UI_HTML_URL: String = "/swagger-ui.html"
+
+        const val API_DOCUMENTATION_URL: String = "/v3/api-docs/**"
     }
 
 }
