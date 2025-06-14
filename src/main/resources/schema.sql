@@ -1,9 +1,9 @@
 -- User table
 CREATE TABLE IF NOT EXISTS _user (
     id UUID PRIMARY KEY NOT NULL,
-    username TEXT NOT NULL UNIQUE,
-    email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
+    username VARCHAR(32) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(64) NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS _user (
 -- Calendar table
 CREATE TABLE IF NOT EXISTS calendar (
     id UUID PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
-    emoji TEXT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    emoji VARCHAR(255) NOT NULL,
     user_id UUID NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS calendar (
 -- Category table
 CREATE TABLE IF NOT EXISTS category (
     id UUID PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
-    color TEXT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    color CHAR(7) NOT NULL,
     user_id UUID NOT NULL,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -35,11 +35,11 @@ CREATE TABLE IF NOT EXISTS category (
 -- Event table
 CREATE TABLE IF NOT EXISTS event (
     id UUID PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(4096),
     start_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     end_date TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    recurring_pattern TEXT NOT NULL,
+    recurring_pattern VARCHAR(32) NOT NULL,
     calendar_id UUID NOT NULL,
     category_id UUID,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -51,9 +51,9 @@ CREATE TABLE IF NOT EXISTS event (
 -- Task table
 CREATE TABLE IF NOT EXISTS task (
     id UUID PRIMARY KEY NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT,
-    status TEXT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description VARCHAR(4096),
+    status VARCHAR(32) NOT NULL,
     calendar_id UUID NOT NULL,
     category_id UUID,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
@@ -65,8 +65,8 @@ CREATE TABLE IF NOT EXISTS task (
 -- Note table
 CREATE TABLE IF NOT EXISTS note (
     id UUID PRIMARY KEY NOT NULL,
-    name TEXT,
-    description TEXT NOT NULL,
+    name VARCHAR(255),
+    description VARCHAR(4096) NOT NULL,
     calendar_id UUID NOT NULL,
     category_id UUID,
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
