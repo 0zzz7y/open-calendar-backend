@@ -1,16 +1,20 @@
 -- Task status type
-DO $$ BEGIN
+DO $$
+BEGIN
   CREATE TYPE task_status AS ENUM ('TODO', 'IN_PROGRESS', 'DONE');
 EXCEPTION
   WHEN duplicate_object THEN NULL;
-END $$;
+END
+$$;
 
 -- Recurring pattern type
-DO $$ BEGIN
+DO $$
+BEGIN
   CREATE TYPE recurring_pattern_type AS ENUM ('NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY');
 EXCEPTION
   WHEN duplicate_object THEN NULL;
-END $$;
+END
+$$;
 
 -- User table
 CREATE TABLE IF NOT EXISTS _user (
