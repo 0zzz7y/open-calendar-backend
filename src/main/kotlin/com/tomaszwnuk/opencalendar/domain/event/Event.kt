@@ -6,6 +6,7 @@ import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITI
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_NAME
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_RECURRING_PATTERN
 import com.tomaszwnuk.opencalendar.domain.record.Record
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -32,7 +33,7 @@ data class Event(
     override val endDate: LocalDateTime,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "recurring_pattern", nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_RECURRING_PATTERN, name = "recurring_pattern", nullable = false)
     override val recurringPattern: RecurringPattern = RecurringPattern.NONE,
 
     @ManyToOne(fetch = FetchType.LAZY)

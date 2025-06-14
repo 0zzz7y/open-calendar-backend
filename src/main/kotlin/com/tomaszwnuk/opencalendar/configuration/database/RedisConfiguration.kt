@@ -21,7 +21,6 @@ import java.time.Duration
 @Configuration
 @EnableCaching
 class RedisConfiguration(
-
     @Qualifier("redisObjectMapper")
     private val _objectMapper: ObjectMapper
 ) {

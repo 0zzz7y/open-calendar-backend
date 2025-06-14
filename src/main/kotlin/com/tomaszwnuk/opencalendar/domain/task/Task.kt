@@ -5,6 +5,7 @@ import com.tomaszwnuk.opencalendar.domain.category.Category
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_DESCRIPTION
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_ID
 import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_NAME
+import com.tomaszwnuk.opencalendar.domain.field.FieldConstraints.COLUMN_DEFINITION_TASK_STATUS
 import com.tomaszwnuk.opencalendar.domain.record.Record
 import jakarta.persistence.*
 import java.util.*
@@ -24,7 +25,7 @@ data class Task(
     override val description: String? = null,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(columnDefinition = COLUMN_DEFINITION_TASK_STATUS, name = "status", nullable = false)
     val status: TaskStatus = TaskStatus.TODO,
 
     @ManyToOne(fetch = FetchType.LAZY)

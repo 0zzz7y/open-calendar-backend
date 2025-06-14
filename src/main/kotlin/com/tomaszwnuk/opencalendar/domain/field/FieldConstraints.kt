@@ -18,7 +18,7 @@ object FieldConstraints {
 
     const val USER_PASSWORD_MAXIMUM_LENGTH: Int = 64
 
-    const val COLUMN_DEFINITION_ID: String = "CHAR(36)"
+    const val COLUMN_DEFINITION_ID: String = "UUID"
 
     const val COLUMN_DEFINITION_NAME: String = "VARCHAR(255)"
 
@@ -29,6 +29,10 @@ object FieldConstraints {
     const val COLUMN_DEFINITION_COLOR: String = "CHAR(7)"
 
     const val COLUMN_DEFINITION_DATE: String = "TIMESTAMP"
+
+    const val COLUMN_DEFINITION_RECURRING_PATTERN: String = "VARCHAR(32)"
+
+    const val COLUMN_DEFINITION_TASK_STATUS: String = "VARCHAR(32)"
 
     const val COLUMN_DEFINITION_USER_NAME: String = "VARCHAR(32)"
 
