@@ -28,8 +28,8 @@ class RestControllerValidationHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException::class)
-    fun handleConstraintViolations(ex: ConstraintViolationException): ResponseEntity<Map<String, Any>> {
-        val errors: Map<String, String> = ex.constraintViolations.associate {
+    fun handleConstraintViolations(exception: ConstraintViolationException): ResponseEntity<Map<String, Any>> {
+        val errors: Map<String, String> = exception.constraintViolations.associate {
             it.propertyPath.toString() to (it.message ?: "Invalid value")
         }
 

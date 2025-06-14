@@ -37,11 +37,8 @@ class SecurityAuthenticationFilter(
 
         val user: User = _userRepository.findById(userId).orElse(null) ?: return filterChain.doFilter(request, response)
 
-        val authentication = UsernamePasswordAuthenticationToken(
-            user, null, emptyList()
-        ).apply {
-            details = WebAuthenticationDetailsSource().buildDetails(request)
-        }
+        val authentication = UsernamePasswordAuthenticationToken(user, null, emptyList())
+        authentication.details = WebAuthenticationDetailsSource().buildDetails(request)
 
         SecurityContextHolder.getContext().authentication = authentication
         filterChain.doFilter(request, response)
