@@ -58,8 +58,8 @@ class SecurityAuthenticationFilter(
 
         // Token is valid and not blacklisted
         val token: String = header?.removePrefix(HEADER_PREFIX)!!.trim()
-        val isTokenValid: Boolean = !(_tokenBlacklistService.isInvalid(token))
-        if (isTokenValid) {
+        val isTokenInvalid: Boolean = (_tokenBlacklistService.isInvalid(token))
+        if (isTokenInvalid) {
             return filterChain.doFilter(request, response)
         }
 
