@@ -66,27 +66,26 @@ class EventService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val calendar: Calendar =
-            _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId).orElseThrow {
-                IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
-            }
-        val category: Category? = dto.categoryId?.let {
-            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-                IllegalArgumentException("Category with id $it not found for user $userId")
-            }
+        val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
+        if (calendar.isEmpty) {
+            throw IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
         }
+
+        val category: Optional<Category>? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId)
+        }
+
         val event = Event(
             name = dto.name,
             description = dto.description,
             startDate = dto.startDate,
             endDate = dto.endDate,
             recurringPattern = dto.recurringPattern,
-            calendar = calendar,
-            category = category
+            calendar = calendar.get(),
+            category = category?.get()
         )
 
         val created: Event = _eventRepository.save(event)
-
         info(source = this, message = "Created $created in ${System.currentTimeMillis() - _timer} ms")
         return created.toDto()
     }
@@ -106,12 +105,13 @@ class EventService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val event: Event = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId).orElseThrow {
+        val event: Optional<Event> = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (event.isEmpty) {
             IllegalArgumentException("Event with id $id not found for user $userId")
         }
 
         info(source = this, message = "Found $event in ${System.currentTimeMillis() - _timer} ms")
-        return event.toDto()
+        return event.get().toDto()
     }
 
     /**
@@ -225,30 +225,31 @@ class EventService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Event = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId).orElseThrow {
+        val existing: Optional<Event> = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (existing.isEmpty) {
             IllegalArgumentException("Event with id $id not found for user $userId")
         }
-        val calendar: Calendar =
-            _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId).orElseThrow {
-                IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
-            }
-        val category: Category? = dto.categoryId?.let {
-            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-                IllegalArgumentException("Category with id $it not found for user $userId")
-            }
+
+        val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
+        if (calendar.isEmpty) {
+            throw IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
         }
-        val updated = existing.copy(
+
+        val category: Optional<Category>? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId)
+        }
+
+        val updated = existing.get().copy(
             name = dto.name,
             description = dto.description,
             startDate = dto.startDate,
             endDate = dto.endDate,
             recurringPattern = dto.recurringPattern,
-            calendar = calendar,
-            category = category
+            calendar = calendar.get(),
+            category = category?.get()
         )
 
         val saved: Event = _eventRepository.save(updated)
-
         info(source = this, message = "Updated $saved in ${System.currentTimeMillis() - _timer} ms")
         return saved.toDto()
     }
@@ -273,11 +274,12 @@ class EventService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Event = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId).orElseThrow {
+        val existing: Optional<Event> = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (existing.isEmpty) {
             IllegalArgumentException("Event with id $id not found for user $userId")
         }
 
-        _eventRepository.delete(existing)
+        _eventRepository.delete(existing.get())
         info(source = this, message = "Deleted event $existing in \${System.currentTimeMillis() - _timer} ms")
     }
 
@@ -305,8 +307,8 @@ class EventService(
             calendarId = calendarId,
             userId = userId
         )
-        _eventRepository.deleteAll(events)
 
+        _eventRepository.deleteAll(events)
         info(
             source = this,
             message = "Deleted all events for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms"
@@ -344,7 +346,7 @@ class EventService(
 
         info(
             source = this,
-            message = "Deleted all events for category with id $categoryId in ${System.currentTimeMillis() - _timer} ms"
+            message = "Updated category to null for all events in ${System.currentTimeMillis() - _timer} ms"
         )
     }
 

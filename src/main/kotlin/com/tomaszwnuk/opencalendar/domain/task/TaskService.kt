@@ -62,30 +62,29 @@ class TaskService(
         ]
     )
     fun create(dto: TaskDto): TaskDto {
-        info(this, "Creating $dto")
+        info(source = this, message = "Creating $dto")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val calendar: Calendar = _calendarRepository.findByIdAndUserId(
-            id = dto.calendarId,
-            userId = userId
-        ).orElseThrow { NoSuchElementException("Calendar with id ${dto.calendarId} not found for user $userId") }
-        val category: Category? = dto.categoryId?.let {
-            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-                NoSuchElementException("Category with id $it not found for user $userId")
-            }
+        val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
+        if (calendar.isEmpty) {
+            throw IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
         }
+
+        val category: Optional<Category>? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId)
+        }
+
         val task = Task(
             name = dto.name,
             description = dto.description,
             status = dto.status,
-            calendar = calendar,
-            category = category
+            calendar = calendar.get(),
+            category = category?.get()
         )
 
         val created: Task = _taskRepository.save(task)
-
-        info(this, "Created $created in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Created $created in ${System.currentTimeMillis() - _timer} ms")
         return created.toDto()
     }
 
@@ -100,15 +99,17 @@ class TaskService(
      */
     @Cacheable(cacheNames = ["taskById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): TaskDto {
-        info(this, "Fetching task with id $id")
+        info(source = this, message = "Fetching task with id $id")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val task: Task = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
-            .orElseThrow { NoSuchElementException("Task with id $id not found for user $userId") }
+        val task: Optional<Task> = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (task.isEmpty) {
+            throw NoSuchElementException("Task with id $id not found for user $userId")
+        }
 
-        info(this, "Found $task in ${System.currentTimeMillis() - _timer} ms")
-        return task.toDto()
+        info(source = this, message = "Found $task in ${System.currentTimeMillis() - _timer} ms")
+        return task.get().toDto()
     }
 
     /**
@@ -118,13 +119,13 @@ class TaskService(
      */
     @Cacheable(cacheNames = ["allTasks"], condition = "#result != null")
     fun getAll(): List<TaskDto> {
-        info(this, "Fetching all tasks")
+        info(source = this, message = "Fetching all tasks")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
         val tasks: List<Task> = _taskRepository.findAllByCalendarUserId(userId = userId)
 
-        info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks.map { it.toDto() }
     }
 
@@ -137,14 +138,16 @@ class TaskService(
      */
     @Cacheable(cacheNames = ["calendarTasks"], key = "#calendarId", condition = "#calendarId != null")
     fun getAllByCalendarId(calendarId: UUID): List<TaskDto> {
-        info(this, "Fetching all tasks for calendar with id $calendarId")
+        info(source = this, message = "Fetching all tasks for calendar with id $calendarId")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val tasks: List<Task> =
-            _taskRepository.findAllByCalendarIdAndCalendarUserId(calendarId = calendarId, userId = userId)
+        val tasks: List<Task> = _taskRepository.findAllByCalendarIdAndCalendarUserId(
+            calendarId = calendarId,
+            userId = userId
+        )
 
-        info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks.map { it.toDto() }
     }
 
@@ -157,14 +160,16 @@ class TaskService(
      */
     @Cacheable(cacheNames = ["categoryTasks"], key = "#categoryId", condition = "#categoryId != null")
     fun getAllByCategoryId(categoryId: UUID): List<TaskDto> {
-        info(this, "Fetching all tasks for category with id $categoryId")
+        info(source = this, message = "Fetching all tasks for category with id $categoryId")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val tasks: List<Task> =
-            _taskRepository.findAllByCategoryIdAndCalendarUserId(categoryId = categoryId, userId = userId)
+        val tasks: List<Task> = _taskRepository.findAllByCategoryIdAndCalendarUserId(
+            categoryId = categoryId,
+            userId = userId
+        )
 
-        info(this, "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $tasks in ${System.currentTimeMillis() - _timer} ms")
         return tasks.map { it.toDto() }
     }
 
@@ -176,7 +181,7 @@ class TaskService(
      * @return A list of tasks that match the filter criteria as data transfer objects
      */
     fun filter(filter: TaskFilterDto): List<TaskDto> {
-        info(this, "Filtering tasks with $filter")
+        info(source = this, message = "Filtering tasks with $filter")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
@@ -189,7 +194,7 @@ class TaskService(
             categoryId = filter.categoryId
         )
 
-        info(this, "Found $filteredTasks in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Found $filteredTasks in ${System.currentTimeMillis() - _timer} ms")
         return filteredTasks.map { it.toDto() }
     }
 
@@ -212,33 +217,35 @@ class TaskService(
         ]
     )
     fun update(id: UUID, dto: TaskDto): TaskDto {
-        info(this, "Updating $dto")
+        info(source = this, message = "Updating $dto")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Task = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
-            .orElseThrow { NoSuchElementException("Task with id $id not found for user $userId") }
-        val calendar: Calendar = dto.calendarId.let {
-            _calendarRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-                NoSuchElementException("Calendar with id $it not found for user $userId")
-            }
+        val existing: Optional<Task> = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (existing.isEmpty) {
+            IllegalArgumentException("Event with id $id not found for user $userId")
         }
-        val category: Category? = dto.categoryId?.let {
-            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-                NoSuchElementException("Category with id $it not found for user $userId")
-            }
+
+        val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
+        if (calendar.isEmpty) {
+            throw IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
         }
-        val changed: Task = existing.copy(
+
+        val category: Optional<Category>? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId)
+        }
+
+        val changed: Task = existing.get().copy(
             name = dto.name,
             description = dto.description,
             status = dto.status,
-            calendar = calendar,
-            category = category
+            calendar = calendar.get(),
+            category = category?.get()
         )
 
         val updated: Task = _taskRepository.save(changed)
 
-        info(this, "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
+        info(source = this, message = "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
         return updated.toDto()
     }
 
@@ -258,15 +265,17 @@ class TaskService(
         ]
     )
     fun delete(id: UUID) {
-        info(this, "Deleting task with id $id.")
+        info(source = this, message = "Deleting task with id $id.")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val task: Task = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
-            .orElseThrow { NoSuchElementException("Task with id $id not found for user $userId") }
+        val existing: Optional<Task> = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (existing.isEmpty) {
+            IllegalArgumentException("Event with id $id not found for user $userId")
+        }
 
-        _taskRepository.delete(task)
-        info(this, "Deleted task $task in ${System.currentTimeMillis() - _timer} ms")
+        _taskRepository.delete(existing.get())
+        info(source = this, message = "Deleted task $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
     /**
@@ -285,7 +294,7 @@ class TaskService(
         ]
     )
     fun deleteAllByCalendarId(calendarId: UUID) {
-        info(this, "Deleting all tasks for calendar with id $calendarId.")
+        info(source = this, message = "Deleting all tasks for calendar with id $calendarId.")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
@@ -295,7 +304,10 @@ class TaskService(
         )
 
         _taskRepository.deleteAll(tasks)
-        info(this, "Deleted all tasks for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms")
+        info(
+            source = this,
+            message = "Deleted all tasks for calendar with id $calendarId in ${System.currentTimeMillis() - _timer} ms"
+        )
     }
 
     /**
@@ -314,7 +326,7 @@ class TaskService(
         ]
     )
     fun removeCategoryByCategoryId(categoryId: UUID) {
-        info(this, "Updating all tasks for category with id $categoryId.")
+        info(source = this, message = "Updating all tasks for category with id $categoryId.")
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
@@ -327,7 +339,10 @@ class TaskService(
             _taskRepository.save(withoutCategory)
         }
 
-        info(this, "Updated category to null for all tasks in ${System.currentTimeMillis() - _timer} ms")
+        info(
+            source = this,
+            message = "Updated category to null for all tasks in ${System.currentTimeMillis() - _timer} ms"
+        )
     }
 
 }

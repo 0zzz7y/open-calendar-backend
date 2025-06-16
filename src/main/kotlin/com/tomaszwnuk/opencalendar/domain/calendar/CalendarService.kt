@@ -23,6 +23,7 @@ class CalendarService(
      * The service for user operations.
      */
     private val _userService: UserService
+
 ) {
 
     /**
@@ -51,17 +52,19 @@ class CalendarService(
         val userId: UUID = _userService.getCurrentUserId()
         val existsByName: Boolean = _calendarRepository.existsByNameAndUserId(
             name = dto.name,
-            userId = _userService.getCurrentUserId()
+            userId = userId
         )
-        if (existsByName) throw IllegalArgumentException("Calendar with name '${dto.name}' already exists for user $userId")
+        if (existsByName) {
+            throw IllegalArgumentException("Calendar with name '${dto.name}' already exists for user $userId")
+        }
 
         val calendar = Calendar(
             name = dto.name,
             emoji = dto.emoji,
             userId = userId
         )
-        val created: Calendar = _calendarRepository.save(calendar)
 
+        val created: Calendar = _calendarRepository.save(calendar)
         info(source = this, message = "Created $created in ${System.currentTimeMillis() - _timer} ms")
         return created.toDto()
     }
@@ -98,12 +101,13 @@ class CalendarService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val calendar: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId).orElseThrow {
-            NoSuchElementException("Calendar with id $id not found for user $userId")
+        val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = id, userId = userId)
+        if (calendar.isEmpty) {
+            throw NoSuchElementException("Calendar with id $id not found for user $userId")
         }
 
         info(source = this, message = "Found $calendar in ${System.currentTimeMillis() - _timer} ms")
-        return calendar.toDto()
+        return calendar.get().toDto()
     }
 
     /**
@@ -150,10 +154,12 @@ class CalendarService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId).orElseThrow {
-            NoSuchElementException("Calendar with id $id not found for user $userId")
+        val existing: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = id, userId = userId)
+        if (existing.isEmpty) {
+            throw NoSuchElementException("Calendar with id $id not found for user $userId")
         }
-        val isNameChanged: Boolean = !(dto.name.equals(other = existing.name, ignoreCase = true))
+
+        val isNameChanged: Boolean = !(dto.name.equals(other = existing.get().name, ignoreCase = true))
         if (isNameChanged) {
             val existsByName: Boolean = _calendarRepository.existsByNameAndUserId(
                 name = dto.name,
@@ -164,12 +170,12 @@ class CalendarService(
             }
         }
 
-        val changed: Calendar = existing.copy(
+        val changed: Calendar = existing.get().copy(
             name = dto.name,
             emoji = dto.emoji
         )
-        val updated: Calendar = _calendarRepository.save(changed)
 
+        val updated: Calendar = _calendarRepository.save(changed)
         info(source = this, message = "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
         return updated.toDto()
     }
@@ -192,11 +198,12 @@ class CalendarService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Calendar = _calendarRepository.findByIdAndUserId(id = id, userId = userId).orElseThrow {
-            NoSuchElementException("Calendar with id $id not found for user $userId")
+        val existing: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = id, userId = userId)
+        if (existing.isEmpty) {
+            throw NoSuchElementException("Calendar with id $id not found for user $userId")
         }
-        _calendarRepository.delete(existing)
 
+        _calendarRepository.delete(existing.get())
         info(source = this, message = "Deleted calendar $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 

@@ -66,25 +66,23 @@ class NoteService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val calendar: Calendar = _calendarRepository.findByIdAndUserId(
-            id = dto.calendarId,
-            userId = userId
-        ).orElseThrow { NoSuchElementException("Calendar with id ${dto.calendarId} not found for user $userId") }
-        val category: Category? = dto.categoryId?.let {
-            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-                NoSuchElementException("Category with id $it not found for user $userId")
-            }
+        val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
+        if (calendar.isEmpty) {
+            throw IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
+        }
+
+        val category: Optional<Category>? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId)
         }
 
         val note = Note(
             name = dto.name,
             description = dto.description,
-            calendar = calendar,
-            category = category
+            calendar = calendar.get(),
+            category = category?.get()
         )
 
         val created: Note = _noteRepository.save(note)
-
         info(source = this, message = "Created $created in ${System.currentTimeMillis() - _timer} ms")
         return created.toDto()
     }
@@ -104,11 +102,13 @@ class NoteService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val note: Note = _noteRepository.findByIdAndCalendarUserId(id = id, userId = userId)
-            .orElseThrow { NoSuchElementException("Note with id $id not found for user $userId") }
+        val note: Optional<Note> = _noteRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (note.isEmpty) {
+            throw NoSuchElementException("Note with id $id not found for user $userId")
+        }
 
         info(source = this, message = "Found $note in ${System.currentTimeMillis() - _timer} ms")
-        return note.toDto()
+        return note.get().toDto()
     }
 
     /**
@@ -219,28 +219,30 @@ class NoteService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Note = _noteRepository.findByIdAndCalendarUserId(id = id, userId = userId)
-            .orElseThrow { NoSuchElementException("Note with id $id not found for user $userId") }
-        val calendar: Calendar = _calendarRepository.findByIdAndUserId(
-            id = dto.calendarId,
-            userId = userId
-        ).orElseThrow { NoSuchElementException("Calendar with id ${dto.calendarId} not found for user $userId") }
-        val category: Category? = dto.categoryId?.let {
-            _categoryRepository.findByIdAndUserId(id = it, userId = userId).orElseThrow {
-                NoSuchElementException("Category with id $it not found for user $userId")
-            }
+        val existing: Optional<Note> = _noteRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (existing.isEmpty) {
+            IllegalArgumentException("Event with id $id not found for user $userId")
         }
-        val changed: Note = existing.copy(
+
+        val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
+        if (calendar.isEmpty) {
+            throw IllegalArgumentException("Calendar with id ${dto.calendarId} not found for user $userId")
+        }
+
+        val category: Optional<Category>? = dto.categoryId?.let {
+            _categoryRepository.findByIdAndUserId(id = it, userId = userId)
+        }
+
+        val updated: Note = existing.get().copy(
             name = dto.name,
             description = dto.description,
-            calendar = calendar,
-            category = category
+            calendar = calendar.get(),
+            category = category?.get()
         )
 
-        val updated: Note = _noteRepository.save(changed)
-
+        val saved: Note = _noteRepository.save(updated)
         info(source = this, message = "Updated $updated in ${System.currentTimeMillis() - _timer} ms")
-        return updated.toDto()
+        return saved.toDto()
     }
 
     /**
@@ -263,10 +265,12 @@ class NoteService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val existing: Note = _noteRepository.findByIdAndCalendarUserId(id = id, userId = userId)
-            .orElseThrow { NoSuchElementException("Note with id $id not found for user $userId") }
+        val existing: Optional<Note> = _noteRepository.findByIdAndCalendarUserId(id = id, userId = userId)
+        if (existing.isEmpty) {
+            IllegalArgumentException("Event with id $id not found for user $userId")
+        }
 
-        _noteRepository.delete(existing)
+        _noteRepository.delete(existing.get())
         info(source = this, message = "Deleted note $existing in ${System.currentTimeMillis() - _timer} ms")
     }
 
