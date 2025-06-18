@@ -26,7 +26,7 @@ import java.util.*
  * The test data loader for populating the database with initial data.
  */
 @Suppress("unused")
-@Profile("development", "test")
+@Profile("production", "development", "test")
 @Component
 class TestDataLoader(
 

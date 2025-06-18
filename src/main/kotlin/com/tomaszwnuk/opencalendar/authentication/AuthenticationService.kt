@@ -21,14 +21,15 @@ class AuthenticationService(
     private val _userRepository: UserRepository,
 
     /**
-     * The password encoder for hashing passwords.
-     */
-    private val _passwordEncoder: PasswordEncoder,
-
-    /**
      * The service for performing JWT operations.
      */
     private val _jwtService: JwtService,
+
+    /**
+     * The password encoder for hashing passwords.
+     */
+    private val _passwordEncoder: PasswordEncoder
+
 ) {
 
     /**
