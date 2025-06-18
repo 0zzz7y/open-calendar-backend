@@ -57,9 +57,7 @@ internal class EventControllerTest {
 
     @Test
     fun `should return created event with status code 201 Created`() {
-        whenever(
-            _service.create(_sampleDto)
-        ).thenReturn(_sampleDto)
+        whenever(_service.create(_sampleDto)).thenReturn(_sampleDto)
 
         val response: ResponseEntity<EventDto> = _controller.create(dto = _sampleDto)
 
@@ -71,16 +69,14 @@ internal class EventControllerTest {
 
     @Test
     fun `should return paginated list of all events with status code 200 OK`() {
-        val events: List<EventDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
-        whenever(
-            _service.getAll()
-        ).thenReturn(events)
+        val dtos: List<EventDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        whenever(_service.getAll()).thenReturn(dtos)
 
         val response: ResponseEntity<Page<EventDto>> = _controller.getAll(pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(events.size.toLong(), response.body?.totalElements)
-        assertEquals(events, response.body?.content)
+        assertEquals(dtos.size.toLong(), response.body?.totalElements)
+        assertEquals(dtos, response.body?.content)
 
         verify(_service).getAll()
     }
@@ -88,9 +84,7 @@ internal class EventControllerTest {
     @Test
     fun `should return event by id with status code 200 OK`() {
         val id: UUID = _sampleDto.id!!
-        whenever(
-            _service.getById(id = id)
-        ).thenReturn(_sampleDto)
+        whenever(_service.getById(id = id)).thenReturn(_sampleDto)
 
         val response: ResponseEntity<EventDto> = _controller.getById(id = id)
 
@@ -116,11 +110,9 @@ internal class EventControllerTest {
             calendarId = _sampleDto.calendarId,
             categoryId = _sampleDto.categoryId
         )
-        val filteredEvents: List<EventDto> = listOf(_sampleDto)
+        val filteredDtos: List<EventDto> = listOf(_sampleDto)
 
-        whenever(
-            _service.filter(filter = filter)
-        ).thenReturn(filteredEvents)
+        whenever(_service.filter(filter = filter)).thenReturn(filteredDtos)
 
         val response: ResponseEntity<Page<EventDto>> = _controller.filter(
             name = name,
@@ -134,8 +126,8 @@ internal class EventControllerTest {
         )
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(filteredEvents.size.toLong(), response.body?.totalElements)
-        assertEquals(filteredEvents, response.body?.content)
+        assertEquals(filteredDtos.size.toLong(), response.body?.totalElements)
+        assertEquals(filteredDtos, response.body?.content)
 
         verify(_service).filter(filter = filter)
     }
@@ -145,9 +137,7 @@ internal class EventControllerTest {
         val id: UUID = _sampleDto.id!!
         val updated: EventDto = _sampleDto.copy(id = UUID.randomUUID())
 
-        whenever(
-            _service.update(id = id, dto = updated)
-        ).thenReturn(updated)
+        whenever(_service.update(id = id, dto = updated)).thenReturn(updated)
 
         val response: ResponseEntity<EventDto> = _controller.update(id = id, dto = updated)
 

@@ -76,9 +76,7 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should return created category with status code 201 Created`() {
-        whenever(
-            _service.create(_sampleDto)
-        ).thenReturn(_sampleDto)
+        whenever(_service.create(_sampleDto)).thenReturn(_sampleDto)
 
         val response: ResponseEntity<CategoryDto> = _controller.create(dto = _sampleDto)
 
@@ -90,17 +88,14 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should return paginated list of all categories with status code 200 OK`() {
-        val categories: List<CategoryDto> =
-            listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
-        whenever(
-            _service.getAll()
-        ).thenReturn(categories)
+        val dtos: List<CategoryDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        whenever(_service.getAll()).thenReturn(dtos)
 
         val response: ResponseEntity<Page<CategoryDto>> = _controller.getAll(pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(categories.size.toLong(), response.body?.totalElements)
-        assertEquals(categories, response.body?.content)
+        assertEquals(dtos.size.toLong(), response.body?.totalElements)
+        assertEquals(dtos, response.body?.content)
 
         verify(_service).getAll()
     }
@@ -108,9 +103,7 @@ internal class CategoryControllerTest {
     @Test
     fun `should return category by id with status code 200 OK`() {
         val id: UUID = _sampleDto.id!!
-        whenever(
-            _service.getById(id = id)
-        ).thenReturn(_sampleDto)
+        whenever(_service.getById(id = id)).thenReturn(_sampleDto)
 
         val response: ResponseEntity<CategoryDto> = _controller.getById(id = id)
 
@@ -141,9 +134,7 @@ internal class CategoryControllerTest {
         )
         val eventsList: List<EventDto> = listOf(event, event.copy(), event.copy())
 
-        whenever(
-            _eventService.getAllByCategoryId(categoryId = id)
-        ).thenReturn(eventsList)
+        whenever(_eventService.getAllByCategoryId(categoryId = id)).thenReturn(eventsList)
 
         val response: ResponseEntity<Page<EventDto>> = _controller.getEvents(id = id, pageable = _pageable)
 
@@ -172,9 +163,7 @@ internal class CategoryControllerTest {
         )
         val tasksList: List<TaskDto> = listOf(task, task.copy(), task.copy())
 
-        whenever(
-            _taskService.getAllByCategoryId(categoryId = id)
-        ).thenReturn(tasksList)
+        whenever(_taskService.getAllByCategoryId(categoryId = id)).thenReturn(tasksList)
 
         val response: ResponseEntity<Page<TaskDto>> = _controller.getTasks(id = id, pageable = _pageable)
 
@@ -202,9 +191,7 @@ internal class CategoryControllerTest {
         )
         val notesList: List<NoteDto> = listOf(note, note.copy(), note.copy())
 
-        whenever(
-            _noteService.getAllByCategoryId(categoryId = id)
-        ).thenReturn(notesList)
+        whenever(_noteService.getAllByCategoryId(categoryId = id)).thenReturn(notesList)
 
         val response: ResponseEntity<Page<NoteDto>> = _controller.getNotes(id = id, pageable = _pageable)
 
@@ -276,11 +263,9 @@ internal class CategoryControllerTest {
             name = name,
             color = color
         )
-        val filteredCategories: List<CategoryDto> = listOf(_sampleDto)
+        val filteredDtos: List<CategoryDto> = listOf(_sampleDto)
 
-        whenever(
-            _service.filter(filter = filter)
-        ).thenReturn(filteredCategories)
+        whenever(_service.filter(filter = filter)).thenReturn(filteredDtos)
 
         val response: ResponseEntity<Page<CategoryDto>> = _controller.filter(
             name = filter.name,
@@ -289,8 +274,8 @@ internal class CategoryControllerTest {
         )
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(filteredCategories.size.toLong(), response.body?.totalElements)
-        assertEquals(filteredCategories, response.body?.content)
+        assertEquals(filteredDtos.size.toLong(), response.body?.totalElements)
+        assertEquals(filteredDtos, response.body?.content)
 
         verify(_service).filter(filter = filter)
     }
@@ -300,9 +285,7 @@ internal class CategoryControllerTest {
         val id: UUID = _sampleDto.id!!
         val updated: CategoryDto = _sampleDto.copy(id = UUID.randomUUID())
 
-        whenever(
-            _service.update(id = id, dto = updated)
-        ).thenReturn(updated)
+        whenever(_service.update(id = id, dto = updated)).thenReturn(updated)
 
         val response: ResponseEntity<CategoryDto> = _controller.update(id = id, dto = updated)
 

@@ -54,9 +54,7 @@ internal class NoteControllerTest {
 
     @Test
     fun `should return created note with status code 201 Created`() {
-        whenever(
-            _service.create(_sampleDto)
-        ).thenReturn(_sampleDto)
+        whenever(_service.create(_sampleDto)).thenReturn(_sampleDto)
 
         val response: ResponseEntity<NoteDto> = _controller.create(dto = _sampleDto)
 
@@ -68,16 +66,14 @@ internal class NoteControllerTest {
 
     @Test
     fun `should return all notes with status code 200 OK`() {
-        val notes: List<NoteDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
-        whenever(
-            _service.getAll()
-        ).thenReturn(notes)
+        val dtos: List<NoteDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        whenever(_service.getAll()).thenReturn(dtos)
 
         val response: ResponseEntity<Page<NoteDto>> = _controller.getAll(pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(notes.size.toLong(), response.body?.totalElements)
-        assertEquals(notes, response.body?.content)
+        assertEquals(dtos.size.toLong(), response.body?.totalElements)
+        assertEquals(dtos, response.body?.content)
 
         verify(_service).getAll()
     }
@@ -85,9 +81,7 @@ internal class NoteControllerTest {
     @Test
     fun `should return note by id with status code 200 OK`() {
         val id: UUID = _sampleDto.id!!
-        whenever(
-            _service.getById(id = id)
-        ).thenReturn(_sampleDto)
+        whenever(_service.getById(id = id)).thenReturn(_sampleDto)
 
         val response: ResponseEntity<NoteDto> = _controller.getById(id = id)
 
@@ -107,11 +101,9 @@ internal class NoteControllerTest {
             calendarId = _sampleDto.calendarId,
             categoryId = _sampleDto.categoryId
         )
-        val filteredNotes: List<NoteDto> = listOf(_sampleDto)
+        val filteredDtos: List<NoteDto> = listOf(_sampleDto)
 
-        whenever(
-            _service.filter(filter = filter)
-        ).thenReturn(filteredNotes)
+        whenever(_service.filter(filter = filter)).thenReturn(filteredDtos)
 
         val response: ResponseEntity<Page<NoteDto>> = _controller.filter(
             name = name,
@@ -122,8 +114,8 @@ internal class NoteControllerTest {
         )
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(filteredNotes.size.toLong(), response.body?.totalElements)
-        assertEquals(filteredNotes, response.body?.content)
+        assertEquals(filteredDtos.size.toLong(), response.body?.totalElements)
+        assertEquals(filteredDtos, response.body?.content)
 
         verify(_service).filter(filter = filter)
     }
@@ -133,9 +125,7 @@ internal class NoteControllerTest {
         val id: UUID = _sampleDto.id!!
         val updated: NoteDto = _sampleDto.copy(id = UUID.randomUUID())
 
-        whenever(
-            _service.update(id = id, dto = updated)
-        ).thenReturn(updated)
+        whenever(_service.update(id = id, dto = updated)).thenReturn(updated)
 
         val response: ResponseEntity<NoteDto> = _controller.update(id = id, dto = updated)
 
