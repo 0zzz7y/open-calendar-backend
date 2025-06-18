@@ -12,119 +12,149 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.*
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.util.*
+import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 internal class NoteControllerTest {
 
     @Mock
-    private lateinit var _noteService: NoteService
+    private lateinit var _service: NoteService
 
     @InjectMocks
     private lateinit var _controller: NoteController
 
-    private lateinit var _pageable: Pageable
-
-    private lateinit var _sampleId: UUID
-
     private lateinit var _sampleDto: NoteDto
+
+    private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setUp() {
-        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
-        _sampleId = UUID.randomUUID()
         _sampleDto = NoteDto(
-            id = _sampleId,
-            name = "Weekly Summary",
-            description = "Summary of weekly progress",
+            id = UUID.randomUUID(),
+            name = "Test",
+            description = "Test",
             calendarId = UUID.randomUUID(),
             categoryId = UUID.randomUUID()
+        )
+        _pageable = PageRequest.of(
+            PAGEABLE_PAGE_NUMBER,
+            PAGEABLE_PAGE_SIZE
         )
     }
 
     @Test
-    fun `should create note with status code 201 Created`() {
-        whenever(_noteService.create(dto = eq(_sampleDto))).thenReturn(_sampleDto)
+    fun `should return created note with status code 201 Created`() {
+        whenever(
+            _service.create(_sampleDto)
+        ).thenReturn(_sampleDto)
 
         val response: ResponseEntity<NoteDto> = _controller.create(dto = _sampleDto)
 
-        assert(response.statusCode == HttpStatus.CREATED)
-        assert(response.body == _sampleDto)
-        verify(_noteService).create(dto = eq(_sampleDto))
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(_sampleDto, response.body)
+
+        verify(_service).create(eq(_sampleDto))
     }
 
     @Test
     fun `should return all notes with status code 200 OK`() {
-        val note1 = _sampleDto.copy(id = UUID.randomUUID(), name = "Standup Notes")
-        val note2 = _sampleDto.copy(id = UUID.randomUUID(), name = "Project Kickoff")
-        whenever(_noteService.getAll()).thenReturn(listOf(note1, note2))
+        val notes: List<NoteDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        whenever(
+            _service.getAll()
+        ).thenReturn(notes)
 
-        val response: ResponseEntity<Page<NoteDto>> =
-            _controller.getAll(pageable = _pageable)
+        val response: ResponseEntity<Page<NoteDto>> = _controller.getAll(pageable = _pageable)
 
-        assert(response.statusCode == HttpStatus.OK)
-        assert(response.body?.totalElements == 2L)
-        val titles = response.body?.content?.map { it.name } ?: emptyList()
-        assert(titles.containsAll(listOf("Standup Notes", "Project Kickoff")))
-        verify(_noteService).getAll()
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(notes.size.toLong(), response.body?.totalElements)
+        assertEquals(notes, response.body?.content)
+
+        verify(_service).getAll()
     }
 
     @Test
     fun `should return note by id with status code 200 OK`() {
-        whenever(_noteService.getById(_sampleId)).thenReturn(_sampleDto)
+        val id: UUID = _sampleDto.id!!
+        whenever(
+            _service.getById(id = id)
+        ).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<NoteDto> = _controller.getById(_sampleId)
+        val response: ResponseEntity<NoteDto> = _controller.getById(id = id)
 
-        assert(response.statusCode == HttpStatus.OK)
-        assert(response.body == _sampleDto)
-        verify(_noteService).getById(_sampleId)
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(_sampleDto, response.body)
+
+        verify(_service).getById(id = id)
     }
 
     @Test
     fun `should return filtered notes with status code 200 OK`() {
-        val filtered = _sampleDto.copy(id = UUID.randomUUID(), name = "Release Notes")
-        whenever(_noteService.filter(any<NoteFilterDto>())).thenReturn(listOf(filtered))
+        val name = "Test"
+        val description = "Test"
+        val filter = NoteFilterDto(
+            name = name,
+            description = description,
+            calendarId = _sampleDto.calendarId,
+            categoryId = _sampleDto.categoryId
+        )
+        val filteredNotes: List<NoteDto> = listOf(_sampleDto)
+
+        whenever(
+            _service.filter(filter = filter)
+        ).thenReturn(filteredNotes)
 
         val response: ResponseEntity<Page<NoteDto>> = _controller.filter(
-            name = "Release",
-            description = "notes",
+            name = name,
+            description = description,
             calendarId = _sampleDto.calendarId,
             categoryId = _sampleDto.categoryId,
             pageable = _pageable
         )
 
-        assert(response.statusCode == HttpStatus.OK)
-        assert(response.body?.totalElements == 1L)
-        assert(response.body?.content?.first()?.name == "Release Notes")
-        verify(_noteService).filter(any<NoteFilterDto>())
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(filteredNotes.size.toLong(), response.body?.totalElements)
+        assertEquals(filteredNotes, response.body?.content)
+
+        verify(_service).filter(filter = filter)
     }
 
     @Test
     fun `should update note with status code 200 OK`() {
-        val updated = _sampleDto.copy(name = "Sprint Retrospective")
-        whenever(_noteService.update(id = _sampleId, dto = _sampleDto)).thenReturn(updated)
+        val id: UUID = _sampleDto.id!!
+        val updated: NoteDto = _sampleDto.copy(id = UUID.randomUUID())
 
-        val response: ResponseEntity<NoteDto> = _controller.update(id = _sampleId, dto = _sampleDto)
+        whenever(
+            _service.update(id = id, dto = updated)
+        ).thenReturn(updated)
 
-        assert(response.statusCode == HttpStatus.OK)
-        assert(response.body == updated)
-        verify(_noteService).update(id = _sampleId, dto = _sampleDto)
+        val response: ResponseEntity<NoteDto> = _controller.update(id = id, dto = updated)
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(updated, response.body)
+
+        verify(_service).update(id = id, dto = updated)
     }
 
     @Test
     fun `should delete note with status code 204 No Content`() {
-        doNothing().whenever(_noteService).delete(id = _sampleId)
+        val id: UUID = _sampleDto.id!!
+        doNothing().whenever(_service).delete(id = id)
 
-        val response: ResponseEntity<Void> = _controller.delete(id = _sampleId)
+        val response: ResponseEntity<Void> = _controller.delete(id = id)
 
-        assert(response.statusCode == HttpStatus.NO_CONTENT)
-        verify(_noteService).delete(id = _sampleId)
+        assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+
+        verify(_service).delete(id = id)
     }
 
 }

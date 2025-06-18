@@ -9,122 +9,153 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.*
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.util.*
+import kotlin.test.assertEquals
 
 @ExtendWith(MockitoExtension::class)
 internal class TaskControllerTest {
 
     @Mock
-    private lateinit var _taskService: TaskService
+    private lateinit var _service: TaskService
 
     @InjectMocks
     private lateinit var _controller: TaskController
 
-    private lateinit var _pageable: Pageable
-
-    private lateinit var _sampleId: UUID
-
     private lateinit var _sampleDto: TaskDto
+
+    private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setUp() {
-        _pageable = PageRequest.of(PAGEABLE_PAGE_NUMBER, PAGEABLE_PAGE_SIZE)
-        _sampleId = UUID.randomUUID()
         _sampleDto = TaskDto(
-            id = _sampleId,
-            name = "Code Review",
-            description = "Review PRs and provide feedback",
+            id = UUID.randomUUID(),
+            name = "Test",
+            description = "Test",
             status = TaskStatus.TODO,
             calendarId = UUID.randomUUID(),
             categoryId = UUID.randomUUID()
         )
+        _pageable = PageRequest.of(
+            PAGEABLE_PAGE_NUMBER,
+            PAGEABLE_PAGE_SIZE
+        )
     }
 
     @Test
-    fun `should create task with status code 201 Created`() {
-        whenever(_taskService.create(dto = eq(_sampleDto))).thenReturn(_sampleDto)
+    fun `should return created task with status code 201 Created`() {
+        whenever(
+            _service.create(_sampleDto)
+        ).thenReturn(_sampleDto)
 
         val response: ResponseEntity<TaskDto> = _controller.create(dto = _sampleDto)
 
-        assert(response.statusCode == HttpStatus.CREATED)
-        assert(response.body == _sampleDto)
-        verify(_taskService).create(eq(_sampleDto))
+        assertEquals(HttpStatus.CREATED, response.statusCode)
+        assertEquals(_sampleDto, response.body)
+
+        verify(_service).create(eq(_sampleDto))
     }
 
     @Test
     fun `should return all tasks with status code 200 OK`() {
-        val taskOne =
-            _sampleDto.copy(id = UUID.randomUUID(), name = "Release Planning", status = TaskStatus.IN_PROGRESS)
-        val taskTwo = _sampleDto.copy(id = UUID.randomUUID(), name = "Sprint Retrospective", status = TaskStatus.DONE)
-        whenever(_taskService.getAll()).thenReturn(listOf(taskOne, taskTwo))
+        val events: List<TaskDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        whenever(
+            _service.getAll()
+        ).thenReturn(events)
 
-        val response: ResponseEntity<Page<TaskDto>> =
-            _controller.getAll(pageable = _pageable)
+        val response: ResponseEntity<Page<TaskDto>> = _controller.getAll(pageable = _pageable)
 
-        assert(response.statusCode == HttpStatus.OK)
-        assert(response.body?.totalElements == 2L)
-        val titles = response.body?.content?.map { it.name } ?: emptyList()
-        assert(titles.containsAll(listOf("Release Planning", "Sprint Retrospective")))
-        verify(_taskService).getAll()
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(events.size.toLong(), response.body?.totalElements)
+        assertEquals(events, response.body?.content)
+
+        verify(_service).getAll()
     }
 
     @Test
     fun `should return task by id with status code 200 OK`() {
-        whenever(_taskService.getById(id = _sampleId)).thenReturn(_sampleDto)
+        val id: UUID = _sampleDto.id!!
+        whenever(
+            _service.getById(id = id)
+        ).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<TaskDto> = _controller.getById(id = _sampleId)
+        val response: ResponseEntity<TaskDto> = _controller.getById(id = id)
 
-        assert(response.statusCode == HttpStatus.OK)
-        assert(response.body == _sampleDto)
-        verify(_taskService).getById(id = _sampleId)
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(_sampleDto, response.body)
+
+        verify(_service).getById(id = id)
     }
 
     @Test
     fun `should return filtered tasks with status code 200 OK`() {
-        val filteredDto = _sampleDto.copy(id = UUID.randomUUID(), name = "Deployment")
-        whenever(_taskService.filter(any<TaskFilterDto>())).thenReturn(listOf(filteredDto))
+        val name = "Test"
+        val description = "Test"
+        val status: TaskStatus = TaskStatus.TODO
+        val filter = TaskFilterDto(
+            name = name,
+            description = description,
+            status = status,
+            calendarId = _sampleDto.calendarId,
+            categoryId = _sampleDto.categoryId
+        )
+        val filteredEvents: List<TaskDto> = listOf(_sampleDto)
+
+        whenever(
+            _service.filter(filter = filter)
+        ).thenReturn(filteredEvents)
 
         val response: ResponseEntity<Page<TaskDto>> = _controller.filter(
-            name = "Deploy",
-            description = "release",
-            status = TaskStatus.TODO.name,
+            name = name,
+            description = description,
+            status = status.toString(),
             calendarId = _sampleDto.calendarId,
             categoryId = _sampleDto.categoryId,
             pageable = _pageable
         )
 
-        assert(response.statusCode == HttpStatus.OK)
-        assert(response.body?.totalElements == 1L)
-        assert(response.body?.content?.first()?.name == "Deployment")
-        verify(_taskService).filter(any<TaskFilterDto>())
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(filteredEvents.size.toLong(), response.body?.totalElements)
+        assertEquals(filteredEvents, response.body?.content)
+
+        verify(_service).filter(filter = filter)
     }
 
     @Test
     fun `should update task with status code 200 OK`() {
-        val updatedDto = _sampleDto.copy(status = TaskStatus.IN_PROGRESS)
-        whenever(_taskService.update(id = _sampleId, dto = _sampleDto)).thenReturn(updatedDto)
+        val id: UUID = _sampleDto.id!!
+        val updated: TaskDto = _sampleDto.copy(id = UUID.randomUUID())
 
-        val response: ResponseEntity<TaskDto> = _controller.update(id = _sampleId, dto = _sampleDto)
+        whenever(
+            _service.update(id = id, dto = updated)
+        ).thenReturn(updated)
 
-        assert(response.statusCode == HttpStatus.OK)
-        assert(response.body == updatedDto)
-        verify(_taskService).update(_sampleId, _sampleDto)
+        val response: ResponseEntity<TaskDto> = _controller.update(id = id, dto = updated)
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(updated, response.body)
+
+        verify(_service).update(id = id, dto = updated)
     }
 
     @Test
     fun `should delete task with status code 204 No Content`() {
-        doNothing().whenever(_taskService).delete(id = _sampleId)
+        val id: UUID = _sampleDto.id!!
+        doNothing().whenever(_service).delete(id = id)
 
-        val response: ResponseEntity<Void> = _controller.delete(id = _sampleId)
+        val response: ResponseEntity<Void> = _controller.delete(id = id)
 
-        assert(response.statusCode == HttpStatus.NO_CONTENT)
-        verify(_taskService).delete(id = _sampleId)
+        assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
+
+        verify(_service).delete(id = id)
     }
 
 }

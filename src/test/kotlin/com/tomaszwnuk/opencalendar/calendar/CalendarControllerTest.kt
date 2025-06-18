@@ -50,24 +50,22 @@ internal class CalendarControllerTest {
     @InjectMocks
     private lateinit var _controller: CalendarController
 
-    private lateinit var _sampleCalendar: Calendar
-
-    private lateinit var _sampleCalendarDto: CalendarDto
+    private lateinit var _sampleDto: CalendarDto
 
     private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setUp() {
-        _sampleCalendar = Calendar(
+        val calendar = Calendar(
             id = UUID.randomUUID(),
             name = "Test",
             emoji = "🟢",
             userId = UUID.randomUUID()
         )
-        _sampleCalendarDto = CalendarDto(
-            id = _sampleCalendar.id,
-            name = _sampleCalendar.name,
-            emoji = _sampleCalendar.emoji
+        _sampleDto = CalendarDto(
+            id = calendar.id,
+            name = calendar.name,
+            emoji = calendar.emoji
         )
         _pageable = PageRequest.of(
             TestConstants.PAGEABLE_PAGE_NUMBER,
@@ -78,28 +76,26 @@ internal class CalendarControllerTest {
     @Test
     fun `should return created calendar with status code 201 Created`() {
         whenever(
-            _service.create(
-                eq(_sampleCalendarDto)
-            )
-        ).thenReturn(_sampleCalendarDto)
+            _service.create(_sampleDto)
+        ).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<CalendarDto> = _controller.create(_sampleCalendarDto)
+        val response: ResponseEntity<CalendarDto> = _controller.create(dto = _sampleDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleCalendarDto, response.body)
+        assertEquals(_sampleDto, response.body)
 
-        verify(_service).create(eq(_sampleCalendarDto))
+        verify(_service).create(eq(_sampleDto))
     }
 
     @Test
     fun `should return paginated list of all calendars with status code 200 OK`() {
         val calendars: List<CalendarDto> =
-            listOf(_sampleCalendarDto, _sampleCalendarDto.copy(), _sampleCalendarDto.copy())
+            listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
         whenever(
             _service.getAll()
         ).thenReturn(calendars)
 
-        val response: ResponseEntity<Page<CalendarDto>> = _controller.getAll(_pageable)
+        val response: ResponseEntity<Page<CalendarDto>> = _controller.getAll(pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(calendars.size.toLong(), response.body?.totalElements)
@@ -110,22 +106,22 @@ internal class CalendarControllerTest {
 
     @Test
     fun `should return calendar by id with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+        val id: UUID = _sampleDto.id!!
         whenever(
             _service.getById(id = id)
-        ).thenReturn(_sampleCalendarDto)
+        ).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<CalendarDto> = _controller.getById(_sampleCalendar.id)
+        val response: ResponseEntity<CalendarDto> = _controller.getById(id = id)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(_sampleCalendarDto, response.body)
+        assertEquals(_sampleDto, response.body)
 
-        verify(_service).getById(id)
+        verify(_service).getById(id = id)
     }
 
     @Test
     fun `should return paginated list of calendar events with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+        val id: UUID = _sampleDto.id!!
         val now: LocalDateTime = LocalDateTime.now()
         val event = EventDto(
             id = UUID.randomUUID(),
@@ -154,7 +150,7 @@ internal class CalendarControllerTest {
 
     @Test
     fun `should return paginated list of calendar tasks with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+        val id: UUID = _sampleDto.id!!
         val task = TaskDto(
             id = UUID.randomUUID(),
             name = "Test",
@@ -179,7 +175,7 @@ internal class CalendarControllerTest {
 
     @Test
     fun `should return paginated list of calendar notes with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+        val id: UUID = _sampleDto.id!!
         val note = NoteDto(
             id = UUID.randomUUID(),
             name = "Test",
@@ -204,7 +200,7 @@ internal class CalendarControllerTest {
 
     @Test
     fun `should return paginated list of calendar items with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
+        val id: UUID = _sampleDto.id!!
         val now: LocalDateTime = LocalDateTime.now()
         val event = EventDto(
             id = UUID.randomUUID(),
@@ -257,16 +253,16 @@ internal class CalendarControllerTest {
 //            name = name,
 //            emoji = emoji
 //        )
-//        val filteredCalendars: List<CalendarDto> = listOf(_sampleCalendarDto)
+//        val filteredCalendars: List<CalendarDto> = listOf(_sampleDto)
 //
 //        whenever(
 //            _service.filter(filter = filter)
 //        ).thenReturn(filteredCalendars)
 //
 //        val response: ResponseEntity<Page<CalendarDto>> = _controller.filter(
-//            name = eq(filter.name),
-//            emoji = eq(filter.emoji),
-//            pageable = eq(_pageable)
+//            name = filter.name,
+//            emoji = filter.emoji,
+//            pageable = _pageable
 //        )
 //
 //        assertEquals(HttpStatus.OK, response.statusCode)
@@ -278,30 +274,31 @@ internal class CalendarControllerTest {
 
     @Test
     fun `should return updated calendar with status code 200 OK`() {
-        val id: UUID = _sampleCalendar.id
-        val updated: CalendarDto = _sampleCalendarDto.copy(id = UUID.randomUUID())
+        val id: UUID = _sampleDto.id!!
+        val updated: CalendarDto = _sampleDto.copy(id = UUID.randomUUID())
 
         whenever(
-            _service.update(id = id, updated)
+            _service.update(id = id, dto = updated)
         ).thenReturn(updated)
 
-        val response: ResponseEntity<CalendarDto> = _controller.update(id = id, updated)
+        val response: ResponseEntity<CalendarDto> = _controller.update(id = id, dto = updated)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(updated, response.body)
 
-        verify(_service).update(id = id, updated)
+        verify(_service).update(id = id, dto = updated)
     }
 
     @Test
     fun `should delete calendar with status code 204 No Content`() {
-        doNothing().whenever(_service).delete(id = _sampleCalendar.id)
+        val id: UUID = _sampleDto.id!!
+        doNothing().whenever(_service).delete(id = id)
 
-        val response: ResponseEntity<Void> = _controller.delete(id = _sampleCalendar.id)
+        val response: ResponseEntity<Void> = _controller.delete(id = id)
 
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
 
-        verify(_service).delete(id = _sampleCalendar.id)
+        verify(_service).delete(id = id)
     }
 
 }

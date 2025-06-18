@@ -89,7 +89,7 @@
 //    @Test
 //    fun `should return category by id`() {
 //        val id = UUID.randomUUID()
-//        val category = Category(id = id, name = "Team", color = "#00FF00")
+//        val category = Category(id = id, name = "Team", color = "#00FF00", userId = _userId)
 //
 //        whenever(_repository.findById(id)).thenReturn(Optional.of(category))
 //
@@ -118,9 +118,9 @@
 //    @Test
 //    fun `should return list of filtered categories`() {
 //        val filter = CategoryFilterDto(name = "Filter", color = "#00FF00")
-//        val matching = Category(id = UUID.randomUUID(), name = "Filter", color = "#00FF00")
+//        val matching = Category(id = UUID.randomUUID(), name = "Filter", color = "#00FF00", userId = _userId)
 //
-//        whenever(_repository.filter(name = "Filter", color = "#00FF00")).thenReturn(listOf(matching))
+//        whenever(_repository.filter(name = "Filter", color = "#00FF00", userId = _userId)).thenReturn(listOf(matching))
 //
 //        val result = _service.filter(filter = filter)
 //
@@ -128,13 +128,13 @@
 //        assertEquals("Filter", result[0].name)
 //        assertEquals("#00FF00", result[0].color)
 //
-//        verify(_repository).filter(name = "Filter", color = "#00FF00")
+//        verify(_repository).filter(name = "Filter", color = "#00FF00", userId = _userId)
 //    }
 //
 //    @Test
 //    fun `should return updated category with old title`() {
 //        val id = UUID.randomUUID()
-//        val existing = Category(id = id, name = "Old", color = "#00FF00")
+//        val existing = Category(id = id, name = "Old", color = "#00FF00", userId = _userId)
 //        val dto = CategoryDto(id = id, name = "Old", color = "#FF0000")
 //
 //        whenever(_repository.findById(id)).thenReturn(Optional.of(existing))
@@ -146,7 +146,7 @@
 //        assertEquals("#FF0000", result.color)
 //
 //        verify(_repository).findById(id)
-//        verify(_repository, never()).existsByNameAndUserId(any<String>())
+//        verify(_repository, never()).existsByNameAndUserId(any<String>(), userId = _userId)
 //        verify(_repository).save(argThat { color == "#FF0000" })
 //    }
 //

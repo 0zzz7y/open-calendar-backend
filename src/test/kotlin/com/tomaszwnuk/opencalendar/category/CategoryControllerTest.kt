@@ -1,9 +1,8 @@
 package com.tomaszwnuk.opencalendar.category
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_NUMBER
 import com.tomaszwnuk.opencalendar.TestConstants.PAGEABLE_PAGE_SIZE
-import com.tomaszwnuk.opencalendar.domain.calendar.Calendar
+import com.tomaszwnuk.opencalendar.domain.calendar.CalendarDto
 import com.tomaszwnuk.opencalendar.domain.category.*
 import com.tomaszwnuk.opencalendar.domain.event.EventDto
 import com.tomaszwnuk.opencalendar.domain.event.EventService
@@ -13,7 +12,6 @@ import com.tomaszwnuk.opencalendar.domain.note.NoteService
 import com.tomaszwnuk.opencalendar.domain.task.TaskDto
 import com.tomaszwnuk.opencalendar.domain.task.TaskService
 import com.tomaszwnuk.opencalendar.domain.task.TaskStatus
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -27,21 +25,19 @@ import org.mockito.kotlin.whenever
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import java.awt.Color
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @ExtendWith(MockitoExtension::class)
 internal class CategoryControllerTest {
 
     @Mock
-    private lateinit var _categoryService: CategoryService
+    private lateinit var _service: CategoryService
 
     @Mock
     private lateinit var _eventService: EventService
@@ -52,223 +48,280 @@ internal class CategoryControllerTest {
     @Mock
     private lateinit var _noteService: NoteService
 
-    @Mock
-    private lateinit var _userId: UUID
-
     @InjectMocks
     private lateinit var _controller: CategoryController
 
-    private lateinit var _mockMvc: MockMvc
-
-    private lateinit var _objectMapper: ObjectMapper
-
-    private lateinit var _sampleCategory: Category
-
-    private lateinit var _sampleCategoryDto: CategoryDto
+    private lateinit var _sampleDto: CategoryDto
 
     private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setUp() {
-        _userId = UUID.randomUUID()
-        _sampleCategory = Category(
+        val category = Category(
             id = UUID.randomUUID(),
-            name = "Personal",
-            color = CategoryColorHelper.toHex(Color.GREEN),
-            userId = _userId
+            name = "Test",
+            color = CategoryColorHelper.toHex(Color.BLUE),
+            userId = UUID.randomUUID()
         )
-        _sampleCategoryDto = _sampleCategory.toDto()
-        _objectMapper = ObjectMapper()
+        _sampleDto = CategoryDto(
+            id = category.id,
+            name = category.name,
+            color = category.color
+        )
         _pageable = PageRequest.of(
             PAGEABLE_PAGE_NUMBER,
             PAGEABLE_PAGE_SIZE
         )
-        _mockMvc = MockMvcBuilders
-            .standaloneSetup(_controller)
-            .setCustomArgumentResolvers(PageableHandlerMethodArgumentResolver())
-            .build()
     }
 
     @Test
     fun `should return created category with status code 201 Created`() {
-        whenever(_categoryService.create(eq(_sampleCategoryDto))).thenReturn(_sampleCategoryDto)
+        whenever(
+            _service.create(_sampleDto)
+        ).thenReturn(_sampleDto)
 
-        val response: ResponseEntity<CategoryDto> = _controller.create(_sampleCategoryDto)
+        val response: ResponseEntity<CategoryDto> = _controller.create(dto = _sampleDto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleCategoryDto, response.body)
+        assertEquals(_sampleDto, response.body)
 
-        verify(_categoryService).create(eq(_sampleCategoryDto))
+        verify(_service).create(eq(_sampleDto))
     }
 
     @Test
     fun `should return paginated list of all categories with status code 200 OK`() {
-        val categories = listOf(_sampleCategory, _sampleCategory.copy(), _sampleCategory.copy())
-        whenever(_categoryService.getAll()).thenReturn(categories.map { it.toDto() })
+        val categories: List<CategoryDto> =
+            listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        whenever(
+            _service.getAll()
+        ).thenReturn(categories)
 
-        val response: ResponseEntity<Page<CategoryDto>> =
-            _controller.getAll(pageable = _pageable)
+        val response: ResponseEntity<Page<CategoryDto>> = _controller.getAll(pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(categories.size.toLong(), response.body?.totalElements)
-        assertEquals(categories.map { it.id }, response.body?.content?.map { it.id })
+        assertEquals(categories, response.body?.content)
 
-        verify(_categoryService).getAll()
+        verify(_service).getAll()
     }
 
     @Test
     fun `should return category by id with status code 200 OK`() {
-        val id = _sampleCategory.id
-        whenever(_categoryService.getById(id = id)).thenReturn(_sampleCategoryDto)
+        val id: UUID = _sampleDto.id!!
+        whenever(
+            _service.getById(id = id)
+        ).thenReturn(_sampleDto)
 
         val response: ResponseEntity<CategoryDto> = _controller.getById(id = id)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(_sampleCategoryDto, response.body)
+        assertEquals(_sampleDto, response.body)
 
-        verify(_categoryService).getById(id)
+        verify(_service).getById(id = id)
     }
 
     @Test
     fun `should return paginated list of category events with status code 200 OK`() {
-        val id = _sampleCategory.id
-        val now = LocalDateTime.now()
-        val calendar = Calendar(name = "Calendar", emoji = "📅", userId = _userId)
-        val eventDto = EventDto(
+        val id: UUID = _sampleDto.id!!
+        val now: LocalDateTime = LocalDateTime.now()
+        val calendar = CalendarDto(
             id = UUID.randomUUID(),
-            name = "Event",
-            description = "Desc",
+            name = "Test",
+            emoji = "🟢"
+        )
+        val event = EventDto(
+            id = UUID.randomUUID(),
+            name = "Test",
+            description = "Test",
             startDate = now,
             endDate = now.plusHours(1),
             recurringPattern = RecurringPattern.NONE,
-            calendarId = calendar.id
+            calendarId = calendar.id!!,
+            categoryId = id
         )
-        whenever(_eventService.getAllByCategoryId(categoryId = id)).thenReturn(listOf(eventDto))
+        val eventsList: List<EventDto> = listOf(event, event.copy(), event.copy())
 
-        val response: ResponseEntity<Page<EventDto>> =
-            _controller.getEvents(id = id, pageable = _pageable)
+        whenever(
+            _eventService.getAllByCategoryId(categoryId = id)
+        ).thenReturn(eventsList)
+
+        val response: ResponseEntity<Page<EventDto>> = _controller.getEvents(id = id, pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(1, response.body?.totalElements)
-        assertEquals(eventDto.name, response.body?.content?.first()?.name)
+        assertEquals(eventsList.size.toLong(), response.body?.totalElements)
+        assertEquals(eventsList, response.body?.content)
 
         verify(_eventService).getAllByCategoryId(categoryId = id)
     }
 
     @Test
     fun `should return paginated list of category tasks with status code 200 OK`() {
-        val id = _sampleCategory.id
-        val calendar = Calendar(id = UUID.randomUUID(), name = "Calendar", emoji = "📅", userId = _userId)
-        val taskDto = TaskDto(
+        val id: UUID = _sampleDto.id!!
+        val calendar = CalendarDto(
             id = UUID.randomUUID(),
-            name = "Task",
-            description = "Desc",
-            status = TaskStatus.TODO,
-            calendarId = calendar.id
+            name = "Test",
+            emoji = "🟢"
         )
-        whenever(_taskService.getAllByCategoryId(categoryId = id)).thenReturn(listOf(taskDto))
+        val task = TaskDto(
+            id = UUID.randomUUID(),
+            name = "Test",
+            description = "Test",
+            status = TaskStatus.TODO,
+            calendarId = calendar.id!!,
+            categoryId = id
+        )
+        val tasksList: List<TaskDto> = listOf(task, task.copy(), task.copy())
 
-        val response: ResponseEntity<Page<TaskDto>> =
-            _controller.getTasks(id = id, pageable = _pageable)
+        whenever(
+            _taskService.getAllByCategoryId(categoryId = id)
+        ).thenReturn(tasksList)
+
+        val response: ResponseEntity<Page<TaskDto>> = _controller.getTasks(id = id, pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(1, response.body?.totalElements)
-        assertEquals(taskDto.name, response.body?.content?.first()?.name)
+        assertEquals(tasksList.size.toLong(), response.body?.totalElements)
+        assertEquals(tasksList, response.body?.content)
 
         verify(_taskService).getAllByCategoryId(categoryId = id)
     }
 
     @Test
     fun `should return paginated list of category notes with status code 200 OK`() {
-        val id = _sampleCategory.id
-        val calendar = Calendar(id = UUID.randomUUID(), name = "Calendar", emoji = "📅", userId = _userId)
-        val noteDto = NoteDto(
+        val id: UUID = _sampleDto.id!!
+        val calendar = CalendarDto(
             id = UUID.randomUUID(),
-            name = "Note",
-            description = "Desc",
-            calendarId = calendar.id
+            name = "Test",
+            emoji = "🟢"
         )
-        whenever(_noteService.getAllByCategoryId(id)).thenReturn(listOf(noteDto))
+        val note = NoteDto(
+            id = UUID.randomUUID(),
+            name = "Test",
+            description = "Test",
+            calendarId = calendar.id!!,
+            categoryId = id
+        )
+        val notesList: List<NoteDto> = listOf(note, note.copy(), note.copy())
 
-        val response: ResponseEntity<Page<NoteDto>> =
-            _controller.getNotes(id, _pageable)
+        whenever(
+            _noteService.getAllByCategoryId(categoryId = id)
+        ).thenReturn(notesList)
+
+        val response: ResponseEntity<Page<NoteDto>> = _controller.getNotes(id = id, pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(1, response.body?.totalElements)
-        assertEquals(noteDto.name, response.body?.content?.first()?.name)
+        assertEquals(notesList.size.toLong(), response.body?.totalElements)
+        assertEquals(notesList, response.body?.content)
 
-        verify(_noteService).getAllByCategoryId(id)
+        verify(_noteService).getAllByCategoryId(categoryId = id)
     }
 
     @Test
     fun `should return combined list of items with status code 200 OK`() {
-        val id = _sampleCategory.id
-        val now = LocalDateTime.now()
-        val calendar = Calendar(name = "Calendar", emoji = "📅", userId = _userId)
-        val eventDto = EventDto(
+        val id: UUID = _sampleDto.id!!
+        val now: LocalDateTime = LocalDateTime.now()
+        val calendar = CalendarDto(
             id = UUID.randomUUID(),
-            name = "Event",
-            description = "",
+            name = "Test",
+            emoji = "🟢"
+        )
+        val calendarId: UUID = calendar.id!!
+        val event = EventDto(
+            id = UUID.randomUUID(),
+            name = "Test",
+            description = "Test",
             startDate = now,
-            endDate = now,
+            endDate = now.plusHours(1),
             recurringPattern = RecurringPattern.NONE,
-            calendarId = calendar.id
+            calendarId = calendarId,
+            categoryId = id
         )
-        val taskDto = TaskDto(
+        val task = TaskDto(
             id = UUID.randomUUID(),
-            name = "Task",
-            description = "",
+            name = "Test",
+            description = "Test",
             status = TaskStatus.TODO,
-            calendarId = calendar.id
+            calendarId = calendarId,
+            categoryId = id
         )
-        val noteDto = NoteDto(
+        val note = NoteDto(
             id = UUID.randomUUID(),
-            name = "Note",
-            description = "",
-            calendarId = calendar.id
+            name = "Test",
+            description = "Test",
+            calendarId = calendarId,
+            categoryId = id
         )
-        whenever(_eventService.getAllByCategoryId(id)).thenReturn(listOf(eventDto))
-        whenever(_taskService.getAllByCategoryId(id)).thenReturn(listOf(taskDto))
-        whenever(_noteService.getAllByCategoryId(id)).thenReturn(listOf(noteDto))
 
-        val response: ResponseEntity<List<Map<String, Any>>> =
-            _controller.getAllItems(id, _pageable)
+        whenever(_eventService.getAllByCategoryId(categoryId = id)).thenReturn(listOf(event))
+        whenever(_taskService.getAllByCategoryId(categoryId = id)).thenReturn(listOf(task))
+        whenever(_noteService.getAllByCategoryId(categoryId = id)).thenReturn(listOf(note))
+
+        val response: ResponseEntity<List<Map<String, Any>>> = _controller.getAllItems(id = id, pageable = _pageable)
 
         assertEquals(HttpStatus.OK, response.statusCode)
         assertEquals(3, response.body?.size)
+
         val types = response.body?.mapNotNull { it["type"] as? String } ?: emptyList()
         assertTrue(types.containsAll(listOf("event", "task", "note")))
 
-        verify(_eventService).getAllByCategoryId(id)
-        verify(_taskService).getAllByCategoryId(id)
-        verify(_noteService).getAllByCategoryId(id)
+        verify(_eventService).getAllByCategoryId(categoryId = id)
+        verify(_taskService).getAllByCategoryId(categoryId = id)
+        verify(_noteService).getAllByCategoryId(categoryId = id)
+    }
+
+    @Test
+    fun `should return paginated list of filtered categories with status code 200 OK`() {
+        val name = "Test"
+        val color = CategoryColorHelper.toHex(Color.BLUE)
+        val filter = CategoryFilterDto(
+            name = name,
+            color = color
+        )
+        val filteredCategories: List<CategoryDto> = listOf(_sampleDto)
+
+        whenever(
+            _service.filter(filter = filter)
+        ).thenReturn(filteredCategories)
+
+        val response: ResponseEntity<Page<CategoryDto>> = _controller.filter(
+            name = filter.name,
+            color = filter.color,
+            pageable = _pageable
+        )
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertEquals(filteredCategories.size.toLong(), response.body?.totalElements)
+        assertEquals(filteredCategories, response.body?.content)
+
+        verify(_service).filter(filter = filter)
     }
 
     @Test
     fun `should update category with status code 200 OK`() {
-        val dto = _sampleCategory.toDto()
-        val updatedDto = dto.copy(name = "Work")
-        whenever(_categoryService.update(id = _sampleCategory.id, dto)).thenReturn(updatedDto)
+        val id: UUID = _sampleDto.id!!
+        val updated: CategoryDto = _sampleDto.copy(id = UUID.randomUUID())
 
-        val response: ResponseEntity<CategoryDto> =
-            _controller.update(id = _sampleCategory.id, dto)
+        whenever(
+            _service.update(id = id, dto = updated)
+        ).thenReturn(updated)
+
+        val response: ResponseEntity<CategoryDto> = _controller.update(id = id, dto = updated)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(updatedDto, response.body)
+        assertEquals(updated, response.body)
 
-        verify(_categoryService).update(id = _sampleCategory.id, dto)
+        verify(_service).update(id = id, dto = updated)
     }
 
     @Test
     fun `should delete category with status code 204 No Content`() {
-        doNothing().whenever(_categoryService).delete(id = _sampleCategory.id)
+        val id: UUID = _sampleDto.id!!
+        doNothing().whenever(_service).delete(id = id)
 
-        val response: ResponseEntity<Void> =
-            _controller.delete(id = _sampleCategory.id)
+        val response: ResponseEntity<Void> = _controller.delete(id = id)
 
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
 
-        verify(_categoryService).delete(id = _sampleCategory.id)
+        verify(_service).delete(id = id)
     }
 
 }
