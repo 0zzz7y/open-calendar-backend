@@ -1,4 +1,4 @@
-group = "com.tomaszwnuk"
+group = "com.ozzz7y"
 version = "1.0.0"
 
 repositories {
