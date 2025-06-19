@@ -8,15 +8,23 @@ on:
 jobs:
   synchronization:
     runs-on: ubuntu-latest
+
+    environment:
+      name: Production
+
     steps:
-      - name: Checkout Production
+      - name: Checkout production branch
         uses: actions/checkout@v4
         with:
           ref: production
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Push to main
+      - name: Set up Git configuration
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Push production to main
+        run: |
+          git fetch origin
           git push origin production:main --force
