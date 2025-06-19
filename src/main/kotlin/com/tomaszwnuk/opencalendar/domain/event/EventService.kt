@@ -52,7 +52,7 @@ class EventService(
      *
      * @return The created event as a data transfer object
      *
-     * @throws IllegalArgumentException if the calendar or category does not exist for the user
+     * @throws IllegalArgumentException If the calendar does not exist for the user
      */
     @Caching(
         evict = [
@@ -97,7 +97,7 @@ class EventService(
      *
      * @return The event as a data transfer object
      *
-     * @throws IllegalArgumentException if the event does not exist for the user
+     * @throws NoSuchElementException If the event does not exist for the user
      */
     @Cacheable(cacheNames = ["eventById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): EventDto {
@@ -107,7 +107,7 @@ class EventService(
         val userId: UUID = _userService.getCurrentUserId()
         val event: Optional<Event> = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId)
         if (event.isEmpty) {
-            IllegalArgumentException("Event with id $id not found for user $userId")
+            throw NoSuchElementException("Event with id $id not found for user $userId")
         }
 
         info(source = this, message = "Found $event in ${System.currentTimeMillis() - _timer} ms")
@@ -210,7 +210,8 @@ class EventService(
      *
      * @return The updated event as a data transfer object
      *
-     * @throws IllegalArgumentException if the event, calendar, or category does not exist for the user
+     * @throws NoSuchElementException If the event does not exist for the user
+     * @throws IllegalArgumentException If the calendar does not exist for the user
      */
     @Caching(
         evict = [
@@ -227,7 +228,7 @@ class EventService(
         val userId: UUID = _userService.getCurrentUserId()
         val existing: Optional<Event> = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId)
         if (existing.isEmpty) {
-            IllegalArgumentException("Event with id $id not found for user $userId")
+            throw NoSuchElementException("Event with id $id not found for user $userId")
         }
 
         val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
@@ -259,7 +260,7 @@ class EventService(
      *
      * @param id The unique identifier of the event to delete
      *
-     * @throws IllegalArgumentException if the event does not exist for the user
+     * @throws NoSuchElementException If the event does not exist for the user
      */
     @Caching(
         evict = [
@@ -276,7 +277,7 @@ class EventService(
         val userId: UUID = _userService.getCurrentUserId()
         val existing: Optional<Event> = _eventRepository.findByIdAndCalendarUserId(id = id, userId = userId)
         if (existing.isEmpty) {
-            IllegalArgumentException("Event with id $id not found for user $userId")
+            throw NoSuchElementException("Event with id $id not found for user $userId")
         }
 
         _eventRepository.delete(existing.get())
@@ -287,8 +288,6 @@ class EventService(
      * Deletes all events associated with a specific calendar.
      *
      * @param calendarId The unique identifier of the calendar
-     *
-     * @throws IllegalArgumentException if the calendar does not exist for the user
      */
     @Caching(
         evict = [
@@ -319,8 +318,6 @@ class EventService(
      * Removes the category from all events associated with a specific category.
      *
      * @param categoryId The unique identifier of the category
-     *
-     * @throws IllegalArgumentException if the category does not exist for the user
      */
     @Caching(
         evict = [

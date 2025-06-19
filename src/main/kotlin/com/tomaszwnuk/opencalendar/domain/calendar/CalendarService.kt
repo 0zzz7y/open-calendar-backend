@@ -38,7 +38,7 @@ class CalendarService(
      *
      * @return The created calendar as a data transfer object
      *
-     * @throws IllegalArgumentException if a calendar with the same name already exists for the user
+     * @throws IllegalArgumentException If a calendar with the same name already exists for the user
      */
     @Caching(
         evict = [
@@ -93,7 +93,7 @@ class CalendarService(
      *
      * @return The calendar as a data transfer object
      *
-     * @throws NoSuchElementException if the calendar with the specified ID is not found for the user
+     * @throws NoSuchElementException If the calendar does not exist for the user
      */
     @Cacheable(cacheNames = ["calendarById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): CalendarDto {
@@ -140,8 +140,8 @@ class CalendarService(
      *
      * @return The updated calendar as a data transfer object
      *
-     * @throws NoSuchElementException if the calendar with the specified unique identifier is not found for the user
-     * @throws IllegalArgumentException if a calendar with the same name already exists for the user
+     * @throws NoSuchElementException If the calendar does not exist for the user
+     * @throws IllegalArgumentException If a calendar with the same name already exists for the user
      */
     @Caching(
         evict = [
@@ -185,7 +185,7 @@ class CalendarService(
      *
      * @param id The unique identifier of the calendar to delete
      *
-     * @throws NoSuchElementException if the calendar with the specified unique identifier is not found for the user
+     * @throws NoSuchElementException If the calendar does not exist for the user
      */
     @Caching(
         evict = [

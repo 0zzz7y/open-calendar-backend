@@ -38,7 +38,7 @@ class CategoryService(
      *
      * @return The created category as a data transfer object
      *
-     * @throws IllegalArgumentException if a category with the same name already exists for the user
+     * @throws IllegalArgumentException If The category with the same name already exists for the user
      */
     @Caching(
         evict = [
@@ -93,7 +93,7 @@ class CategoryService(
      *
      * @return The category as a data transfer object
      *
-     * @throws NoSuchElementException if the category with the specified unique identifier does not exist for the user
+     * @throws NoSuchElementException If the category does not exist for the user
      */
     @Cacheable(cacheNames = ["categoryById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): CategoryDto {
@@ -140,8 +140,8 @@ class CategoryService(
      *
      * @return The updated category as a data transfer object
      *
-     * @throws NoSuchElementException if the category with the specified unique identifier is not found for the user
-     * @throws IllegalArgumentException if a category with the same name already exists for the user
+     * @throws NoSuchElementException If the category does not exist for the user
+     * @throws IllegalArgumentException If a category with the same name already exists for the user
      */
     @Caching(
         evict = [
@@ -185,7 +185,7 @@ class CategoryService(
      *
      * @param id The unique identifier of the category to delete
      *
-     * @throws NoSuchElementException if the category with the specified unique identifier is not found for the user
+     * @throws NoSuchElementException If the category does not exist for the user
      */
     @Caching(
         evict = [

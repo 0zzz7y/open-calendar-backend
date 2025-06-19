@@ -43,7 +43,7 @@ interface NoteRepository : JpaRepository<Note, UUID> {
     WHERE (n.calendar.userId = :userId)
     """
     )
-    fun findAllByUserId(
+    fun findAllByCalendarUserId(
         @Param("userId") userId: UUID
     ): List<Note>
 

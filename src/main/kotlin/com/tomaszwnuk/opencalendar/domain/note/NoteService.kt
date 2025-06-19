@@ -52,7 +52,7 @@ class NoteService(
      *
      * @return The created note as a data transfer object
      *
-     * @throws NoSuchElementException if the calendar or category does not exist for the user
+     * @throws IllegalArgumentException If the calendar does not exist for the user
      */
     @Caching(
         evict = [
@@ -94,7 +94,7 @@ class NoteService(
      *
      * @return The note as a data transfer object
      *
-     * @throws NoSuchElementException if the note does not exist for the user
+     * @throws NoSuchElementException If the note does not exist for the user
      */
     @Cacheable(cacheNames = ["noteById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): NoteDto {
@@ -166,7 +166,7 @@ class NoteService(
         _timer = System.currentTimeMillis()
 
         val userId: UUID = _userService.getCurrentUserId()
-        val notes: List<Note> = _noteRepository.findAllByUserId(userId = userId)
+        val notes: List<Note> = _noteRepository.findAllByCalendarUserId(userId = userId)
 
         info(source = this, message = "Found $notes in ${System.currentTimeMillis() - _timer} ms")
         return notes.map { it.toDto() }
@@ -204,7 +204,8 @@ class NoteService(
      *
      * @return The updated note as a data transfer object
      *
-     * @throws NoSuchElementException if the note, calendar, or category does not exist for the user
+     * @throws NoSuchElementException if the note does not exist for the user
+     * @throws IllegalArgumentException If the calendar does not exist for the user
      */
     @Caching(
         evict = [
@@ -221,7 +222,7 @@ class NoteService(
         val userId: UUID = _userService.getCurrentUserId()
         val existing: Optional<Note> = _noteRepository.findByIdAndCalendarUserId(id = id, userId = userId)
         if (existing.isEmpty) {
-            IllegalArgumentException("Event with id $id not found for user $userId")
+            throw NoSuchElementException("Event with id $id not found for user $userId")
         }
 
         val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
@@ -250,7 +251,7 @@ class NoteService(
      *
      * @param id The unique identifier of the note to delete
      *
-     * @throws NoSuchElementException if the note does not exist for the user
+     * @throws NoSuchElementException If the note does not exist for the user
      */
     @Caching(
         evict = [
@@ -267,7 +268,7 @@ class NoteService(
         val userId: UUID = _userService.getCurrentUserId()
         val existing: Optional<Note> = _noteRepository.findByIdAndCalendarUserId(id = id, userId = userId)
         if (existing.isEmpty) {
-            IllegalArgumentException("Event with id $id not found for user $userId")
+            throw NoSuchElementException("Event with id $id not found for user $userId")
         }
 
         _noteRepository.delete(existing.get())
@@ -278,8 +279,6 @@ class NoteService(
      * Deletes all notes associated with a specific calendar.
      *
      * @param calendarId The unique identifier of the calendar
-     *
-     * @throws NoSuchElementException if the calendar does not exist for the user
      */
     @Caching(
         evict = [
@@ -310,8 +309,6 @@ class NoteService(
      * Removes the category from all notes associated with a specific category.
      *
      * @param categoryId The unique identifier of the category to remove
-     *
-     * @throws NoSuchElementException if the category does not exist for the user
      */
     @Caching(
         evict = [

@@ -52,7 +52,7 @@ class TaskService(
      *
      * @return The created task as a data transfer object
      *
-     * @throws NoSuchElementException if the calendar or category with the specified IDs does not exist for the user
+     * @throws IllegalArgumentException If the calendar does not exist for the user
      */
     @Caching(
         evict = [
@@ -95,7 +95,7 @@ class TaskService(
      *
      * @return The task as a data transfer object
      *
-     * @throws NoSuchElementException if the task with the specified unique identifier does not exist for the user
+     * @throws NoSuchElementException If the task does not exist for the user
      */
     @Cacheable(cacheNames = ["taskById"], key = "#id", condition = "#id != null")
     fun getById(id: UUID): TaskDto {
@@ -206,7 +206,8 @@ class TaskService(
      *
      * @return The updated task as a data transfer object
      *
-     * @throws NoSuchElementException if the task with the specified ID does not exist for the user
+     * @throws NoSuchElementException If the task does not exist for the user
+     * @throws IllegalArgumentException If the calendar does not exist for the user
      */
     @Caching(
         evict = [
@@ -223,7 +224,7 @@ class TaskService(
         val userId: UUID = _userService.getCurrentUserId()
         val existing: Optional<Task> = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
         if (existing.isEmpty) {
-            IllegalArgumentException("Event with id $id not found for user $userId")
+            throw NoSuchElementException("Event with id $id not found for user $userId")
         }
 
         val calendar: Optional<Calendar> = _calendarRepository.findByIdAndUserId(id = dto.calendarId, userId = userId)
@@ -254,7 +255,7 @@ class TaskService(
      *
      * @param id The unique identifier of the task to delete
      *
-     * @throws NoSuchElementException if the task with the specified ID does not exist for the user
+     * @throws NoSuchElementException If the task does not exist for the user
      */
     @Caching(
         evict = [
@@ -271,7 +272,7 @@ class TaskService(
         val userId: UUID = _userService.getCurrentUserId()
         val existing: Optional<Task> = _taskRepository.findByIdAndCalendarUserId(id = id, userId = userId)
         if (existing.isEmpty) {
-            IllegalArgumentException("Event with id $id not found for user $userId")
+            throw NoSuchElementException("Event with id $id not found for user $userId")
         }
 
         _taskRepository.delete(existing.get())
@@ -282,8 +283,6 @@ class TaskService(
      * Deletes all tasks associated with a specific calendar.
      *
      * @param calendarId The unique identifier of the calendar
-     *
-     * @throws NoSuchElementException if no tasks are found for the specified calendar
      */
     @Caching(
         evict = [
@@ -314,8 +313,6 @@ class TaskService(
      * Removes the category from all tasks associated with a specific category.
      *
      * @param categoryId The unique identifier of the category
-     *
-     * @throws NoSuchElementException if no tasks are found for the specified category
      */
     @Caching(
         evict = [

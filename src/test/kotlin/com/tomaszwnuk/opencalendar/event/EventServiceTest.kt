@@ -248,7 +248,7 @@ internal class EventServiceTest {
     }
 
     @Test
-    fun `should delete event when exists`() {
+    fun `should delete event`() {
         whenever(_userService.getCurrentUserId()).thenReturn(_userId)
         whenever(_eventRepository.findByIdAndCalendarUserId(id = _event.id, userId = _userId))
             .thenReturn(Optional.of(_event))
@@ -274,7 +274,7 @@ internal class EventServiceTest {
     }
 
     @Test
-    fun `should delete all events by category id`() {
+    fun `should clear category for all events by category id`() {
         whenever(_userService.getCurrentUserId()).thenReturn(_userId)
         whenever(_eventRepository.findAllByCategoryIdAndCalendarUserId(categoryId = _category.id, userId = _userId))
             .thenReturn(_eventList)

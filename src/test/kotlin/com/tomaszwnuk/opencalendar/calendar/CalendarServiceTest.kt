@@ -172,7 +172,7 @@ internal class CalendarServiceTest {
     }
 
     @Test
-    fun `should delete calendar when exists`() {
+    fun `should delete calendar`() {
         whenever(_userService.getCurrentUserId()).thenReturn(_userId)
         whenever(_repository.findByIdAndUserId(id = _calendar.id, userId = _userId)).thenReturn(Optional.of(_calendar))
         doNothing().whenever(_repository).delete(_calendar)
