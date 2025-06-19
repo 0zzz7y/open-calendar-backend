@@ -51,22 +51,16 @@ internal class CategoryControllerTest {
     @InjectMocks
     private lateinit var _controller: CategoryController
 
-    private lateinit var _sampleDto: CategoryDto
+    private lateinit var _dto: CategoryDto
 
     private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setUp() {
-        val category = Category(
+        _dto = CategoryDto(
             id = UUID.randomUUID(),
             name = "Test",
             color = CategoryColorHelper.toHex(Color.BLUE),
-            userId = UUID.randomUUID()
-        )
-        _sampleDto = CategoryDto(
-            id = category.id,
-            name = category.name,
-            color = category.color
         )
         _pageable = PageRequest.of(
             PAGEABLE_PAGE_NUMBER,
@@ -76,19 +70,19 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should return created category with status code 201 Created`() {
-        whenever(_service.create(_sampleDto)).thenReturn(_sampleDto)
+        whenever(_service.create(_dto)).thenReturn(_dto)
 
-        val response: ResponseEntity<CategoryDto> = _controller.create(dto = _sampleDto)
+        val response: ResponseEntity<CategoryDto> = _controller.create(dto = _dto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleDto, response.body)
+        assertEquals(_dto, response.body)
 
-        verify(_service).create(eq(_sampleDto))
+        verify(_service).create(eq(_dto))
     }
 
     @Test
     fun `should return paginated list of all categories with status code 200 OK`() {
-        val dtos: List<CategoryDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        val dtos: List<CategoryDto> = listOf(_dto, _dto.copy(), _dto.copy())
         whenever(_service.getAll()).thenReturn(dtos)
 
         val response: ResponseEntity<Page<CategoryDto>> = _controller.getAll(pageable = _pageable)
@@ -102,20 +96,20 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should return category by id with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
-        whenever(_service.getById(id = id)).thenReturn(_sampleDto)
+        val id: UUID = _dto.id!!
+        whenever(_service.getById(id = id)).thenReturn(_dto)
 
         val response: ResponseEntity<CategoryDto> = _controller.getById(id = id)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(_sampleDto, response.body)
+        assertEquals(_dto, response.body)
 
         verify(_service).getById(id = id)
     }
 
     @Test
     fun `should return paginated list of category events with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
+        val id: UUID = _dto.id!!
         val now: LocalDateTime = LocalDateTime.now()
         val calendar = CalendarDto(
             id = UUID.randomUUID(),
@@ -147,7 +141,7 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should return paginated list of category tasks with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
+        val id: UUID = _dto.id!!
         val calendar = CalendarDto(
             id = UUID.randomUUID(),
             name = "Test",
@@ -176,7 +170,7 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should return paginated list of category notes with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
+        val id: UUID = _dto.id!!
         val calendar = CalendarDto(
             id = UUID.randomUUID(),
             name = "Test",
@@ -204,7 +198,7 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should return combined list of items with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
+        val id: UUID = _dto.id!!
         val now: LocalDateTime = LocalDateTime.now()
         val calendar = CalendarDto(
             id = UUID.randomUUID(),
@@ -263,7 +257,7 @@ internal class CategoryControllerTest {
             name = name,
             color = color
         )
-        val filteredDtos: List<CategoryDto> = listOf(_sampleDto)
+        val filteredDtos: List<CategoryDto> = listOf(_dto)
 
         whenever(_service.filter(filter = filter)).thenReturn(filteredDtos)
 
@@ -282,8 +276,8 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should update category with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
-        val updated: CategoryDto = _sampleDto.copy(id = UUID.randomUUID())
+        val id: UUID = _dto.id!!
+        val updated: CategoryDto = _dto.copy(id = UUID.randomUUID())
 
         whenever(_service.update(id = id, dto = updated)).thenReturn(updated)
 
@@ -297,7 +291,7 @@ internal class CategoryControllerTest {
 
     @Test
     fun `should delete category with status code 204 No Content`() {
-        val id: UUID = _sampleDto.id!!
+        val id: UUID = _dto.id!!
         doNothing().whenever(_service).delete(id = id)
 
         val response: ResponseEntity<Void> = _controller.delete(id = id)

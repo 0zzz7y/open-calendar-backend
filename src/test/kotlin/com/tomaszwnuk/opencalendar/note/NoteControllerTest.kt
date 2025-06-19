@@ -33,13 +33,13 @@ internal class NoteControllerTest {
     @InjectMocks
     private lateinit var _controller: NoteController
 
-    private lateinit var _sampleDto: NoteDto
+    private lateinit var _dto: NoteDto
 
     private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setUp() {
-        _sampleDto = NoteDto(
+        _dto = NoteDto(
             id = UUID.randomUUID(),
             name = "Test",
             description = "Test",
@@ -54,19 +54,19 @@ internal class NoteControllerTest {
 
     @Test
     fun `should return created note with status code 201 Created`() {
-        whenever(_service.create(_sampleDto)).thenReturn(_sampleDto)
+        whenever(_service.create(_dto)).thenReturn(_dto)
 
-        val response: ResponseEntity<NoteDto> = _controller.create(dto = _sampleDto)
+        val response: ResponseEntity<NoteDto> = _controller.create(dto = _dto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleDto, response.body)
+        assertEquals(_dto, response.body)
 
-        verify(_service).create(eq(_sampleDto))
+        verify(_service).create(eq(_dto))
     }
 
     @Test
     fun `should return all notes with status code 200 OK`() {
-        val dtos: List<NoteDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        val dtos: List<NoteDto> = listOf(_dto, _dto.copy(), _dto.copy())
         whenever(_service.getAll()).thenReturn(dtos)
 
         val response: ResponseEntity<Page<NoteDto>> = _controller.getAll(pageable = _pageable)
@@ -80,13 +80,13 @@ internal class NoteControllerTest {
 
     @Test
     fun `should return note by id with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
-        whenever(_service.getById(id = id)).thenReturn(_sampleDto)
+        val id: UUID = _dto.id!!
+        whenever(_service.getById(id = id)).thenReturn(_dto)
 
         val response: ResponseEntity<NoteDto> = _controller.getById(id = id)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(_sampleDto, response.body)
+        assertEquals(_dto, response.body)
 
         verify(_service).getById(id = id)
     }
@@ -98,18 +98,18 @@ internal class NoteControllerTest {
         val filter = NoteFilterDto(
             name = name,
             description = description,
-            calendarId = _sampleDto.calendarId,
-            categoryId = _sampleDto.categoryId
+            calendarId = _dto.calendarId,
+            categoryId = _dto.categoryId
         )
-        val filteredDtos: List<NoteDto> = listOf(_sampleDto)
+        val filteredDtos: List<NoteDto> = listOf(_dto)
 
         whenever(_service.filter(filter = filter)).thenReturn(filteredDtos)
 
         val response: ResponseEntity<Page<NoteDto>> = _controller.filter(
             name = name,
             description = description,
-            calendarId = _sampleDto.calendarId,
-            categoryId = _sampleDto.categoryId,
+            calendarId = _dto.calendarId,
+            categoryId = _dto.categoryId,
             pageable = _pageable
         )
 
@@ -122,8 +122,8 @@ internal class NoteControllerTest {
 
     @Test
     fun `should update note with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
-        val updated: NoteDto = _sampleDto.copy(id = UUID.randomUUID())
+        val id: UUID = _dto.id!!
+        val updated: NoteDto = _dto.copy(id = UUID.randomUUID())
 
         whenever(_service.update(id = id, dto = updated)).thenReturn(updated)
 
@@ -137,7 +137,7 @@ internal class NoteControllerTest {
 
     @Test
     fun `should delete note with status code 204 No Content`() {
-        val id: UUID = _sampleDto.id!!
+        val id: UUID = _dto.id!!
         doNothing().whenever(_service).delete(id = id)
 
         val response: ResponseEntity<Void> = _controller.delete(id = id)

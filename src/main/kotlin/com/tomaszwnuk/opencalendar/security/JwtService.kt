@@ -18,6 +18,7 @@ class JwtService(
      */
     @Value("\${jwt.secret}") private val _secret: String,
     private val _blackList: TokenBlackListService
+
 ) {
 
     /**

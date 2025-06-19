@@ -37,7 +37,7 @@ internal class CategoryServiceTest {
     fun `should return created category`() {
         val id: UUID = UUID.randomUUID()
         val dto = CategoryDto(
-            id = UUID.randomUUID(),
+            id = id,
             name = "Test",
             color = CategoryColorHelper.DEFAULT_COLOR
         )

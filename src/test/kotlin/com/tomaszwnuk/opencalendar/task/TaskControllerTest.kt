@@ -30,13 +30,13 @@ internal class TaskControllerTest {
     @InjectMocks
     private lateinit var _controller: TaskController
 
-    private lateinit var _sampleDto: TaskDto
+    private lateinit var _dto: TaskDto
 
     private lateinit var _pageable: Pageable
 
     @BeforeEach
     fun setUp() {
-        _sampleDto = TaskDto(
+        _dto = TaskDto(
             id = UUID.randomUUID(),
             name = "Test",
             description = "Test",
@@ -52,19 +52,19 @@ internal class TaskControllerTest {
 
     @Test
     fun `should return created task with status code 201 Created`() {
-        whenever(_service.create(_sampleDto)).thenReturn(_sampleDto)
+        whenever(_service.create(_dto)).thenReturn(_dto)
 
-        val response: ResponseEntity<TaskDto> = _controller.create(dto = _sampleDto)
+        val response: ResponseEntity<TaskDto> = _controller.create(dto = _dto)
 
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(_sampleDto, response.body)
+        assertEquals(_dto, response.body)
 
-        verify(_service).create(eq(_sampleDto))
+        verify(_service).create(eq(_dto))
     }
 
     @Test
     fun `should return all tasks with status code 200 OK`() {
-        val dtos: List<TaskDto> = listOf(_sampleDto, _sampleDto.copy(), _sampleDto.copy())
+        val dtos: List<TaskDto> = listOf(_dto, _dto.copy(), _dto.copy())
         whenever(_service.getAll()).thenReturn(dtos)
 
         val response: ResponseEntity<Page<TaskDto>> = _controller.getAll(pageable = _pageable)
@@ -78,13 +78,13 @@ internal class TaskControllerTest {
 
     @Test
     fun `should return task by id with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
-        whenever(_service.getById(id = id)).thenReturn(_sampleDto)
+        val id: UUID = _dto.id!!
+        whenever(_service.getById(id = id)).thenReturn(_dto)
 
         val response: ResponseEntity<TaskDto> = _controller.getById(id = id)
 
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(_sampleDto, response.body)
+        assertEquals(_dto, response.body)
 
         verify(_service).getById(id = id)
     }
@@ -98,10 +98,10 @@ internal class TaskControllerTest {
             name = name,
             description = description,
             status = status,
-            calendarId = _sampleDto.calendarId,
-            categoryId = _sampleDto.categoryId
+            calendarId = _dto.calendarId,
+            categoryId = _dto.categoryId
         )
-        val filteredDtos: List<TaskDto> = listOf(_sampleDto)
+        val filteredDtos: List<TaskDto> = listOf(_dto)
 
         whenever(_service.filter(filter = filter)).thenReturn(filteredDtos)
 
@@ -109,8 +109,8 @@ internal class TaskControllerTest {
             name = name,
             description = description,
             status = status.toString(),
-            calendarId = _sampleDto.calendarId,
-            categoryId = _sampleDto.categoryId,
+            calendarId = _dto.calendarId,
+            categoryId = _dto.categoryId,
             pageable = _pageable
         )
 
@@ -123,8 +123,8 @@ internal class TaskControllerTest {
 
     @Test
     fun `should update task with status code 200 OK`() {
-        val id: UUID = _sampleDto.id!!
-        val updated: TaskDto = _sampleDto.copy(id = UUID.randomUUID())
+        val id: UUID = _dto.id!!
+        val updated: TaskDto = _dto.copy(id = UUID.randomUUID())
 
         whenever(_service.update(id = id, dto = updated)).thenReturn(updated)
 
@@ -138,7 +138,7 @@ internal class TaskControllerTest {
 
     @Test
     fun `should delete task with status code 204 No Content`() {
-        val id: UUID = _sampleDto.id!!
+        val id: UUID = _dto.id!!
         doNothing().whenever(_service).delete(id = id)
 
         val response: ResponseEntity<Void> = _controller.delete(id = id)
