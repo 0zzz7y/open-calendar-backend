@@ -6,7 +6,7 @@ on:
       - production
 
 jobs:
-  sync:
+  synchronization:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Production
