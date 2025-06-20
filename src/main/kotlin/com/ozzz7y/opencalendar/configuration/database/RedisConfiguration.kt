@@ -30,6 +30,7 @@ class RedisConfiguration(
      */
     @Qualifier("redisObjectMapper")
     private val _objectMapper: ObjectMapper
+
 ) {
 
     /**

@@ -15,7 +15,7 @@ class UserService {
      *
      * @return The unique identifier of the currently authenticated user
      *
-     * @throws IllegalStateException if no authenticated user is found in the security context
+     * @throws IllegalStateException If no authenticated user is found in the security context
      */
     fun getCurrentUserId(): UUID {
         val authentication = SecurityContextHolder.getContext().authentication
@@ -29,7 +29,7 @@ class UserService {
      *
      * @return The currently authenticated user
      *
-     * @throws IllegalStateException if no authenticated user is found in the security context
+     * @throws IllegalStateException If no authenticated user is found in the security context
      */
     fun getCurrentUser(): User {
         val authentication = SecurityContextHolder.getContext().authentication

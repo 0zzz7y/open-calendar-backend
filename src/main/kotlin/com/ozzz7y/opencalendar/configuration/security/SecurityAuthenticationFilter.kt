@@ -50,14 +50,15 @@ class SecurityAuthenticationFilter(
         filterChain: FilterChain
     ) {
         // Header exists and is correct
-        val header: String? = request.getHeader("Authorization")
-        val isHeaderCorrect: Boolean = (header != null && header.isNotBlank() && header.startsWith(HEADER_PREFIX))
+        val header: String? = request.getHeader(AUTHORIZATION_HEADER_NAME)
+        val isHeaderCorrect: Boolean =
+            (header != null && header.isNotBlank() && header.startsWith(AUTHORIZATION_HEADER_PREFIX))
         if (!isHeaderCorrect) {
             return filterChain.doFilter(request, response)
         }
 
         // Token is valid and not blacklisted
-        val token: String = header?.removePrefix(HEADER_PREFIX)!!.trim()
+        val token: String = header?.removePrefix(AUTHORIZATION_HEADER_PREFIX)!!.trim()
         val isTokenInvalid: Boolean = (_tokenBlacklistService.isInvalid(token))
         if (isTokenInvalid) {
             return filterChain.doFilter(request, response)
@@ -92,9 +93,14 @@ class SecurityAuthenticationFilter(
     companion object {
 
         /**
+         * The name for the authorization header.
+         */
+        const val AUTHORIZATION_HEADER_NAME: String = "Authorization"
+
+        /**
          * The prefix for the authorization header.
          */
-        const val HEADER_PREFIX: String = "Bearer "
+        const val AUTHORIZATION_HEADER_PREFIX: String = "Bearer "
 
     }
 

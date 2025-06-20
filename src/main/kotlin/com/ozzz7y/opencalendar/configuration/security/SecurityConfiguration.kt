@@ -59,7 +59,6 @@ class SecurityConfiguration(
                 authorize(STATIC_RESOURCES_URL, permitAll)
 
                 authorize(SWAGGER_UI_URL, permitAll)
-                authorize(SWAGGER_UI_HTML_URL, permitAll)
                 authorize(API_DOCUMENTATION_URL, permitAll)
 
                 authorize(AUTHENTICATION_URL_PATTERN, permitAll)
@@ -111,14 +110,9 @@ class SecurityConfiguration(
         const val STATIC_RESOURCES_URL: String = "/static/**"
 
         /**
-         * The URL pattern for Swagger UI.
+         * The URL for the Swagger UI.
          */
-        const val SWAGGER_UI_URL: String = "/swagger-ui/**"
-
-        /**
-         * The URL for the Swagger UI HTML page.
-         */
-        const val SWAGGER_UI_HTML_URL: String = "/swagger-ui.html"
+        const val SWAGGER_UI_URL: String = "/swagger-ui.html"
 
         /**
          * The URL pattern for API documentation.

@@ -36,6 +36,8 @@ class AuthenticationService(
      * Registers a new user.
      *
      * @param request The registration request containing user details
+     *
+     * @throws IllegalArgumentException If the user with given username or email already exists
      */
     fun register(request: RegisterRequest) {
         if (_userRepository.findByUsername(request.username) != null) {
@@ -61,6 +63,8 @@ class AuthenticationService(
      * @param request The login request containing user credentials
      *
      * @return A JWT token for the authenticated user
+     *
+     * @throws IllegalArgumentException If credentials are not valid
      */
     fun login(request: LoginRequest): String {
         val user = _userRepository.findByUsername(request.username)
@@ -77,6 +81,8 @@ class AuthenticationService(
      * Logs out a user by invalidating their JWT token.
      *
      * @param request The request containing the user's session information
+     *
+     * @throws IllegalArgumentException If the authorization token is not valid
      */
     fun logout(request: HttpServletRequest) {
         val header: String = request.getHeader("Authorization")

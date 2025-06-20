@@ -81,6 +81,7 @@ internal class CalendarControllerTest {
     @Test
     fun `should return paginated list of all calendars with status code 200 OK`() {
         val dtos: List<CalendarDto> = listOf(_dto, _dto.copy(), _dto.copy())
+
         whenever(_service.getAll()).thenReturn(dtos)
 
         val response: ResponseEntity<Page<CalendarDto>> = _controller.getAll(pageable = _pageable)
@@ -95,6 +96,7 @@ internal class CalendarControllerTest {
     @Test
     fun `should return calendar by id with status code 200 OK`() {
         val id: UUID = _dto.id!!
+
         whenever(_service.getById(id = id)).thenReturn(_dto)
 
         val response: ResponseEntity<CalendarDto> = _controller.getById(id = id)
@@ -268,6 +270,7 @@ internal class CalendarControllerTest {
     @Test
     fun `should delete calendar with status code 204 No Content`() {
         val id: UUID = _dto.id!!
+
         doNothing().whenever(_service).delete(id = id)
 
         val response: ResponseEntity<Void> = _controller.delete(id = id)
