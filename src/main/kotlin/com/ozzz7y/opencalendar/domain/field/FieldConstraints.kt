@@ -68,7 +68,7 @@ object FieldConstraints {
     /**
      * The column definition for the color field.
      */
-    const val COLUMN_DEFINITION_COLOR: String = "CHAR(7)"
+    const val COLUMN_DEFINITION_COLOR: String = "VARCHAR(7)"
 
     /**
      * The column definition for the date field.
