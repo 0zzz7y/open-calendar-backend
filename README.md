@@ -1,3 +1,3 @@
 # OpenCalendar
 
-Application for supporting daily routine.
+Backend for OpenCalendar application.
